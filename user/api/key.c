@@ -76,7 +76,7 @@ void EXTI0_IRQHandler(void)
     if(EXTI->PR & (1<<0))
     {
        EXTI->PR |= (1<<0);
-       GPIOD->ODR &=~(1<<12);      
+            
     }
     
     

@@ -10,6 +10,10 @@
 #include <stdio.h>
 
 
+extern volatile uint8_t usart_flag;
+extern volatile uint8_t str_buf[100];
+
+
 void Usart1_Config(u32 brr);
 
 void usart1_send_byte(u8 btye);

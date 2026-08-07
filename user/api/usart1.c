@@ -77,8 +77,8 @@ void Usart1_Config(uint32_t brr)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-//    USART_ITConfig(USART1,USART_IT_RXNE,ENABLE);//接收中断
-//    USART_ITConfig(USART1,USART_IT_IDLE,ENABLE);//空闲中断
+    USART_ITConfig(USART1,USART_IT_RXNE,ENABLE);//接收中断使能
+    USART_ITConfig(USART1,USART_IT_IDLE,ENABLE);//空闲中断使能
 
     // 初始化 USART1
     USART_Init(USART1, &usart_InitTypeDef);
@@ -128,29 +128,29 @@ uint8_t usart1_rev_byte(void)
 }
 
 
-volatile uint8_t cnt=0;
+volatile uint8_t usart_flag=0;
 volatile uint8_t str_buf[100];
 
 void USART1_IRQHandler(void) 
 {
-    
+    static uint16_t i=0;
     if(USART_GetITStatus(USART1,USART_IT_RXNE))//接收中断
     {
-        
-        uint8_t data = USART_ReceiveData(USART1);  // 读 DR → 数据取走 + RXNE标志自动清零
-       if(cnt < sizeof(str_buf) - 1)   // ← 留 1 字节给 '\0'
-        {
-            str_buf[cnt++] = data;       
-        }
+        USART_ClearITPendingBit(USART1,USART_IT_RXNE);//清除标志位
+        str_buf[i++]=USART_ReceiveData(USART1);
     }
     
     
-    if(USART_GetITStatus(USART1,USART_IT_TXE))
+    if(USART_GetITStatus(USART1,USART_IT_IDLE))//空闲中断
     {
-
+        volatile uint32_t temp;
+        temp=USART1->SR;
+        temp=USART1->DR;
+        (void)tmp;
         
-        usart1_send_string(str_buf);
-        cnt=0;        
+         str_buf[i]='\0';
+        i=0;
+        usart_flag=1;
     }
 }
 

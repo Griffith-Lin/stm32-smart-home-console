@@ -23,19 +23,13 @@ int main(void)
     while(1)
     {
         
-        char send='a';
-        usart1_send_byte(send);
-        char rec;
-        rec=usart1_rev_byte();//收一个字节
-        usart1_send_byte(rec);
-        
-        
-        
-        
+        if(usart_flag)
+        {
+           usart_flag=0;
+           printf("%s\r\n",str_buf); 
+        }
         
 
-        
-        TIM6_delay(1000);
     }   
     
 }
