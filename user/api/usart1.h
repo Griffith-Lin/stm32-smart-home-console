@@ -3,8 +3,12 @@
 
 #include "stm32f4xx.h"
 #include "led.h"
+#include "debug.h"
+
 #include <string.h>
 #include <stddef.h>
+#include <stdio.h>
+
 
 void Usart1_Config(u32 brr);
 

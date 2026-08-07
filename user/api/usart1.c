@@ -39,6 +39,9 @@
 ////    USART1->CR1 |= (1<<4);   // IDLEIE：空闲中断使能    
 //}
 
+
+
+
 void Usart1_Config(uint32_t brr)
 {
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
@@ -52,32 +55,108 @@ void Usart1_Config(uint32_t brr)
     gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_NOPULL;
     gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_9 | GPIO_Pin_10;
     
+
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
     GPIO_Init(GPIOA,&gpio_InitTypeDef);
+    
+    
+    USART_InitTypeDef usart_InitTypeDef;
+    
+    usart_InitTypeDef.USART_BaudRate = brr;            // 库函数内部自动计算 div_m 和 div_f
+    usart_InitTypeDef.USART_WordLength = USART_WordLength_8b; // CR1 &= ~(1<<12) -> 8位
+    usart_InitTypeDef.USART_StopBits = USART_StopBits_1;      // CR2 &= ~(3<<12) -> 1位停止位
+    usart_InitTypeDef.USART_Parity = USART_Parity_No;         // CR1 &= ~(1<<10) -> 无校验
+    usart_InitTypeDef.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 无流控
+    usart_InitTypeDef.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; // CR1 |= (3<<2) -> 收发使能
+
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3; // 抢占优先级
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;        // 子优先级
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+//    USART_ITConfig(USART1,USART_IT_RXNE,ENABLE);//接收中断
+//    USART_ITConfig(USART1,USART_IT_IDLE,ENABLE);//空闲中断
+
+    // 初始化 USART1
+    USART_Init(USART1, &usart_InitTypeDef);
+    
+    //使能
+    USART_Cmd(USART1, ENABLE);
+    
 }
 
+////单字节发送
+//void usart1_send_byte(uint8_t byte)
+//{
+//    while(! (USART1->SR & (1<<7)))
+//    {
+//        //这里的 while 起到的正是典型的阻塞（Blocking） 作用，这种机制在嵌入式中称为阻塞式轮询（Polling）
+//        //位 7 (TXE) 为 1，表示的是 “发送数据寄存器 (TDR) 为空”，可以接收 CPU 写入的新数据。而不是“数据已到达移位寄存器”（虽然 TXE 置 1 的前提确实是上一个数据已经转移到了移位寄存器，但 TXE 的直接含义是 TDR 空）。
+//    }
+//    USART1->DR=byte;//TDR（发送数据寄存器）
+//}
 
-
-//单字节发送
 void usart1_send_byte(uint8_t byte)
 {
-    while(! (USART1->SR & (1<<7)))//这一位叫 TXE（Transmit data register empty，发送数据寄存器空。空时txe值为1，跳出阻塞
-    {
-        //这里的 while 起到的正是典型的阻塞（Blocking） 作用，这种机制在嵌入式中称为阻塞式轮询（Polling）       
-    }
-    USART1->DR=byte;//将该字节送入TDR（发送数据寄存器）
+    while(!USART_GetFlagStatus(USART1,USART_FLAG_TXE));//等待接收标志位
+
+    USART_SendData(USART1,byte);
 }
 
-//单字节接收
+
+////单字节接收
+//uint8_t usart1_rev_byte(void)
+//{
+//    uint8_t byte;
+//    while(!(USART1->SR & (1<<5)))//接收数据寄存器（DR）中已经有完整、有效的新数据，CPU 现在可以安全地去读取它了。
+//    {
+//        //这里的 while 起到的正是典型的阻塞（Blocking） 作用，这种机制在嵌入式中称为阻塞式轮询（Polling）     
+//    }
+//    byte=USART1->DR;//位5自动归0,RDR（接收数据寄存器）
+//    return byte;
+//}
+
 uint8_t usart1_rev_byte(void)
 {
     uint8_t byte;
-    while(!(USART1->SR & (1<<5)))//接收数据寄存器（DR）中已经有完整、有效的新数据，CPU 现在可以安全地去读取它了。
-    {
-        //这里的 while 起到的正是典型的阻塞（Blocking） 作用，这种机制在嵌入式中称为阻塞式轮询（Polling）     
-    }
-    byte=USART1->DR;//位5自动归0
+    while(!USART_GetFlagStatus(USART1,USART_FLAG_RXNE));
+    byte=USART_ReceiveData(USART1);
     return byte;
 }
+
+
+volatile uint8_t cnt=0;
+volatile uint8_t str_buf[100];
+
+void USART1_IRQHandler(void) 
+{
+    
+    if(USART_GetITStatus(USART1,USART_IT_RXNE))//接收中断
+    {
+        
+        uint8_t data = USART_ReceiveData(USART1);  // 读 DR → 数据取走 + RXNE标志自动清零
+       if(cnt < sizeof(str_buf) - 1)   // ← 留 1 字节给 '\0'
+        {
+            str_buf[cnt++] = data;       
+        }
+    }
+    
+    
+    if(USART_GetITStatus(USART1,USART_IT_TXE))
+    {
+
+        
+        usart1_send_string(str_buf);
+        cnt=0;        
+    }
+}
+
+
+
+
 
 //串口从上位机接收不规范字符串(....\r\n)
 //调用者传的 buffer 可能是 uint8_t buff[50]，但函数不知道，发 200 字节就溢出了,最好再接收一个长度max_len

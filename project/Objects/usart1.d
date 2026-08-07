@@ -37,5 +37,7 @@
 .\objects\usart1.o: ..\lib\inc\stm32f4xx_dcmi.h
 .\objects\usart1.o: ..\lib\inc\stm32f4xx_fsmc.h
 .\objects\usart1.o: ..\user\api\led.h
+.\objects\usart1.o: ..\user\api\debug.h
+.\objects\usart1.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\usart1.o: D:\keil5core\ARM\ARMCC\Bin\..\include\string.h
 .\objects\usart1.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stddef.h

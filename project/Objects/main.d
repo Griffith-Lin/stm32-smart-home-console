@@ -41,5 +41,6 @@
 .\objects\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stddef.h
 .\objects\main.o: ..\user\api\usart1.h
+.\objects\main.o: ..\user\api\debug.h
 .\objects\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\string.h
 .\objects\main.o: ..\user\api\key.h

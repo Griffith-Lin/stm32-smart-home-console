@@ -414,16 +414,6 @@
               <FilePath>..\user\api\LED.c</FilePath>
             </File>
             <File>
-              <FileName>LED.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\LED.h</FilePath>
-            </File>
-            <File>
-              <FileName>delay.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\delay.h</FilePath>
-            </File>
-            <File>
               <FileName>delay.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\delay.c</FilePath>
@@ -447,6 +437,16 @@
               <FileName>key.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\user\api\key.h</FilePath>
+            </File>
+            <File>
+              <FileName>debug.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\debug.c</FilePath>
+            </File>
+            <File>
+              <FileName>debug.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\debug.h</FilePath>
             </File>
           </Files>
         </Group>

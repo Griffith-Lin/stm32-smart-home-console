@@ -42,5 +42,6 @@
 .\objects\stm32f4xx_it.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\stm32f4xx_it.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stddef.h
 .\objects\stm32f4xx_it.o: ..\user\api\usart1.h
+.\objects\stm32f4xx_it.o: ..\user\api\debug.h
 .\objects\stm32f4xx_it.o: D:\keil5core\ARM\ARMCC\Bin\..\include\string.h
 .\objects\stm32f4xx_it.o: ..\user\api\key.h

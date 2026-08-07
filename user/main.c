@@ -10,7 +10,8 @@ int fputc(int c,FILE *stream)
 
 int main(void)
 {
-    NVIC_SetPriorityGrouping(3);//配置优先级组 3位占先位数 1位次级位数
+    
+//    NVIC_PriorityGroupConfig(3);
     
     TIM6_Delay_Init(84, 1000);
     led_ini();
@@ -21,10 +22,19 @@ int main(void)
 
     while(1)
     {
-        printf("111\r\n");
-        GPIO_SetBits(GPIOD,GPIO_Pin_12);
-        TIM6_delay(1000);
-        GPIO_ResetBits(GPIOD,GPIO_Pin_12);
+        
+        char send='a';
+        usart1_send_byte(send);
+        char rec;
+        rec=usart1_rev_byte();//收一个字节
+        usart1_send_byte(rec);
+        
+        
+        
+        
+        
+
+        
         TIM6_delay(1000);
     }   
     
