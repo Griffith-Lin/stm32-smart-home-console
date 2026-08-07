@@ -1,17 +1,39 @@
 #include "key.h"
 
-//key1(pa0) key2(pb0) key3(pb1)
+////key1(pa0) key2(pb0) key3(pb1)
+//void key_ini(void)
+//{
+//	RCC->AHB1ENR |=(1<<0);//PA时钟
+//	RCC->AHB1ENR |=(1<<1);//PB时钟
+//	
+//	GPIOA->MODER &=~(3<<0);//输入模式
+//	GPIOB->MODER &=~(0xf<<0);//输入模式
+//	
+//	GPIOA->PUPDR &=~(3<<0);//无上下拉
+//	GPIOB->PUPDR &=~(0xf<<0);//无上下拉
+//}
+
 void key_ini(void)
 {
-	RCC->AHB1ENR |=(1<<0);//PA时钟
-	RCC->AHB1ENR |=(1<<1);//PB时钟
-	
-	GPIOA->MODER &=~(3<<0);//输入模式
-	GPIOB->MODER &=~(0xf<<0);//输入模式
-	
-	GPIOA->PUPDR &=~(3<<0);//无上下拉
-	GPIOB->PUPDR &=~(0xf<<0);//无上下拉
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+    
+    
+    GPIO_InitTypeDef gpio_InitTypeDef={0};
+    
+    gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_IN;
+    gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_NOPULL;
+    gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_0;
+    
+    GPIO_Init(GPIOA,&gpio_InitTypeDef);
+    
+    
+    gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_0 | GPIO_Pin_1;
+    GPIO_Init(GPIOB,&gpio_InitTypeDef);
 }
+
+
+
 
 void Exti_key_ini(void)
 {
@@ -27,7 +49,6 @@ void Exti_key_ini(void)
     EXTI->IMR |= (1<<0);//中断屏蔽寄存器（选择性屏蔽/允许某些中断源）。 pa0是属于EXTI0上的，对应的是中断屏蔽寄存器0线，开放来自0线的中断请求
     //上升沿触发指的是当信号从低电平（0）跳变到高电平（1）的瞬间，触发某个动作或事件。这个"沿"就是指电平变化的边沿。
     
-    //pb0的中断怎么配？
     
     
     
@@ -52,11 +73,12 @@ void Exti_key_ini(void)
 
 void EXTI0_IRQHandler(void)
 {
-    if(EXTI->PR & (1<<0))//挂起寄存器。  当挂起寄存器中的第0位（即EXTI0）为1时，即表示发生上升沿触发寄存器动作时
+    if(EXTI->PR & (1<<0))
     {
-       EXTI->PR |= (1<<0);//在挂起寄存器中，再写入1，视为清除触发请求（注意！这里是写入1，直接用=号更规范，而不是用|=）
+       EXTI->PR |= (1<<0);
        GPIOD->ODR &=~(1<<12);      
     }
     
     
 }
+

@@ -3,14 +3,17 @@
         {
             "name": "Target 1",
             "includePath": [
-                "c:\\Users\\Administrator\\Desktop\\xyd_project\\stm32f405VGT\\train-基础工程\\user",
-                "c:\\Users\\Administrator\\Desktop\\xyd_project\\stm32f405VGT\\train-基础工程\\user\\api",
-                "c:\\Users\\Administrator\\Desktop\\xyd_project\\stm32f405VGT\\train-基础工程\\startup",
+                "g:\\github\\train1\\user",
+                "g:\\github\\train1\\user\\api",
+                "g:\\github\\train1\\startup",
+                "g:\\github\\train1\\lib\\inc",
                 "D:\\keil5core\\ARM\\ARMCC\\include",
-                "D:\\keil5core\\ARM\\ARMCC\\include\\rw"
+                "D:\\keil5core\\ARM\\ARMCC\\include\\rw",
+                "g:\\github\\train1\\lib\\src"
             ],
             "defines": [
                 "STM32F40_41xxx",
+                "USE_STDPERIPH_DRIVER",
                 "__CC_ARM",
                 "__arm__",
                 "__align(x)=",

@@ -18,15 +18,14 @@ int main(void)
     key_ini();
     Exti_key_ini();
     
-     
-    
-    
+
     while(1)
     {
-       
         printf("111\r\n");
+        GPIO_SetBits(GPIOD,GPIO_Pin_12);
         TIM6_delay(1000);
-        
+        GPIO_ResetBits(GPIOD,GPIO_Pin_12);
+        TIM6_delay(1000);
     }   
     
 }

@@ -1,43 +1,60 @@
 #include "usart1.h"
 
-//pa9 10
+////pa9 10
+//void Usart1_Config(uint32_t brr)
+//{
+//    RCC->AHB1ENR |= (1<<0);//使能gpioa的时钟
+//    RCC->APB2ENR |= (1<<4);//使能usart1的时钟
+//    
+//    GPIOA->MODER &=~(0xf<<18);//清零
+//    GPIOA->MODER |=(0xa<<18);//功能模式为复用
+//    GPIOA->OTYPER &=~(3<<9);//推挽
+//    
+//    GPIOA->OSPEEDR |= (1<<18);//引脚速度，默认为0（低速）
+//    GPIOA->PUPDR &=~(0xf<<18);//上拉下拉设置为无，和ODR、IDR有关
+//    
+//    GPIOA->AFR[1] |= (0x77<<4); //配置复用功能映射（就是在数据手册上的复用功能表上，找你要的功能对应的AF是几）,AFR 寄存器就是"引脚功能选择器"，决定每个引脚连接哪个外设。
+//    //AFR[0]是复用功能低位寄存器，AFR[1]是复用功能高位寄存器
+//    
+//    uint32_t numerator = 84000000;
+//    uint32_t div_m = numerator / (16 * brr);
+//    uint32_t remainder = numerator % (16 * brr);//提取余数
+//    uint32_t div_f = (remainder * 16 + (16 * brr) / 2) / (16 * brr);//四舍五入技巧：在纯整数除法中，没有round(）函数。要实现的四舍五入，标准做法是在分子上加上除数的一半，即x+(y/2) / y
+//    USART1->BRR = (div_m << 4) | div_f;
+
+//    
+//    USART1->CR1 |=(3<<2);//发送器 接收器使能
+//	USART1->CR1 &=~(1<<10);//禁止奇偶校验
+//	USART1->CR1 &=~(1<<12);//字长 8位
+//	USART1->CR1 &=~(1<<15);//16倍过采样
+//	USART1->CR2 &=~(3<<12);//1位停止位
+//	USART1->CR1 |=(1<<13);//使能USART1
+//    
+////    NVIC_SetPriority(USART1_IRQn, 6);//111 0
+////    NVIC_EnableIRQ(USART1_IRQn);
+//    
+////    USART1->CR1 |= (1<<5);   // RXNEIE：接收中断使能,当 USART_SR 寄存器中 ORE=1 或 RXNE=1 时，生成 USART 中断
+////                             //即串口接收到1字节数据触发中断
+////                             
+////    USART1->CR1 |= (1<<4);   // IDLEIE：空闲中断使能    
+//}
+
 void Usart1_Config(uint32_t brr)
 {
-    RCC->AHB1ENR |= (1<<0);//使能gpioa的时钟
-    RCC->APB2ENR |= (1<<4);//使能usart1的时钟
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
     
-    GPIOA->MODER &=~(0xf<<18);//清零
-    GPIOA->MODER |=(0xa<<18);//功能模式为复用
-    GPIOA->OTYPER &=~(3<<9);//推挽
+    GPIO_InitTypeDef gpio_InitTypeDef={0};
     
-    GPIOA->OSPEEDR |= (1<<18);//引脚速度，默认为0（低速）
-    GPIOA->PUPDR &=~(0xf<<18);//上拉下拉设置为无，和ODR、IDR有关
+    gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_AF;
+    gpio_InitTypeDef.GPIO_OType=GPIO_OType_PP;
+    gpio_InitTypeDef.GPIO_Speed=GPIO_Low_Speed;
+    gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_NOPULL;
+    gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_9 | GPIO_Pin_10;
     
-    GPIOA->AFR[1] |= (0x77<<4); //配置复用功能映射（就是在数据手册上的复用功能表上，找你要的功能对应的AF是几）,AFR 寄存器就是"引脚功能选择器"，决定每个引脚连接哪个外设。
-    //AFR[0]是复用功能低位寄存器，AFR[1]是复用功能高位寄存器
-    
-    uint32_t numerator = 84000000;
-    uint32_t div_m = numerator / (16 * brr);
-    uint32_t remainder = numerator % (16 * brr);//提取余数
-    uint32_t div_f = (remainder * 16 + (16 * brr) / 2) / (16 * brr);//四舍五入技巧：在纯整数除法中，没有round(）函数。要实现的四舍五入，标准做法是在分子上加上除数的一半，即x+(y/2) / y
-    USART1->BRR = (div_m << 4) | div_f;
-
-    
-    USART1->CR1 |=(3<<2);//发送器 接收器使能
-	USART1->CR1 &=~(1<<10);//禁止奇偶校验
-	USART1->CR1 &=~(1<<12);//字长 8位
-	USART1->CR1 &=~(1<<15);//16倍过采样
-	USART1->CR2 &=~(3<<12);//1位停止位
-	USART1->CR1 |=(1<<13);//使能USART1
-    
-//    NVIC_SetPriority(USART1_IRQn, 6);//111 0
-//    NVIC_EnableIRQ(USART1_IRQn);
-    
-//    USART1->CR1 |= (1<<5);   // RXNEIE：接收中断使能,当 USART_SR 寄存器中 ORE=1 或 RXNE=1 时，生成 USART 中断
-//                             //即串口接收到1字节数据触发中断
-//                             
-//    USART1->CR1 |= (1<<4);   // IDLEIE：空闲中断使能    
+    GPIO_Init(GPIOA,&gpio_InitTypeDef);
 }
+
 
 
 //单字节发送
