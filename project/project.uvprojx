@@ -448,6 +448,16 @@
               <FileType>5</FileType>
               <FilePath>..\user\api\debug.h</FilePath>
             </File>
+            <File>
+              <FileName>sg90.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\sg90.c</FilePath>
+            </File>
+            <File>
+              <FileName>sg90.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\sg90.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

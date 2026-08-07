@@ -7,6 +7,7 @@
 ".\objects\usart1.o"
 ".\objects\key.o"
 ".\objects\debug.o"
+".\objects\sg90.o"
 ".\objects\startup_stm32f40_41xxx.o"
 ".\objects\misc.o"
 ".\objects\stm32f4xx_adc.o"

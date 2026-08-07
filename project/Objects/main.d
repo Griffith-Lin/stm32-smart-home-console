@@ -44,3 +44,4 @@
 .\objects\main.o: ..\user\api\debug.h
 .\objects\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\string.h
 .\objects\main.o: ..\user\api\key.h
+.\objects\main.o: ..\user\api\sg90.h

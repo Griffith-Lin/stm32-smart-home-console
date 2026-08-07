@@ -18,17 +18,16 @@ int main(void)
     Usart1_Config(115200);
     key_ini();
     Exti_key_ini();
+    sg90_PWM(84,20000);  
     
-
+    sg90_set_angle(180);
+    TIM6_delay(1000);
+    sg90_set_angle(90);
+    TIM6_delay(1000);
+    
     while(1)
     {
-        
-        if(usart_flag)
-        {
-           usart_flag=0;
-           printf("%s\r\n",str_buf); 
-        }
-        
+
 
     }   
     
