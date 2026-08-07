@@ -1,0 +1,12 @@
+.\objects\delay.o: ..\user\api\delay.c
+.\objects\delay.o: ..\user\api\delay.h
+.\objects\delay.o: ..\user\stm32f4xx.h
+.\objects\delay.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm4.h
+.\objects\delay.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\delay.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_version.h
+.\objects\delay.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_compiler.h
+.\objects\delay.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armcc.h
+.\objects\delay.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\mpu_armv7.h
+.\objects\delay.o: ..\user\system_stm32f4xx.h
+.\objects\delay.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\delay.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stddef.h

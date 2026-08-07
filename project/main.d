@@ -1,0 +1,10 @@
+.\main.o: ..\user\main.c
+.\main.o: ..\user\main.h
+.\main.o: ..\user\stm32f4xx.h
+.\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm4.h
+.\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdint.h
+.\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_version.h
+.\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_compiler.h
+.\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armcc.h
+.\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\mpu_armv7.h
+.\main.o: ..\user\system_stm32f4xx.h

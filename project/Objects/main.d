@@ -1,0 +1,17 @@
+.\objects\main.o: ..\user\main.c
+.\objects\main.o: ..\user\main.h
+.\objects\main.o: ..\user\stm32f4xx.h
+.\objects\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm4.h
+.\objects\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_version.h
+.\objects\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_compiler.h
+.\objects\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armcc.h
+.\objects\main.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\mpu_armv7.h
+.\objects\main.o: ..\user\system_stm32f4xx.h
+.\objects\main.o: ..\user\api\LED.h
+.\objects\main.o: ..\user\api\delay.h
+.\objects\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stddef.h
+.\objects\main.o: ..\user\api\usart1.h
+.\objects\main.o: D:\keil5core\ARM\ARMCC\Bin\..\include\string.h
+.\objects\main.o: ..\user\api\key.h

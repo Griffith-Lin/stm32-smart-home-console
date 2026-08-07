@@ -1,0 +1,9 @@
+.\objects\system_stm32f4xx.o: ..\user\system_stm32f4xx.c
+.\objects\system_stm32f4xx.o: ..\user\stm32f4xx.h
+.\objects\system_stm32f4xx.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\core_cm4.h
+.\objects\system_stm32f4xx.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\system_stm32f4xx.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_version.h
+.\objects\system_stm32f4xx.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_compiler.h
+.\objects\system_stm32f4xx.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armcc.h
+.\objects\system_stm32f4xx.o: D:\keil5pack\ARM\CMSIS\5.8.0\CMSIS\Core\Include\mpu_armv7.h
+.\objects\system_stm32f4xx.o: ..\user\system_stm32f4xx.h
