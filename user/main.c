@@ -10,24 +10,22 @@ int fputc(int c,FILE *stream)
 
 int main(void)
 {
+    //NVIC_SetPriorityGrouping(3);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);
     
-//    NVIC_PriorityGroupConfig(3);
-    
-    TIM6_Delay_Init(84, 1000);
+    TIM6_Delay_Init(84, 1000);   
     led_ini();
     Usart1_Config(115200);
+    
     key_ini();
     Exti_key_ini();
     sg90_PWM(84,20000);  
     
-    sg90_set_angle(180);
-    TIM6_delay(1000);
-    sg90_set_angle(90);
-    TIM6_delay(1000);
     
     while(1)
     {
-
+        printf("111\r\n");
+        TIM6_delay(500);
 
     }   
     

@@ -62,10 +62,10 @@ void Exti_key_ini(void)
     
     
         
-    NVIC_SetPriority(EXTI0_IRQn,4);//配置EXTI0的优先级，010 0 占先位数的十进制值为2（最前面3位），次级位数的十进制值为0（后面1位）
+    NVIC_SetPriority(EXTI0_IRQn,14);//配置EXTI0的优先级，111 0 占先位数的十进制值为2（最前面3位），次级位数的十进制值为0（后面1位）
     NVIC_EnableIRQ(EXTI0_IRQn);//使能EXTI0响应中断
     
-    NVIC_SetPriority(EXTI1_IRQn,6);//011 0
+    NVIC_SetPriority(EXTI1_IRQn,14);//111 0
     NVIC_EnableIRQ(EXTI1_IRQn);
     
 
