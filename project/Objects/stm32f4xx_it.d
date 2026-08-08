@@ -49,3 +49,5 @@
 .\objects\stm32f4xx_it.o: ..\user\api\sg90.h
 .\objects\stm32f4xx_it.o: ..\user\api\beep.h
 .\objects\stm32f4xx_it.o: ..\user\api\motor.h
+.\objects\stm32f4xx_it.o: ..\user\api\adc.h
+.\objects\stm32f4xx_it.o: ..\user\api\gl5506.h

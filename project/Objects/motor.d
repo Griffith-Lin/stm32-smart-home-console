@@ -36,3 +36,4 @@
 .\objects\motor.o: ..\lib\inc\stm32f4xx_dac.h
 .\objects\motor.o: ..\lib\inc\stm32f4xx_dcmi.h
 .\objects\motor.o: ..\lib\inc\stm32f4xx_fsmc.h
+.\objects\motor.o: ..\user\api\delay.h

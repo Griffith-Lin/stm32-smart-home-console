@@ -49,8 +49,11 @@ void motor_pwm_ini(uint32_t psc,uint32_t arr)
     
     TIM_Cmd(TIM3, ENABLE);
     
-    
-    
 }
 
-
+void mortor_minspeed_open(void)
+{
+    TIM_SetCompare3(TIM3,500);
+    Delay_Ms(100);
+    TIM_SetCompare3(TIM3,200);
+}

@@ -71,22 +71,46 @@ void Exti_key_ini(void)
 
 }
 
+//void EXTI0_IRQHandler(void)
+//{
+//    if(EXTI->PR & (1<<0))
+//    {
+//       EXTI->PR |= (1<<0);
+////       GPIO_SetBits(GPIOD,GPIO_Pin_15); 
+////       Delay_Ms(100);
+////       GPIO_ResetBits(GPIOD,GPIO_Pin_15); 
+//        
+//       if(TIM3->CCR3<1000) 
+//       TIM3->CCR3+=100;
+//    }
+//      
+//}
+
+volatile uint32_t motor_ccr=0;
+
 void EXTI0_IRQHandler(void)
 {
-    if(EXTI->PR & (1<<0))
+    if(EXTI_GetITStatus(EXTI_Line0)==SET)
     {
-       EXTI->PR |= (1<<0);
+        EXTI_ClearITPendingBit(EXTI_Line0);
 //       GPIO_SetBits(GPIOD,GPIO_Pin_15); 
 //       Delay_Ms(100);
 //       GPIO_ResetBits(GPIOD,GPIO_Pin_15); 
         
-       if(TIM3->CCR3<1000) 
-       TIM3->CCR3+=100;
+//       if(TIM3->CCR3<1000) 
+//       TIM3->CCR3+=100;
+       
+//       if(TIM_GetCapture3(TIM3)<1000)
+//       {
+//           
+//             motor_ccr+=100;
+//            TIM_SetCompare3(TIM3,motor_ccr);    
+//       }
+        
+        ADC_SoftwareStartConv(ADC1);
+        gl5506_flag=1;
     }
-      
 }
-
-
 
 
 void EXTI1_IRQHandler(void)

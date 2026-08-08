@@ -11,6 +11,8 @@
 #include "sg90.h"
 #include "beep.h"
 #include "motor.h"
+#include "adc.h"
+#include "gl5506.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t

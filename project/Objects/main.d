@@ -48,3 +48,5 @@
 .\objects\main.o: ..\user\api\sg90.h
 .\objects\main.o: ..\user\api\beep.h
 .\objects\main.o: ..\user\api\motor.h
+.\objects\main.o: ..\user\api\adc.h
+.\objects\main.o: ..\user\api\gl5506.h

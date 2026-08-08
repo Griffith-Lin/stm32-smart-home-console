@@ -3,6 +3,9 @@
 
 #include "stm32f4xx.h"
 #include "delay.h"
+#include "debug.h"
+
+extern volatile uint32_t motor_ccr;
 
 void key_ini(void);
 void Exti_key_ini(void);
