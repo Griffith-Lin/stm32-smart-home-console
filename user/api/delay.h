@@ -1,13 +1,9 @@
-#ifndef __DELAY_
-#define __DELAY_
+#ifndef _DELAY_H
+#define _DELAY_H
 
 #include "stm32f4xx.h"
-#include "stdio.h" //ø…“‘”√printf
-#include <stddef.h>
 
-void TIM6_delay(uint32_t ms);
-void TIM6_Task_Init(uint32_t psc,uint32_t arr);
-
-
+void Delay_Us(u32 ustime);
+void Delay_Ms(u32 mstime);
 
 #endif

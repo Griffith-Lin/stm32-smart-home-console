@@ -414,11 +414,6 @@
               <FilePath>..\user\api\LED.c</FilePath>
             </File>
             <File>
-              <FileName>delay.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\user\api\delay.c</FilePath>
-            </File>
-            <File>
               <FileName>usart1.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\usart1.c</FilePath>
@@ -432,11 +427,6 @@
               <FileName>key.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\key.c</FilePath>
-            </File>
-            <File>
-              <FileName>key.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\key.h</FilePath>
             </File>
             <File>
               <FileName>debug.c</FileName>
@@ -457,6 +447,36 @@
               <FileName>sg90.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\user\api\sg90.h</FilePath>
+            </File>
+            <File>
+              <FileName>beep.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\beep.h</FilePath>
+            </File>
+            <File>
+              <FileName>beep.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\beep.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\tim.h</FilePath>
+            </File>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\delay.c</FilePath>
+            </File>
+            <File>
+              <FileName>delay.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\delay.h</FilePath>
             </File>
           </Files>
         </Group>

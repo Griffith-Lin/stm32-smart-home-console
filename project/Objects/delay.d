@@ -36,5 +36,3 @@
 .\objects\delay.o: ..\lib\inc\stm32f4xx_dac.h
 .\objects\delay.o: ..\lib\inc\stm32f4xx_dcmi.h
 .\objects\delay.o: ..\lib\inc\stm32f4xx_fsmc.h
-.\objects\delay.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\delay.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stddef.h

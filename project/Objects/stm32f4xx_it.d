@@ -38,11 +38,13 @@
 .\objects\stm32f4xx_it.o: ..\lib\inc\stm32f4xx_fsmc.h
 .\objects\stm32f4xx_it.o: ..\user\main.h
 .\objects\stm32f4xx_it.o: ..\user\api\LED.h
-.\objects\stm32f4xx_it.o: ..\user\api\delay.h
+.\objects\stm32f4xx_it.o: ..\user\api\tim.h
 .\objects\stm32f4xx_it.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\stm32f4xx_it.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stddef.h
 .\objects\stm32f4xx_it.o: ..\user\api\usart1.h
 .\objects\stm32f4xx_it.o: ..\user\api\debug.h
 .\objects\stm32f4xx_it.o: D:\keil5core\ARM\ARMCC\Bin\..\include\string.h
 .\objects\stm32f4xx_it.o: ..\user\api\key.h
+.\objects\stm32f4xx_it.o: ..\user\api\delay.h
 .\objects\stm32f4xx_it.o: ..\user\api\sg90.h
+.\objects\stm32f4xx_it.o: ..\user\api\beep.h

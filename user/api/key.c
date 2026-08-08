@@ -76,7 +76,9 @@ void EXTI0_IRQHandler(void)
     if(EXTI->PR & (1<<0))
     {
        EXTI->PR |= (1<<0);
-            
+       GPIO_SetBits(GPIOD,GPIO_Pin_15); 
+       Delay_Ms(100);
+       GPIO_ResetBits(GPIOD,GPIO_Pin_15); 
     }
     
     

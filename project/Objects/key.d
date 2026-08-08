@@ -37,5 +37,3 @@
 .\objects\key.o: ..\lib\inc\stm32f4xx_dcmi.h
 .\objects\key.o: ..\lib\inc\stm32f4xx_fsmc.h
 .\objects\key.o: ..\user\api\delay.h
-.\objects\key.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\key.o: D:\keil5core\ARM\ARMCC\Bin\..\include\stddef.h

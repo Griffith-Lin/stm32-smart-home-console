@@ -20,6 +20,8 @@ int main(void)
     key_ini();
     Exti_key_ini();
     sg90_PWM(84,20000);  
+    beep_ini();
+    
     
     
     while(1)
