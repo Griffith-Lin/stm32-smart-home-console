@@ -47,3 +47,4 @@
 .\objects\main.o: ..\user\api\delay.h
 .\objects\main.o: ..\user\api\sg90.h
 .\objects\main.o: ..\user\api\beep.h
+.\objects\main.o: ..\user\api\motor.h

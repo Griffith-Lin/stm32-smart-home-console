@@ -22,7 +22,7 @@ int main(void)
     sg90_PWM(84,20000);  
     beep_ini();
     
-    
+    motor_pwm_ini(84,1000);
     
     while(1)
     {
