@@ -73,7 +73,7 @@ void TIM6_Task_Init(uint32_t psc,uint32_t arr)
     NVIC_Init(&NVIC_InitStructure);
     
     
-    TIM_Cmd(TIM6, ENABLE);
+//    TIM_Cmd(TIM6, ENABLE);
 }
 
 
@@ -89,6 +89,8 @@ void TIM6_delay(uint32_t ms)
     
    tim6=ms;
     while(tim6);
+    
+    TIM6->CR1 &=~(1<<0);
     /*
     while(tim6) 是忙等（busy-wait），CPU 被占着、main 后面的代码不执行。
     但它不像 while(1) 那样死循环，因为 ISR 在背后偷偷改 tim6，最终会让条件变假。

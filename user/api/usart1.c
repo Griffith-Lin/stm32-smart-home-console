@@ -74,7 +74,9 @@ void Usart1_Config(uint32_t brr)
     NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3; // 抢占优先级
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;        // 子优先级
+    
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    
     NVIC_Init(&NVIC_InitStructure);
 
     USART_ITConfig(USART1,USART_IT_RXNE,ENABLE);//接收中断使能
