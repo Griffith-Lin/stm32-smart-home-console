@@ -73,44 +73,67 @@ void TIM6_Task_Init(uint32_t psc,uint32_t arr)
     NVIC_Init(&NVIC_InitStructure);
     
     
-//    TIM_Cmd(TIM6, ENABLE);
+//    TIM_Cmd(TIM6, ENABLE);//在延时函数里使能和禁能，能减小能耗
 }
 
 
 
 
 
+
+//volatile uint32_t tim6=0;
+
+//void TIM6_delay(uint32_t ms)
+//{ 
+//    TIM6->CR1 |= (1<<0);
+//    
+//    tim6=ms;
+//    while(tim6);
+//    
+//    TIM6->CR1 &=~(1<<0);
+//    /*
+//    while(tim6) 是忙等（busy-wait），CPU 被占着、main 后面的代码不执行。
+//    但它不像 while(1) 那样死循环，因为 ISR 在背后偷偷改 tim6，最终会让条件变假。
+//    这就是 volatile 为什么重要——
+//    没有它编译器会把 while(tim6) 当成 while(1) 处理，因为编译器"看不见"ISR。
+//    */
+//}
 
 volatile uint32_t tim6=0;
 
 void TIM6_delay(uint32_t ms)
-{ 
-   TIM6->CR1 |= (1<<0);
+{
+    TIM_Cmd(TIM6,ENABLE);
     
-   tim6=ms;
-    while(tim6);
+    tim6=ms;
+    while(tim6);    
     
-    TIM6->CR1 &=~(1<<0);
-    /*
-    while(tim6) 是忙等（busy-wait），CPU 被占着、main 后面的代码不执行。
-    但它不像 while(1) 那样死循环，因为 ISR 在背后偷偷改 tim6，最终会让条件变假。
-    这就是 volatile 为什么重要——
-    没有它编译器会把 while(tim6) 当成 while(1) 处理，因为编译器"看不见"ISR。
-    */
+    TIM_Cmd(TIM6,DISABLE);
 }
 
 
-//有中断必配优先级
+
+
+////有中断必配优先级
+//void TIM6_DAC_IRQHandler(void)
+//{ 
+//    if(TIM6->SR & (1<<0))// 等 UIF 变 1
+//    {
+//        TIM6->SR &=~(1<<0);//清空状态
+//        tim6--;
+//        //如果定时器不会停，中断会一直触发，这里不加判断，tim6 会从 0 继续递减变成 0xFFFFFFFF, 0xFFFFFFFE... while(tim6) 永远为真 → 主线程永久死锁
+//    }
+//}
+
+
+//中断外面用TIM_GetFlagStatus,中断里面用TIM_GetITStatus
 void TIM6_DAC_IRQHandler(void)
 {
-    
-   
-    if(TIM6->SR & (1<<0))// 等 UIF 变 1
+    if(TIM_GetITStatus(TIM6, TIM_IT_Update)==SET)
     {
-        TIM6->SR &=~(1<<0);//清空状态
-        tim6--;
-        //如果定时器不会停，中断会一直触发，这里不加判断，tim6 会从 0 继续递减变成 0xFFFFFFFF, 0xFFFFFFFE... while(tim6) 永远为真 → 主线程永久死锁
+        TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
+        
+        if (tim6 > 0) 
+        {tim6--;}
     }
 }
-
-
