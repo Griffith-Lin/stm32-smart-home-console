@@ -444,11 +444,6 @@
               <FilePath>..\user\api\tim.c</FilePath>
             </File>
             <File>
-              <FileName>tim.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\tim.h</FilePath>
-            </File>
-            <File>
               <FileName>delay.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\delay.c</FilePath>
@@ -469,9 +464,34 @@
               <FilePath>..\user\api\gl5506.c</FilePath>
             </File>
             <File>
-              <FileName>gl5506.h</FileName>
+              <FileName>pd333b.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\pd333b.c</FilePath>
+            </File>
+            <File>
+              <FileName>w25qxx.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\user\api\gl5506.h</FilePath>
+              <FilePath>..\user\api\w25qxx.h</FilePath>
+            </File>
+            <File>
+              <FileName>w25qxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\w25qxx.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\spi.h</FilePath>
+            </File>
+            <File>
+              <FileName>bitband.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\bitband.h</FilePath>
             </File>
           </Files>
         </Group>

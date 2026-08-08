@@ -30,10 +30,8 @@ int main(void)
     adc_GL5506_ini();//¹âÃôµç×è
     
     while(1)
-    {
-        while(!ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC));
-        printf("%.2f%%\r\n",(4095-ADC_GetConversionValue(ADC1))/(float)4095 *100);
-        TIM6_delay(500);
+    {   
+        adc_debug_auto();
     }   
     
 }

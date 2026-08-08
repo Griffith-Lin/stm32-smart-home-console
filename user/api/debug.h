@@ -13,7 +13,6 @@ extern uint8_t tmp;
 extern uint8_t gl5506_flag;
 
 
-void gl5506_debug_manual(void);
-void gl5506_debug_auto(void);
-
+void adc_debug_manual(void);
+void adc_debug_auto(void);
 #endif

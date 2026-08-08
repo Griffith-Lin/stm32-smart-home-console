@@ -2,6 +2,8 @@
 
 void adc_ini(void)
 {
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1,ENABLE);
+    
     //adc通用配置
     ADC_CommonInitTypeDef adc_CommonInitTypeDef={0};
     
@@ -14,20 +16,38 @@ void adc_ini(void)
     ADC_CommonInit(&adc_CommonInitTypeDef);
     
     
+//    //配置adc1参数
+//    ADC_InitTypeDef adc_InitTypeDef={0};
+//    
+//    adc_InitTypeDef.ADC_Resolution = ADC_Resolution_12b;// 12位分辨率 (0~4095)
+//    adc_InitTypeDef.ADC_ScanConvMode = DISABLE;// 关闭扫描模式 先一次只读一个通道
+////    adc_InitTypeDef.ADC_ContinuousConvMode = DISABLE;// 关闭连续转换 (我们想要软件触发，读一次算一次)
+//    adc_InitTypeDef.ADC_ContinuousConvMode = ENABLE;//打开连续转   ！！！含义是：第一次触发后，自动持续转换！！！
+//    adc_InitTypeDef.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None; // 不用外部触发
+//    adc_InitTypeDef.ADC_DataAlign = ADC_DataAlign_Right;// 数据右对齐 (标准做法)
+//    adc_InitTypeDef.ADC_NbrOfConversion = 1;// 每次转换 1 个通道
+    
+    
     //配置adc1参数
     ADC_InitTypeDef adc_InitTypeDef={0};
     
     adc_InitTypeDef.ADC_Resolution = ADC_Resolution_12b;// 12位分辨率 (0~4095)
-    adc_InitTypeDef.ADC_ScanConvMode = DISABLE;// 关闭扫描模式 先一次只读一个通道
-//    adc_InitTypeDef.ADC_ContinuousConvMode = DISABLE;// 关闭连续转换 (我们想要软件触发，读一次算一次)
+    adc_InitTypeDef.ADC_ScanConvMode = ENABLE;// 扫描模式 
     adc_InitTypeDef.ADC_ContinuousConvMode = ENABLE;//打开连续转   ！！！含义是：第一次触发后，自动持续转换！！！
     adc_InitTypeDef.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None; // 不用外部触发
     adc_InitTypeDef.ADC_DataAlign = ADC_DataAlign_Right;// 数据右对齐 (标准做法)
-    adc_InitTypeDef.ADC_NbrOfConversion = 1;// 每次转换 1 个通道
+    adc_InitTypeDef.ADC_NbrOfConversion = 2;// 总共转换 几个通道   
     
-    ADC_Init(ADC1, &adc_InitTypeDef);
+    ADC_Init(ADC1, &adc_InitTypeDef);   
     
+//ADC 内部状态机是按"先配 CR1→CR2→SQR→通道"的顺序设计的。你把通道写在 ADC_Init 前面，相当于先往购物车里放东西，然后才进超市——购物车是空的。
+    
+    // 第 1 个转换：Channel 10
     ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_480Cycles);
+    
+    // 第 2 个转换：Channel 11
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_480Cycles);
+      
     
     ADC_Cmd(ADC1,ENABLE);
     
