@@ -11,9 +11,9 @@ int fputc(int c,FILE *stream)
 int main(void)
 {
     //NVIC_SetPriorityGrouping(3);
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);//不配置默认为4位占先
     
-    TIM6_Delay_Init(84, 1000);   
+    TIM6_Task_Init(84, 1000);   
     led_ini();
     Usart1_Config(115200);
     

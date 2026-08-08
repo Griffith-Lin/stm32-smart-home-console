@@ -6,7 +6,7 @@
 #include <stddef.h>
 
 void TIM6_delay(uint32_t ms);
-void TIM6_Delay_Init(uint32_t psc,uint32_t arr);
+void TIM6_Task_Init(uint32_t psc,uint32_t arr);
 
 
 
