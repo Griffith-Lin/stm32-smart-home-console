@@ -93,9 +93,9 @@ void spi_ini(void)
     GPIO_Init(GPIOC,&gpio_InitTypeDef);
     
     
-    GPIO_PinAFConfig(GPIOA,GPIO_Pin_5,GPIO_AF6_SPI1);
-    GPIO_PinAFConfig(GPIOA,GPIO_Pin_6,GPIO_AF6_SPI1);
-    GPIO_PinAFConfig(GPIOA,GPIO_Pin_7,GPIO_AF6_SPI1);    
+    GPIO_PinAFConfig(GPIOA,GPIO_PinSource5,GPIO_AF_SPI1);
+    GPIO_PinAFConfig(GPIOA,GPIO_PinSource6,GPIO_AF_SPI1);
+    GPIO_PinAFConfig(GPIOA,GPIO_PinSource7,GPIO_AF_SPI1);    
     
     
     SPI_InitTypeDef spi_InitTypeDef={0};
@@ -106,12 +106,12 @@ void spi_ini(void)
     spi_InitTypeDef.SPI_BaudRatePrescaler=SPI_BaudRatePrescaler_2;
     spi_InitTypeDef.SPI_Mode=SPI_Mode_Master;
     spi_InitTypeDef.SPI_FirstBit=SPI_FirstBit_MSB;
-    spi_InitTypeDef.SPI_NSS=SPI_NSSInternalSoft_Set;
+    spi_InitTypeDef.SPI_NSS=SPI_NSS_Soft ;
     spi_InitTypeDef.SPI_Direction=SPI_Direction_2Lines_FullDuplex;
     
     SPI_Init(SPI1,&spi_InitTypeDef);
     
-    
+    SPI_Cmd(SPI1, ENABLE);
 
 }
 
@@ -122,10 +122,10 @@ void spi_ini(void)
 uint8_t SPI_Echo(uint8_t data)
 {
 	uint32_t timeout = 0xFFFF;//如果硬件出问题（MISO 短路、W25Qxx 损坏），两个 while 会永久死等。加超时
-    while((SPI_GetFlagStatus(SPI1,SPI_FLAG_TXE)==SET) && --timeout);//等待发送缓冲区为空
+    while((SPI_GetFlagStatus(SPI1,SPI_FLAG_TXE)==RESET) && --timeout);//等待发送缓冲区为空
     SPI_SendData(SPI1,data);
     timeout = 0xFFFF;
-    while((SPI_GetFlagStatus(SPI1,SPI_FLAG_RXNE)==SET) && --timeout);//等待接收缓冲区为空
+    while((SPI_GetFlagStatus(SPI1,SPI_FLAG_RXNE)==RESET) && --timeout);//等待接收缓冲区收到,标志位的定义一定要点进去看，标志位的逻辑不一定一样，有的为空，有的为非空
     return SPI_ReceiveData(SPI1);
 }
 

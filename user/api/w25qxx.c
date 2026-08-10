@@ -132,7 +132,7 @@ uint8_t W25Qxx_Read_SR1_busy(void)
 		return 0;
 	}
     
-    printf("¶ÁSR1%#x\r\n",rec_data);
+    
 }
 
 //ÉÏËøflash

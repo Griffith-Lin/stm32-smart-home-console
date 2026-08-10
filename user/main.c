@@ -29,6 +29,8 @@ int main(void)
     adc_ini();
     adc_GL5506_ini();//¹âÃôµç×è
     
+    spi_ini();
+    
     while(1)
     {   
         W25Qxx_test();

@@ -6,7 +6,7 @@
 #include "bitband.h"
 #include "stdio.h"
 
-#define SPI_CS PBout(14)
+
 
 void W25Qxx_Read_ID(void);
 
