@@ -82,9 +82,11 @@ void spi_ini(void)
     gpio_InitTypeDef.GPIO_OType=GPIO_OType_PP;
     gpio_InitTypeDef.GPIO_Speed=GPIO_High_Speed;
     gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_NOPULL;
+    gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
     
     GPIO_Init(GPIOA,&gpio_InitTypeDef);
     
+    gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_7;
     gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_OUT;
     gpio_InitTypeDef.GPIO_Speed=GPIO_Low_Speed;
     
@@ -107,22 +109,10 @@ void spi_ini(void)
     spi_InitTypeDef.SPI_NSS=SPI_NSSInternalSoft_Set;
     spi_InitTypeDef.SPI_Direction=SPI_Direction_2Lines_FullDuplex;
     
+    SPI_Init(SPI1,&spi_InitTypeDef);
     
     
-    
-    //    /*
-//    0(高位)    0(低位)     ==0 
-//    CPOL       CPHA        sp0
-//    */
-//    SPI1->CR1 &=~(1<<0);//时钟相位CPHA,从第一个时钟边沿开始采样数据
-//    SPI1->CR1 &=~(1<<1);//时钟极性CPOL,空闲状态时，SCK保持低电平
-//    SPI1->CR1 |=(1<<2);//配置为主机 (Master)，告诉 SPI 硬件，由我来产生 SCK 时钟信号，并主导通信流程。
-//    SPI1->CR1 &=~(7<<3);//波特率控制 fpclk/2，在仿真器或极短的 PCB 走线上，fPCLK/2 没问题。但在实际智能家居产品的外接模块中，线束寄生电容会导致高速信号失真。强烈建议在调试初期改为 3<<3 (即 011，分频系数 8 或 16)，通信稳定后再尝试提高速率。
-//    SPI1->CR1 &=~(1<<7);//先发送MSB,先发送最高有效位 (MSB)
-//    SPI1->CR1 |=(3<<8);//从器件管理,启用软件管理 NSS (片选) 信号。这意味着 STM32 不会自动控制硬件 NSS 引脚（如 PA4），而是把它释放出来，当作普通的 GPIO 让你手动控制（拉低选中，拉高释放）。这在驱动多个 SPI 设备时是必须的。
-//    SPI1->CR1 &=~(1<<11);//数据帧格式---八位
-//    SPI1->CR1 &=~(1<<15);//双线单向通信数据格式,即 MOSI 和 MISO 独立工作，这是标准 SPI 的形态
-//    SPI1->CR1 |=(1<<6);//使能SPI,打开 SPI 模块的时钟树和逻辑电路
+
 }
 
 
@@ -132,18 +122,12 @@ void spi_ini(void)
 uint8_t SPI_Echo(uint8_t data)
 {
 	uint32_t timeout = 0xFFFF;//如果硬件出问题（MISO 短路、W25Qxx 损坏），两个 while 会永久死等。加超时
-    while(!(SPI1->SR & (1<<1)) && --timeout);//等待发送缓冲区为空
-    SPI1->DR = data;
+    while((SPI_GetFlagStatus(SPI1,SPI_FLAG_TXE)==SET) && --timeout);//等待发送缓冲区为空
+    SPI_SendData(SPI1,data);
     timeout = 0xFFFF;
-    while(!(SPI1->SR & (1<<0)) && --timeout);//等待接收缓冲区为空
-    return SPI1->DR;
+    while((SPI_GetFlagStatus(SPI1,SPI_FLAG_RXNE)==SET) && --timeout);//等待接收缓冲区为空
+    return SPI_ReceiveData(SPI1);
 }
-/*
-数据寄存器SPI1->DR分为2个缓冲区，一个用于写入（发送缓冲区Tx buffer），
-一个用于读取（接收缓冲区Rx buffer）。对数据寄存器执行写操作时，数据将写入发送缓冲区，
-从数据寄存器执行读取时，将返回接收缓冲区中的值。
-*/
-
 
 
 

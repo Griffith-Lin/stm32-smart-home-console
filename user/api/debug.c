@@ -39,6 +39,13 @@ void adc_debug_auto(void)
     printf("»ðÑæÖ¸Êý£º%d\r\n",adc_arr[1]);
     TIM6_delay(500);
 
-
 }
 
+void W25Qxx_test(void)
+{
+    W25Qxx_write_enable();
+    W25Qxx_Read_ID();
+    W25Qxx_Read_SR1_busy();
+
+    TIM6_delay(500);
+}

@@ -31,7 +31,8 @@ int main(void)
     
     while(1)
     {   
-        adc_debug_auto();
+        W25Qxx_test();
+        
     }   
     
 }
