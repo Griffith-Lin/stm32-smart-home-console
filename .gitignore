@@ -49,3 +49,5 @@ Thumbs.db     # Windows缩略图缓存
 # 如果是自定义移植的驱动/HAL库，建议保留或作为子模块管理
 # Middleware/
 # Drivers/
+/project/Listings
+/project/Objects
