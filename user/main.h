@@ -13,6 +13,7 @@
 #include "motor.h"
 #include "adc.h"
 #include "gl5506.h"
+#include "ws2812e.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t

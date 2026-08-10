@@ -469,11 +469,6 @@
               <FilePath>..\user\api\pd333b.c</FilePath>
             </File>
             <File>
-              <FileName>w25qxx.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\w25qxx.h</FilePath>
-            </File>
-            <File>
               <FileName>w25qxx.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\w25qxx.c</FilePath>
@@ -484,14 +479,19 @@
               <FilePath>..\user\api\spi.c</FilePath>
             </File>
             <File>
-              <FileName>spi.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\spi.h</FilePath>
-            </File>
-            <File>
               <FileName>bitband.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\user\api\bitband.h</FilePath>
+            </File>
+            <File>
+              <FileName>ws2812e.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\ws2812e.c</FilePath>
+            </File>
+            <File>
+              <FileName>ws2812e.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\ws2812e.h</FilePath>
             </File>
           </Files>
         </Group>

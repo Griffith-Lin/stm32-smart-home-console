@@ -11,6 +11,15 @@ Remarks:
 1ms处理168K条指令
 1us处理168条指令
 */
+void Delay_100Ns(u32 nstime)
+{
+    while(nstime--)
+    {
+        __NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
+		__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
+    }
+}
+
 void Delay_Us(u32 ustime)
 {
 	while(ustime--)

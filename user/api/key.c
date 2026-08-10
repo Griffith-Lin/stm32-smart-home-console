@@ -107,8 +107,18 @@ void EXTI0_IRQHandler(void)
 //            TIM_SetCompare3(TIM3,motor_ccr);    
 //       }
         
-        ADC_SoftwareStartConv(ADC1);
-        gl5506_flag=1;
+        
+        
+        
+//        ADC_SoftwareStartConv(ADC1);
+//        gl5506_flag=1;
+        
+        
+        
+        green+=50;
+        red+=50;
+        blue+=50;
+        
     }
 }
 

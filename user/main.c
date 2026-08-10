@@ -31,9 +31,14 @@ int main(void)
     
     spi_ini();
     
+   
+    ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上逻辑
+    
+    
     while(1)
     {   
-        W25Qxx_test();
+
+        ws2812e_open_reset(green,red,blue,4);
         
     }   
     

@@ -72,9 +72,10 @@ pa7 SPI1_MOSI
 */
 void spi_ini(void)
 {
-    RCC->APB2ENR |=(1<<12);//使能spi1时钟
-    RCC->AHB1ENR |=(1<<0);//使能gpioa时钟
-    RCC->AHB1ENR |=(1<<2);//使能gpioc时钟
+    
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
     
     GPIO_InitTypeDef gpio_InitTypeDef={0};
     
