@@ -38,8 +38,6 @@ int main(void)
     while(1)
     {   
 
-        ws2812e_open_reset(green,red,blue,4);
-        
     }   
     
 }

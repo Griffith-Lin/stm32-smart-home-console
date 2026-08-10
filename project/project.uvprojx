@@ -489,9 +489,14 @@
               <FilePath>..\user\api\ws2812e.c</FilePath>
             </File>
             <File>
-              <FileName>ws2812e.h</FileName>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\user\api\ws2812e.h</FilePath>
+              <FilePath>..\user\api\i2c.h</FilePath>
             </File>
           </Files>
         </Group>
