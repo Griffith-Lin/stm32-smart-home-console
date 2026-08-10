@@ -25,12 +25,18 @@ CH11 采样(480周期) → CH11 转换(12周期) → EOC=1, DR=CH11值(覆盖)
 CH10 采样 → ... 循环
 */
 
+uint16_t adc_arr[2];
+
 void adc_debug_auto(void)
 {
-    while(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)==RESET);//转换完成退出阻塞
-    printf("光照强度：%.2f%%\r\n",(4095-ADC_GetConversionValue(ADC1))/(float)4095 *100);//读了DR后会清EOC
-    while(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)==RESET);
-    printf("火焰指数：%d\r\n",ADC_GetConversionValue(ADC1));
+    for(int i=0;i<2;i++)
+    {
+        while(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)==RESET);//转换完成退出阻塞
+        adc_arr[i]=ADC_GetConversionValue(ADC1);
+    }
+
+    printf("光照强度：%.2f%%\r\n",(4095-adc_arr[1])/(float)4095 *100);//读了DR后会清EOC
+    printf("火焰指数：%d\r\n",adc_arr[1]);
     TIM6_delay(500);
 
 
