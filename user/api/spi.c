@@ -1,75 +1,129 @@
 #include "spi.h"
 
 
-/*---------spi通信（硬件实现）----------*/
+///*---------spi通信（硬件实现）----------*/
+///*
+//为什么不用pa4的spi1_nss？
+//做嵌入式开发（尤其是驱动 W25Qxx Flash 这种），强烈建议使用软件 NSS 模式。
+//把 NSS 引脚配置为普通推挽输出 GPIO。
+//不要开启 SPI 外设的硬件 NSS 功能（除非你非常清楚自己在做什么）。
+//这样你可以精确控制片选的时序，避免硬件自动拉高/拉低导致的通信失败。
+
+//pb14 cs片选线
+
+//AF5
+//pa5 spi1_sck
+//pa6 spi1_miso 
+//pa7 spi1_mosi
+//*/
+
+////结合从机SPI的主机代码流程分析:
+//void spi_ini(void)
+//{
+//    //打开时钟（SPI1 PA PB）
+//    RCC->APB2ENR |=(1<<12);//使能spi1时钟
+//    RCC->AHB1ENR |=(1<<0);//使能gpioa时钟
+//    RCC->AHB1ENR |=(1<<1);//使能gpiob时钟
+//    
+//    //pa5 6 7
+//    GPIOA->MODER &=~(0x3f<<10);//清零
+//    GPIOA->MODER |=(0x2a<<10);//功能模式为复用
+//    GPIOA->OTYPER &=~(7<<5);//推挽 
+//    GPIOA->OSPEEDR &=~(0x3f<<10);
+//    GPIOA->OSPEEDR |=(0x2a<<10);//引脚速度 快速
+//    GPIOA->PUPDR &=~(0x3f<<10);//上拉下拉设置为无，和ODR、IDR有关    
+//    GPIOA->AFR[0] &=~(0xfff<<20);
+//    GPIOA->AFR[0] |=(0x555<<20);;//af5
+//    
+//    //pb14
+//    GPIOB->MODER &=~(3<<28);
+//    GPIOB->MODER |= (1<<28);//通用输出
+//    GPIOB->OTYPER &=~(1<<14);//推挽
+//    GPIOB->OSPEEDR &=~(3<<28);//低速，片选线不用高速
+//    GPIOB->PUPDR &=~(3<<28);//无上下拉
+//    SPI_CS = 1;   // 初始化完成后释放片选
+
+
+//    SPI1->CR1 =0;
+//    
+//    /*
+//    0(高位)    0(低位)     ==0 
+//    CPOL       CPHA        sp0
+//    */
+//    SPI1->CR1 &=~(1<<0);//时钟相位CPHA,从第一个时钟边沿开始采样数据
+//    SPI1->CR1 &=~(1<<1);//时钟极性CPOL,空闲状态时，SCK保持低电平
+//    SPI1->CR1 |=(1<<2);//配置为主机 (Master)，告诉 SPI 硬件，由我来产生 SCK 时钟信号，并主导通信流程。
+//    SPI1->CR1 &=~(7<<3);//波特率控制 fpclk/2，在仿真器或极短的 PCB 走线上，fPCLK/2 没问题。但在实际智能家居产品的外接模块中，线束寄生电容会导致高速信号失真。强烈建议在调试初期改为 3<<3 (即 011，分频系数 8 或 16)，通信稳定后再尝试提高速率。
+//    SPI1->CR1 &=~(1<<7);//先发送MSB,先发送最高有效位 (MSB)
+//    SPI1->CR1 |=(3<<8);//从器件管理,启用软件管理 NSS (片选) 信号。这意味着 STM32 不会自动控制硬件 NSS 引脚（如 PA4），而是把它释放出来，当作普通的 GPIO 让你手动控制（拉低选中，拉高释放）。这在驱动多个 SPI 设备时是必须的。
+//    SPI1->CR1 &=~(1<<11);//数据帧格式---八位
+//    SPI1->CR1 &=~(1<<15);//双线单向通信数据格式,即 MOSI 和 MISO 独立工作，这是标准 SPI 的形态
+//    SPI1->CR1 |=(1<<6);//使能SPI,打开 SPI 模块的时钟树和逻辑电路
+//   
+//}
+
+
 /*
-为什么不用pa4的spi1_nss？
-做嵌入式开发（尤其是驱动 W25Qxx Flash 这种），强烈建议使用软件 NSS 模式。
-把 NSS 引脚配置为普通推挽输出 GPIO。
-不要开启 SPI 外设的硬件 NSS 功能（除非你非常清楚自己在做什么）。
-这样你可以精确控制片选的时序，避免硬件自动拉高/拉低导致的通信失败。
+pc7 flash_cs
+pa5 SPI1_SCK
+pa6 SPI1_MISO
+pa7 SPI1_MOSI
 
-pb14 cs片选线
-
-AF5
-pa5 spi1_sck
-pa6 spi1_miso 
-pa7 spi1_mosi
 */
-
-//结合从机SPI的主机代码流程分析:
 void spi_ini(void)
 {
-    //打开时钟（SPI1 PA PB）
     RCC->APB2ENR |=(1<<12);//使能spi1时钟
     RCC->AHB1ENR |=(1<<0);//使能gpioa时钟
-    RCC->AHB1ENR |=(1<<1);//使能gpiob时钟
+    RCC->AHB1ENR |=(1<<2);//使能gpioc时钟
     
-    //pa5 6 7
-    GPIOA->MODER &=~(0x3f<<10);//清零
-    GPIOA->MODER |=(0x2a<<10);//功能模式为复用
-    GPIOA->OTYPER &=~(7<<5);//推挽 
-    GPIOA->OSPEEDR &=~(0x3f<<10);
-    GPIOA->OSPEEDR |=(0x2a<<10);//引脚速度 快速
-    GPIOA->PUPDR &=~(0x3f<<10);//上拉下拉设置为无，和ODR、IDR有关    
-    GPIOA->AFR[0] &=~(0xfff<<20);
-    GPIOA->AFR[0] |=(0x555<<20);;//af5
+    GPIO_InitTypeDef gpio_InitTypeDef={0};
     
-    //pb14
-    GPIOB->MODER &=~(3<<28);
-    GPIOB->MODER |= (1<<28);//通用输出
-    GPIOB->OTYPER &=~(1<<14);//推挽
-    GPIOB->OSPEEDR &=~(3<<28);//低速，片选线不用高速
-    GPIOB->PUPDR &=~(3<<28);//无上下拉
-    SPI_CS = 1;   // 初始化完成后释放片选
-
-
-    SPI1->CR1 =0;
+    gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_AF;
+    gpio_InitTypeDef.GPIO_OType=GPIO_OType_PP;
+    gpio_InitTypeDef.GPIO_Speed=GPIO_High_Speed;
+    gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_NOPULL;
     
-    /*
-    0(高位)    0(低位)     ==0 
-    CPOL       CPHA        sp0
-    */
-    SPI1->CR1 &=~(1<<0);//时钟相位CPHA,从第一个时钟边沿开始采样数据
-    SPI1->CR1 &=~(1<<1);//时钟极性CPOL,空闲状态时，SCK保持低电平
-    SPI1->CR1 |=(1<<2);//配置为主机 (Master)，告诉 SPI 硬件，由我来产生 SCK 时钟信号，并主导通信流程。
-    SPI1->CR1 &=~(7<<3);//波特率控制 fpclk/2，在仿真器或极短的 PCB 走线上，fPCLK/2 没问题。但在实际智能家居产品的外接模块中，线束寄生电容会导致高速信号失真。强烈建议在调试初期改为 3<<3 (即 011，分频系数 8 或 16)，通信稳定后再尝试提高速率。
-    SPI1->CR1 &=~(1<<7);//先发送MSB,先发送最高有效位 (MSB)
-    SPI1->CR1 |=(3<<8);//从器件管理,启用软件管理 NSS (片选) 信号。这意味着 STM32 不会自动控制硬件 NSS 引脚（如 PA4），而是把它释放出来，当作普通的 GPIO 让你手动控制（拉低选中，拉高释放）。这在驱动多个 SPI 设备时是必须的。
-    SPI1->CR1 &=~(1<<11);//数据帧格式---八位
-    SPI1->CR1 &=~(1<<15);//双线单向通信数据格式,即 MOSI 和 MISO 独立工作，这是标准 SPI 的形态
-    SPI1->CR1 |=(1<<6);//使能SPI,打开 SPI 模块的时钟树和逻辑电路
-   
+    GPIO_Init(GPIOA,&gpio_InitTypeDef);
+    
+    gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_OUT;
+    gpio_InitTypeDef.GPIO_Speed=GPIO_Low_Speed;
+    
+    GPIO_Init(GPIOC,&gpio_InitTypeDef);
+    
+    
+    GPIO_PinAFConfig(GPIOA,GPIO_Pin_5,GPIO_AF6_SPI1);
+    GPIO_PinAFConfig(GPIOA,GPIO_Pin_6,GPIO_AF6_SPI1);
+    GPIO_PinAFConfig(GPIOA,GPIO_Pin_7,GPIO_AF6_SPI1);    
+    
+    
+    SPI_InitTypeDef spi_InitTypeDef={0};
+    
+    spi_InitTypeDef.SPI_CPOL=SPI_CPOL_Low;
+    spi_InitTypeDef.SPI_CPHA=SPI_CPHA_1Edge;
+    spi_InitTypeDef.SPI_DataSize=SPI_DataSize_8b;
+    spi_InitTypeDef.SPI_BaudRatePrescaler=SPI_BaudRatePrescaler_2;
+    spi_InitTypeDef.SPI_Mode=SPI_Mode_Master;
+    spi_InitTypeDef.SPI_FirstBit=SPI_FirstBit_MSB;
+    spi_InitTypeDef.SPI_NSS=SPI_NSSInternalSoft_Set;
+    spi_InitTypeDef.SPI_Direction=SPI_Direction_2Lines_FullDuplex;
+    
+    
+    
+    
+    //    /*
+//    0(高位)    0(低位)     ==0 
+//    CPOL       CPHA        sp0
+//    */
+//    SPI1->CR1 &=~(1<<0);//时钟相位CPHA,从第一个时钟边沿开始采样数据
+//    SPI1->CR1 &=~(1<<1);//时钟极性CPOL,空闲状态时，SCK保持低电平
+//    SPI1->CR1 |=(1<<2);//配置为主机 (Master)，告诉 SPI 硬件，由我来产生 SCK 时钟信号，并主导通信流程。
+//    SPI1->CR1 &=~(7<<3);//波特率控制 fpclk/2，在仿真器或极短的 PCB 走线上，fPCLK/2 没问题。但在实际智能家居产品的外接模块中，线束寄生电容会导致高速信号失真。强烈建议在调试初期改为 3<<3 (即 011，分频系数 8 或 16)，通信稳定后再尝试提高速率。
+//    SPI1->CR1 &=~(1<<7);//先发送MSB,先发送最高有效位 (MSB)
+//    SPI1->CR1 |=(3<<8);//从器件管理,启用软件管理 NSS (片选) 信号。这意味着 STM32 不会自动控制硬件 NSS 引脚（如 PA4），而是把它释放出来，当作普通的 GPIO 让你手动控制（拉低选中，拉高释放）。这在驱动多个 SPI 设备时是必须的。
+//    SPI1->CR1 &=~(1<<11);//数据帧格式---八位
+//    SPI1->CR1 &=~(1<<15);//双线单向通信数据格式,即 MOSI 和 MISO 独立工作，这是标准 SPI 的形态
+//    SPI1->CR1 |=(1<<6);//使能SPI,打开 SPI 模块的时钟树和逻辑电路
 }
-
-/*
-在 SPI 的硬件物理层面上，不存在纯粹的“先发后收”或“先收后发”，而是“同步全双工”的——发送和接收是同时发生的。
-软件代码之所以写成“先写后读”，是因为 SPI 的接收动作必须由发送动作来触发。
-
-只有一个数据寄存器，为什么能同时收发呢?
-在代码里 SPI1->DR 确实只有一个地址，但在单片机内部的物理硅片上，它对应的是两个完全独立的物理寄存器。
-发送移位寄存器  接收移位寄存器
-*/
 
 
 
