@@ -14,6 +14,8 @@
 #include "adc.h"
 #include "gl5506.h"
 #include "ws2812e.h"
+#include "i2c.h"
+#include "MLX90614.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t

@@ -34,9 +34,19 @@ int main(void)
    
     ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上逻辑
     
+    i2c_master_ini();
+    
+    uint8_t buf[2]={0};
+    uint16_t read_flag=0;
     
     while(1)
-    {   
+    {         
+        mlx90614_slave_read(0x07,buf);//读标志位
+        
+        read_flag=(buf[1]<<8) | buf[0];
+        printf("%d\r\n",read_flag);
+        
+        Delay_Ms(1000);
 
     }   
     

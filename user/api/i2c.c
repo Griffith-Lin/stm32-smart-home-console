@@ -17,7 +17,7 @@ void i2c_master_ini(void)
     gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_NOPULL;
     gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_6 | GPIO_Pin_7;
     
-    GPIO_Init(GPIOA,&gpio_InitTypeDef); 
+    GPIO_Init(GPIOB,&gpio_InitTypeDef); 
     
     //PB6/PB7 的 ODR 复位值是 0，初始化完成后 SDA=0、SCL=0——两条线都低，是从机眼里的异常状态
     I2C_SDA = 1;
@@ -63,17 +63,17 @@ SDA 和 SCL 在空闲时都是高电平。
 
 */
 
-// 主机接收从机数据时，回应的发应答
+// 主机接收从机数据时，主机回应的让从机继续发的应答
 void i2c_master_ack(uint8_t ack)
 {
     I2C_SCL = 0;
     if (ack)
     {
-        I2C_SDA = 1;//ACK，主机告诉从机继续发
+        I2C_SDA = 0;//ACK，主机告诉从机继续发
     }
     else
     {
-        I2C_SDA = 0;//NACK，主机告诉从机停止发
+        I2C_SDA = 1;//NACK，主机告诉从机停止发
     }
     Delay_Us(4);
     I2C_SCL = 1;
@@ -84,10 +84,11 @@ void i2c_master_ack(uint8_t ack)
     Delay_Us(4);//保证SCL低电平宽度： I2C标准对SCL低电平持续时间有最小值要求（Standard Mode ≥ 4.7μs，Fast Mode ≥ 1.3μs）。这个延时确保即使后续代码立即执行，也不会违反时序。
 }
 
-// 接收从机的收应答
+// 从机接收主机数据后，返回的收应答
 uint8_t i2c_master_wait_ack(void)
 {
     uint8_t ack = 0;
+    I2C_SCL = 0;//在释放 SDA 之前，必须先拉低 SCL，确保处于数据准备阶段。
     I2C_SDA = 1; // sda拉高，数据线空闲状态，不影响引脚输入
 
     // 这就是软件模拟 I2C 的一个时钟周期。
