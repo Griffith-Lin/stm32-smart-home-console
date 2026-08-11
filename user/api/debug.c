@@ -49,3 +49,20 @@ void W25Qxx_test(void)
 
     TIM6_delay(500);
 }
+
+
+
+
+uint8_t buf[2]={0};
+uint16_t read_flag=0;
+
+void mlx90614_test(void)
+{
+    mlx90614_slave_read(0x07,buf);//¶Á±êÖ¾Î»
+    
+    read_flag=(buf[1]<<8) | buf[0];
+    printf("%d\r\n",read_flag);
+    
+    Delay_Ms(1000);    
+}
+

@@ -4,6 +4,8 @@
 #include "stm32f4xx.h"
 #include "tim.h"
 #include "W25Qxx.h"
+#include "delay.h"
+#include "MLX90614.h"
 
 #include <stdio.h>
 #include <stdint.h> 
