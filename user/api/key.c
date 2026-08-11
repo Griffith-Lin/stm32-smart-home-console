@@ -118,7 +118,7 @@ void EXTI0_IRQHandler(void)
         green+=50;
         red+=50;
         blue+=50;
-        
+        Delay_Ms(100);//Ïû¶¶
     }
 }
 
