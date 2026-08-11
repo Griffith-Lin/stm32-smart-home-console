@@ -16,7 +16,7 @@ void ws2812e_ini(uint16_t rgb_num)
     
     GPIO_Init(GPIOB,&gpio_InitTypeDef);
     
-    __disable_irq();                // 关全局中断
+    //__disable_irq();                // 关全局中断
     
     rgb_num += 10;                // 冗余，确保覆盖所有灯
 
@@ -30,7 +30,7 @@ void ws2812e_ini(uint16_t rgb_num)
     PB15_LOW();
     Delay_Us(400);
     
-    __enable_irq();                 // 开全局中断
+    //__enable_irq();                 // 开全局中断
 }
 
 void ws2812e_send_byte(uint8_t data)

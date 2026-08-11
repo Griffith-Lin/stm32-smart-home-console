@@ -38,22 +38,19 @@ int main(void)
     
     i2c_master_ini();
     
-    uint8_t buf[2]={0};
-    uint16_t read_flag=0;
+
     
     ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上逻辑
     //后面的 i2c_master_ini 会操作 GPIOB（PB6/PB7），虽然没有直接动 PB15，但同一组 GPIO 的寄存器读写可能产生微妙影响。加上前导复位丢失，噪声数据就一直在第一个灯里锁着。
+    //复位时第一个灯闪绿灯，原因是硬件浮空，加下拉电阻解决
+    //WS2812 的 DIN 脚内部有弱上拉（~100kΩ），会把线往上拽。但 PCB 走线本身是天线，会耦合周围的电磁噪声。结果就是 DIN 上的电压随机波动——可能刚好跨过 WS2812 的高低电平阈值，被当成数据吞进去。
+    
     
     while(1)
     {         
-        ws2812e_open_reset(green, red, blue, 4);
         
-//        mlx90614_slave_read(0x07,buf);//读标志位
-//        
-//        read_flag=(buf[1]<<8) | buf[0];
-//        printf("%d\r\n",read_flag);
-//        
-//        Delay_Ms(1000);
+        
+
 
     }   
     
