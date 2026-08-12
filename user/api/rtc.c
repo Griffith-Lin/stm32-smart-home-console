@@ -1,0 +1,111 @@
+#include "rtc.h"
+
+void RTC_Cal_Config(void)
+{
+	
+    
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR,ENABLE);//使能电源接口时钟
+	PWR_BackupAccessCmd(ENABLE);//使能备份域访问
+    
+	RCC_LSICmd(ENABLE);//使能LSI时钟
+    
+    
+	RCC_RTCCLKConfig(RCC_RTCCLKSource_LSI);//选择RTC时钟为LSI
+    
+	RCC_RTCCLKCmd(ENABLE);//使能RTC时钟
+	
+//	RTC_WriteProtectionCmd(DISABLE);//取消写保护
+//	RTC_EnterInitMode();//进入初始化模式
+//	while(RTC_GetFlagStatus(RTC_FLAG_INITF)==RESET);//等待标志位
+//	
+//	
+//	RTC_ExitInitMode();//退出初始化模式
+//	RTC_WriteProtectionCmd(ENABLE);//使能写保护
+	
+	//上述的流程在任意的写入库函数中都存在 可以省略不写
+    
+	RTC_InitTypeDef rtc_InitTypeDef={0};
+	
+	rtc_InitTypeDef.RTC_HourFormat=RTC_HourFormat_24;//时间格式
+	rtc_InitTypeDef.RTC_AsynchPrediv=127;//异步分频 128分频
+	rtc_InitTypeDef.RTC_SynchPrediv=249;//同步分频 250分频
+    
+	RTC_Init(&rtc_InitTypeDef);
+    
+	//直接赋值初始时间
+	RTC_Set_Date(26,8,11,2);
+	RTC_Set_Time(RTC_H12_PM,16,42,30);
+}
+
+/*
+RTC_TimeTypeDef是硬件寄存器的软件抽象,无需关心具体是寄存器哪一位
+
+初始化函数的接口设计为接收结构体指针 (&rtc_TimeTypeDef)，避免了大结构体压栈拷贝的开销，同时允许库函数读取配置并写入硬件。
+*/
+
+//配置RTC_TimeTypeDef结构体
+void RTC_Set_Time(uint8_t H12,uint8_t Hours,uint8_t Minutes,uint8_t Seconds)
+{
+	RTC_TimeTypeDef rtc_TimeTypeDef={0};
+    
+	rtc_TimeTypeDef.RTC_H12=H12;
+	rtc_TimeTypeDef.RTC_Hours=Hours;
+	rtc_TimeTypeDef.RTC_Minutes=Minutes;
+	rtc_TimeTypeDef.RTC_Seconds=Seconds;
+    
+	RTC_SetTime(RTC_Format_BIN,&rtc_TimeTypeDef);
+}
+
+//配置RTC_DateTypeDef结构体
+void RTC_Set_Date(uint8_t Year,uint8_t Month,uint8_t Date,uint8_t WeekDay)
+{
+	RTC_DateTypeDef rtc_DateTypeDef={0};
+	
+	rtc_DateTypeDef.RTC_Date=Date;
+	rtc_DateTypeDef.RTC_Month=Month;
+	rtc_DateTypeDef.RTC_WeekDay=WeekDay;
+	rtc_DateTypeDef.RTC_Year=Year;
+	
+	RTC_SetDate(RTC_Format_BIN,&rtc_DateTypeDef);
+}
+
+
+
+void RTC_Show_Time(void)
+{
+	RTC_TimeTypeDef RTC_Time={0};
+	RTC_DateTypeDef RTC_Date={0};
+    
+    //指定返回参数格式为BIN还是BCD
+	RTC_GetTime(RTC_Format_BIN,&RTC_Time);
+	RTC_GetDate(RTC_Format_BIN,&RTC_Date);
+	
+    
+	printf("%d年-%d月-%d日 星期%d\t",2000+RTC_Date.RTC_Year,RTC_Date.RTC_Month,RTC_Date.RTC_Date,RTC_Date.RTC_WeekDay);
+	printf("%d:%d:%d\r\n",RTC_Time.RTC_Hours,RTC_Time.RTC_Minutes,RTC_Time.RTC_Seconds);
+}
+
+
+uint8_t Compile_WeekDay(void)
+{
+    const char *date = __DATE__;   // "Aug 11 2026"
+    const char *mon_str[] = {"Jan","Feb","Mar","Apr","May","Jun",
+                             "Jul","Aug","Sep","Oct","Nov","Dec"};
+    
+    uint8_t month = 0;
+    for (int i = 0; i < 12; i++) {
+        if (date[0] == mon_str[i][0] && date[1] == mon_str[i][1] && date[2] == mon_str[i][2]) {
+            month = i + 1;
+            break;
+        }
+    }
+    
+    uint8_t  day  = (date[4] == ' ' ? 0 : (date[4] - '0') * 10) + (date[5] - '0');
+    uint16_t year = (date[7] - '0') * 1000 + (date[8] - '0') * 100 
+                  + (date[9] - '0') * 10  + (date[10] - '0');
+    
+    // Sakamoto 算法
+    static const uint8_t t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+    year -= month < 3;
+    return (year + year / 4 - year / 100 + year / 400 + t[month - 1] + day) % 7;
+}
