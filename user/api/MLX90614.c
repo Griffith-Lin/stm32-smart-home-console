@@ -1,8 +1,5 @@
 #include "MLX90614.h"
 
-
-
-
 uint8_t try_count=0;
 
 //主机写从机数据
@@ -29,7 +26,7 @@ void mlx90614_slave_write(uint8_t data)
 }
 
 //主机读从机数据
-void mlx90614_slave_read(uint8_t command,uint8_t *buf)
+void mlx90614_slave_read(uint8_t command,volatile uint8_t *buf)
 {
     i2c_master_start();
     
@@ -59,3 +56,13 @@ void mlx90614_slave_read(uint8_t command,uint8_t *buf)
     
     i2c_master_stop();
 }
+
+
+float temperature_calculate(volatile uint8_t *buf)
+{
+    uint16_t tmp=(buf[1]<<8) | buf[0];
+    tmp=tmp*0.02-273.15;
+    return tmp;
+}
+
+
