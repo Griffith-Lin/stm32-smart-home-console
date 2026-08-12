@@ -60,7 +60,7 @@ void mlx90614_slave_read(uint8_t command,volatile uint8_t *buf)
 
 float temperature_calculate(volatile uint8_t *buf)
 {
-    float tmp=(buf[1]<<8) | buf[0];
+    float tmp=(buf[1]<<8) | buf[0];//float类型数据有32bit
     tmp=tmp*0.02-273.15;
     return tmp;
 }

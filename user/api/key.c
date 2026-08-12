@@ -28,7 +28,7 @@ void key_ini(void)
     GPIO_Init(GPIOA,&gpio_InitTypeDef);
     
     
-    gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_0 | GPIO_Pin_1;
+    gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_1;
     GPIO_Init(GPIOB,&gpio_InitTypeDef);
 }
 
