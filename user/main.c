@@ -61,11 +61,12 @@ int main(void)
     //多调用一次变色函数，解决复位时第一个灯常亮绿灯。原因是复位时有脏数据进入灯带
     
    
-    RTC_Cal_Config();
+    RTC_Cal_Config();//时间初始化
+    alarm_ini(RTC_H12_PM,17,55,30,3);//闹钟初始化
     
     while(1)
     {         
-//        RTC_Show_Time();
+        RTC_Show_Time();
 //        ws2812e_open_reset(green,red,blue,4);
 //        green+=50;
 //        red+=50;

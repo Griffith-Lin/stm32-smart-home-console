@@ -132,24 +132,71 @@ void Compile_Time(void)
 }
 
 
-void alarm_ini(void)
+void alarm_ini(uint8_t H12,uint8_t Hours,uint8_t Minutes,uint8_t Seconds,uint8_t Weekday)
 {
+    RTC_AlarmTypeDef rtc_AlarmTypeDef={0};  //闹钟配置结构体
+	RTC_TimeTypeDef rtc_TimeTypeDef={0};    //时间配置结构体
+	EXTI_InitTypeDef exti_InitTypeDef={0};  //EXTI配置结构体
+	NVIC_InitTypeDef nvic_InitTypeDef={0};  //嵌套向量中断控制器配置结构体
+    
+    
 //    RTC->CR &=~(1<<8);//禁能闹钟A
     RTC_AlarmCmd(RTC_Alarm_A,DISABLE);
     
 //    轮询 RTC_ISR 寄存器中的ALRAWF或ALRBWF位，直到其中一个置1，以确保闹钟寄存器可以访问。大约需要2个RTCCLK时钟周期（由于时钟同步）。
 //    while(!(RTC->ISR & (1<<0)));
-    while(RTC_GetFlagStatus(RTC_FLAG_ALRAF)!=SET);
+    while(RTC_GetFlagStatus(RTC_FLAG_ALRAWF)!=SET);
     
+//    设置亚秒掩码，这里省略
 //    RTC->ALRMASSR;
 //    RTC->ALRMAR;
-//    RTC_AlarmSubSecondConfig(RTC_Alarm_A,RTC_AlarmSubSecondMask_SS14_13
+//    RTC_AlarmSubSecondConfig(RTC_Alarm_A,RTC_AlarmSubSecondMask_SS14_13,
+    
+    rtc_TimeTypeDef.RTC_H12=H12;
+	rtc_TimeTypeDef.RTC_Hours=Hours;
+	rtc_TimeTypeDef.RTC_Minutes=Minutes;
+	rtc_TimeTypeDef.RTC_Seconds=Seconds;
+
+	rtc_AlarmTypeDef.RTC_AlarmTime=rtc_TimeTypeDef;//闹钟时间配置
+	rtc_AlarmTypeDef.RTC_AlarmDateWeekDay=Weekday;//选择的是星期而不是日期，所以这里配置的是星期
+	rtc_AlarmTypeDef.RTC_AlarmDateWeekDaySel=RTC_AlarmDateWeekDaySel_WeekDay;//星期/日期选择
+	rtc_AlarmTypeDef.RTC_AlarmMask=RTC_AlarmMask_Minutes;//掩码，RTC_AlarmMask 的工作机制是：被掩码屏蔽的字段不参与闹钟比较，相当于“通配符/任意值”。
+	//闹钟产生中断事件，需要满足星期 时 分 秒与配置的相同，用掩码屏蔽分钟，意思就是满足星期 时 秒相同就可以触发中断
+    
+	RTC_SetAlarm(RTC_Format_BIN,RTC_Alarm_A,&rtc_AlarmTypeDef);
+	RTC_ITConfig(RTC_IT_ALRA,ENABLE);//使能闹钟中断
+	
+	exti_InitTypeDef.EXTI_Line=EXTI_Line17;//线17，从参考手册的唤醒事件管理中得知
+	exti_InitTypeDef.EXTI_LineCmd=ENABLE;
+	exti_InitTypeDef.EXTI_Mode=EXTI_Mode_Interrupt;//中断服务模式
+	exti_InitTypeDef.EXTI_Trigger=EXTI_Trigger_Rising_Falling;//上下沿触发
+    
+	EXTI_Init(&exti_InitTypeDef);
+	
+    
+	nvic_InitTypeDef.NVIC_IRQChannel=RTC_Alarm_IRQn;//闹钟通道
+	nvic_InitTypeDef.NVIC_IRQChannelCmd=ENABLE;
+	nvic_InitTypeDef.NVIC_IRQChannelPreemptionPriority=3;//占先
+	nvic_InitTypeDef.NVIC_IRQChannelSubPriority=0;//次级
+    
+	NVIC_Init(&nvic_InitTypeDef);
+	
+	RTC_AlarmCmd(RTC_Alarm_A,ENABLE);//使能闹钟
     
     
 }
 
 
-
+void RTC_Alarm_IRQHandler(void)
+{
+	if(RTC_GetITStatus(RTC_IT_ALRA)==SET)
+	{
+		RTC_ClearITPendingBit(RTC_IT_ALRA);
+		
+		printf("时间到了\r\n");
+	}
+	EXTI_ClearITPendingBit(EXTI_Line17);
+}
 
 
 
