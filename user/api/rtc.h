@@ -29,6 +29,8 @@ void RTC_Show_Time(void);
 void Compile_WeekDay(void);
 void Compile_Time(void);
 void alarm_ini(uint8_t H12,uint8_t Hours,uint8_t Minutes,uint8_t Seconds,uint8_t Weekday);
+void rtc_wakeup_ini(void);
+
 
 #endif
 

@@ -200,4 +200,62 @@ void RTC_Alarm_IRQHandler(void)
 }
 
 
+void rtc_wakeup_ini(void)
+{
+    RTC_WriteProtectionCmd(DISABLE);//RTC 寄存器默认开启写保护。需要手动关闭
+    
+//    RTC->CR &=~(1<<10);//唤醒定时器禁能
+    RTC_WakeUpCmd(DISABLE);
+    
+    while(RTC_GetFlagStatus(RTC_FLAG_WUTWF)!=SET);//唤醒定时器 它的写标志。在 RTC_CR 寄存器中的WUTE位置0后，当唤醒定时器值可更改时，由硬件将该位置1。
+
+    RTC_WakeUpClockConfig(RTC_WakeUpClock_CK_SPRE_16bits);//前 4 个用的是 RTCCLK 分频（高频，精度高，但最大只能到几十秒）；后 2 个用的是 CK_SPRE（RTC 预分频器输出的 1Hz 信号，低频，精度低，但能到几十小时）。
+    
+    RTC_SetWakeUpCounter(0);//WUTR  配置要计数次数  STM32 的 Wakeup 计数器是递减到 0 后再额外计一个周期才触发中断，硬件设计上是 (WUTR + 1) 个时钟周期。
+    
+    
+    
+    RTC_ITConfig(RTC_IT_WUT,ENABLE);//使能唤醒定时器中断
+    
+    //嵌套向量中断控制器配置
+    NVIC_InitTypeDef nvic_InitTypeDef={0};
+    
+    nvic_InitTypeDef.NVIC_IRQChannel=RTC_WKUP_IRQn;
+    nvic_InitTypeDef.NVIC_IRQChannelPreemptionPriority=3;
+    nvic_InitTypeDef.NVIC_IRQChannelSubPriority=0;    
+    nvic_InitTypeDef.NVIC_IRQChannelCmd=ENABLE;
+    
+    NVIC_Init(&nvic_InitTypeDef);
+    
+    //EXTI配置
+    EXTI_InitTypeDef exti_InitTypeDef={0};
+    
+    exti_InitTypeDef.EXTI_Mode=EXTI_Mode_Interrupt;
+    exti_InitTypeDef.EXTI_Line=EXTI_Line22;
+    exti_InitTypeDef.EXTI_Trigger=EXTI_Trigger_Rising;//从参考手册rtc中断章节得知
+    exti_InitTypeDef.EXTI_LineCmd=ENABLE;
+    
+    EXTI_Init(&exti_InitTypeDef);
+    
+    
+    RTC_WakeUpCmd(ENABLE);
+    
+    RTC_WriteProtectionCmd(ENABLE);//恢复写保护
+}
+
+void RTC_WKUP_IRQHandler (void)
+{
+    if(RTC_GetITStatus(RTC_IT_WUT)==SET)
+    {
+        RTC_ClearITPendingBit(RTC_IT_WUT);
+ 
+        EXTI_ClearITPendingBit(EXTI_Line22);
+        //RTC Wakeup 的中断链路是：RTC → EXTI Line 22 → NVIC。
+        //如果你只清除了 RTC 内部的标志位，但 EXTI Line 22 的 Pending Bit 仍然置位。这会导致：
+        //退出 ISR 后，NVIC 立即再次触发中断（因为 EXTI 挂起位还在）
+        
+        printf("唤醒\r\n");
+    }
+}
+
 

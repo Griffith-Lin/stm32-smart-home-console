@@ -63,14 +63,14 @@ int main(void)
    
     RTC_Cal_Config();//时间初始化
     alarm_ini(RTC_H12_PM,0,0,30,3);//闹钟初始化
+    rtc_wakeup_ini();
     
     while(1)
     {         
         RTC_Show_Time();
 
-        mlx90614_test();
-
         
+       
         Delay_Ms(1000);
 
     }   
