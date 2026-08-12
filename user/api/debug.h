@@ -6,6 +6,7 @@
 #include "W25Qxx.h"
 #include "delay.h"
 #include "MLX90614.h"
+#include "rtc.h"
 
 #include <stdio.h>
 #include <stdint.h> 
@@ -14,8 +15,13 @@
 extern uint8_t tmp;
 extern uint8_t gl5506_flag;
 
+extern volatile uint8_t mlx90614_buf[2];
+extern volatile uint16_t mlx90614_read_flag;
+
 
 void adc_debug_manual(void);
 void adc_debug_auto(void);
 void W25Qxx_test(void);
+void rtc_test(void);
+void mlx90614_test(void);
 #endif

@@ -10,6 +10,8 @@ int fputc(int c,FILE *stream)
 
 int main(void)
 { 
+    
+    
     //NVIC_SetPriorityGrouping(3);
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);//不配置默认为4位占先
     
@@ -25,7 +27,7 @@ int main(void)
     motor_pwm_ini(84,1000);
     mortor_minspeed_open();
     
-    
+       
     adc_ini();
     adc_GL5506_ini();//光敏电阻
     
@@ -35,26 +37,19 @@ int main(void)
     i2c_master_ini();
     
 
-    ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上逻辑
+    ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上灯的复位逻辑
     //后面的 i2c_master_ini 会操作 GPIOB（PB6/PB7），虽然没有直接动 PB15，但同一组 GPIO 的寄存器读写可能产生微妙影响。加上前导复位丢失，噪声数据就一直在第一个灯里锁着。
     //复位时第一个灯闪绿灯，原因是硬件浮空，加下拉电阻解决
     //WS2812 的 DIN 脚内部有弱上拉（~100kΩ），会把线往上拽。但 PCB 走线本身是天线，会耦合周围的电磁噪声。结果就是 DIN 上的电压随机波动——可能刚好跨过 WS2812 的高低电平阈值，被当成数据吞进去。
+    //多调用一次变色函数，解决复位时第一个灯常亮绿灯。原因是复位时有脏数据进入灯带
     
    
     RTC_Cal_Config();
     
     while(1)
     {         
-//        RTC_Show_Time();
-//		Delay_Ms(1000);
-        
-        
-        //是编译期宏，格式固定为 "Aug 11 2026"（月 日 年）
-//		printf("%s\r\n",__DATE__);
-        const char *week[] = {"日", "一", "二", "三", "四", "五", "六"};
-        printf("编译日期: %s 星期%s\r\n", __DATE__, week[Compile_WeekDay()]);
-		printf("%s\r\n",__TIME__);
-		Delay_Ms(1000);
+        RTC_Show_Time();
+        Delay_Ms(1000);
 
     }   
     

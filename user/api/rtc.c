@@ -1,5 +1,7 @@
 #include "rtc.h"
 
+
+
 void RTC_Cal_Config(void)
 {
 	
@@ -32,9 +34,13 @@ void RTC_Cal_Config(void)
     
 	RTC_Init(&rtc_InitTypeDef);
     
+    
+    Compile_WeekDay();
+    Compile_Time();
+    
 	//直接赋值初始时间
-	RTC_Set_Date(26,8,11,2);
-	RTC_Set_Time(RTC_H12_PM,16,42,30);
+	RTC_Set_Date(compile_date.year,compile_date.month,compile_date.day,2);
+	RTC_Set_Time(RTC_H12_PM,compile_time.hour,compile_time.min,compile_time.second);
 }
 
 /*
@@ -86,26 +92,41 @@ void RTC_Show_Time(void)
 }
 
 
+
+volatile struct COMPILE_data compile_date;
+
 uint8_t Compile_WeekDay(void)
 {
     const char *date = __DATE__;   // "Aug 11 2026"
     const char *mon_str[] = {"Jan","Feb","Mar","Apr","May","Jun",
                              "Jul","Aug","Sep","Oct","Nov","Dec"};
     
-    uint8_t month = 0;
+    
     for (int i = 0; i < 12; i++) {
         if (date[0] == mon_str[i][0] && date[1] == mon_str[i][1] && date[2] == mon_str[i][2]) {
-            month = i + 1;
+            compile_date.month = i + 1;
             break;
         }
     }
     
-    uint8_t  day  = (date[4] == ' ' ? 0 : (date[4] - '0') * 10) + (date[5] - '0');
+    compile_date.day  = (date[4] == ' ' ? 0 : (date[4] - '0') * 10) + (date[5] - '0');
+    
     uint16_t year = (date[7] - '0') * 1000 + (date[8] - '0') * 100 
                   + (date[9] - '0') * 10  + (date[10] - '0');
+    compile_date.year=year-2000;
     
     // Sakamoto 算法
     static const uint8_t t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
-    year -= month < 3;
-    return (year + year / 4 - year / 100 + year / 400 + t[month - 1] + day) % 7;
+    year -= compile_date.month < 3;
+    return (year + year / 4 - year / 100 + year / 400 + t[compile_date.month - 1] + compile_date.day) % 7;
+}
+
+volatile struct COMPILE_time compile_time;
+
+void Compile_Time(void)
+{
+    const char *time = __TIME__;   // "16:42:30"
+    compile_time.hour   = (time[0] - '0') * 10 + (time[1] - '0');
+    compile_time.min    = (time[3] - '0') * 10 + (time[4] - '0');
+    compile_time.second = (time[6] - '0') * 10 + (time[7] - '0');
 }

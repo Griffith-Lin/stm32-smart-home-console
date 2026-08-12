@@ -53,16 +53,36 @@ void W25Qxx_test(void)
 
 
 
-uint8_t buf[2]={0};
-uint16_t read_flag=0;
+volatile uint8_t mlx90614_buf[2]={0};
+volatile uint16_t mlx90614_read_flag=0;
 
 void mlx90614_test(void)
 {
-    mlx90614_slave_read(0x07,buf);//读标志位
     
-    read_flag=(buf[1]<<8) | buf[0];
-    printf("%d\r\n",read_flag);
+    mlx90614_slave_read(0x07,mlx90614_buf);//读标志位
+    
+    mlx90614_read_flag=(mlx90614_buf[1]<<8) | mlx90614_buf[0];//由高8位（DataH）和低8位（DataL）两部分组成，
+    printf("%d\r\n",mlx90614_read_flag);
+    
+    
+    float result=temperature_calculate(mlx90614_buf);
+    printf("%.2f\r\n",result);
     
     Delay_Ms(1000);    
+}
+
+
+void rtc_test(void)
+{
+//      RTC_Show_Time();
+//		Delay_Ms(1000);
+        
+        
+        //是编译期宏，格式固定为 "Aug 11 2026"（月 日 年）
+//		printf("%s\r\n",__DATE__);
+        const char *week[] = {"日", "一", "二", "三", "四", "五", "六"};
+        printf("编译日期: %s 星期%d\r\n", __DATE__, compile_date.weekday);
+		printf("%s\r\n",__TIME__);
+		Delay_Ms(1000);
 }
 
