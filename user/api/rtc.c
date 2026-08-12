@@ -39,7 +39,7 @@ void RTC_Cal_Config(void)
     Compile_Time();
     
 	//直接赋值初始时间
-	RTC_Set_Date(compile_date.year,compile_date.month,compile_date.day,2);
+	RTC_Set_Date(compile_date.year,compile_date.month,compile_date.day,compile_date.weekday);
 	RTC_Set_Time(RTC_H12_PM,compile_time.hour,compile_time.min,compile_time.second);
 }
 
@@ -95,7 +95,7 @@ void RTC_Show_Time(void)
 
 volatile struct COMPILE_data compile_date;
 
-uint8_t Compile_WeekDay(void)
+void Compile_WeekDay(void)
 {
     const char *date = __DATE__;   // "Aug 11 2026"
     const char *mon_str[] = {"Jan","Feb","Mar","Apr","May","Jun",
@@ -118,7 +118,7 @@ uint8_t Compile_WeekDay(void)
     // Sakamoto 算法
     static const uint8_t t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
     year -= compile_date.month < 3;
-    return (year + year / 4 - year / 100 + year / 400 + t[compile_date.month - 1] + compile_date.day) % 7;
+    compile_date.weekday= (year + year / 4 - year / 100 + year / 400 + t[compile_date.month - 1] + compile_date.day) % 7;
 }
 
 volatile struct COMPILE_time compile_time;
@@ -130,3 +130,26 @@ void Compile_Time(void)
     compile_time.min    = (time[3] - '0') * 10 + (time[4] - '0');
     compile_time.second = (time[6] - '0') * 10 + (time[7] - '0');
 }
+
+
+void alarm_ini(void)
+{
+//    RTC->CR &=~(1<<8);//禁能闹钟A
+    RTC_AlarmCmd(RTC_Alarm_A,DISABLE);
+    
+//    轮询 RTC_ISR 寄存器中的ALRAWF或ALRBWF位，直到其中一个置1，以确保闹钟寄存器可以访问。大约需要2个RTCCLK时钟周期（由于时钟同步）。
+//    while(!(RTC->ISR & (1<<0)));
+    while(RTC_GetFlagStatus(RTC_FLAG_ALRAF)!=SET);
+    
+//    RTC->ALRMASSR;
+//    RTC->ALRMAR;
+//    RTC_AlarmSubSecondConfig(RTC_Alarm_A,RTC_AlarmSubSecondMask_SS14_13
+    
+    
+}
+
+
+
+
+
+

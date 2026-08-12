@@ -16,7 +16,7 @@ void Delay_100Ns(u32 nstime)
     while(nstime--)
     {
         __NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
-		__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
+		__NOP();__NOP();__NOP();__NOP();//这里我减了3个nop（周期），为了抵消灯带3次循环开销（3个周期）
     }
 }
 

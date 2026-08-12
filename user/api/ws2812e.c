@@ -11,7 +11,7 @@ void ws2812e_ini(uint16_t rgb_num)
     gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_OUT;
     gpio_InitTypeDef.GPIO_OType=GPIO_OType_PP;
     gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_15;
-    gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_NOPULL;
+//    gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_DOWN;上下拉电阻仅在输入模式下有效
     gpio_InitTypeDef.GPIO_Speed=GPIO_High_Speed;
     
     GPIO_Init(GPIOB,&gpio_InitTypeDef);
@@ -61,6 +61,8 @@ void ws2812e_ini(uint16_t rgb_num)
 
 void ws2812e_send_byte(uint8_t data)
 {
+     __disable_irq();                    // 关全局中断，保护时序
+    
     for(int i=0;i<8;i++)
     {
         if(data & (0x80>>i))
@@ -79,6 +81,8 @@ void ws2812e_send_byte(uint8_t data)
         }
     }
 
+    
+    __enable_irq();                 // 开全局中断
 }
 
 
@@ -101,7 +105,6 @@ void ws2812e_open(uint8_t green,uint8_t red,uint8_t blue)
 volatile uint8_t green=0;
 volatile uint8_t red=0;
 volatile uint8_t blue=0;
-
 
 
 void ws2812e_open_reset(uint8_t green,uint8_t red,uint8_t blue,uint8_t rgb_num)

@@ -475,6 +475,18 @@ static void SystemInit_ExtMemCtl(void);
   */
 void SystemInit(void)
 {
+    // ==== 第一件事：拉低 PB15，复位 WS2812E 链 ====
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;   // 开 GPIOB 时钟
+    __NOP(); __NOP();                         // 等时钟稳定
+    GPIOB->MODER &= ~(3 << 30);              // PB15 模式清零
+    GPIOB->MODER |=  (1 << 30);              // PB15 = 输出模式
+    GPIOB->ODR   &= ~(1 << 15);              // PB15 输出低电平
+    // 从此刻起 PB15 就被驱动为 LOW，WS2812E 进入复位状态
+    
+    
+    
+    
+    
   /* FPU settings ------------------------------------------------------------*/
   #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
     SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */

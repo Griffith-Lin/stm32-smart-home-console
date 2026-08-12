@@ -8,9 +8,28 @@ int fputc(int c,FILE *stream)
 	return c;
 }
 
+
+/*    WS2812E闪绿灯排查
+上电复位
+  → 硬件启动（电压爬坡、振荡器起振）        ← PB15 浮空
+  → Reset_Handler（汇编启动代码）            ← PB15 浮空
+  → SystemInit()（配置 HSE/PLL，耗时数ms）   ← PB15 浮空  
+  → .data/.bss 初始化                        ← PB15 浮空
+  → main() 第14行  ← 你的寄存器操作，PB15 才变 LOW 
+  → ...大量初始化（TIM6/LED/USART/...）...
+  → ws2812e_ini()  ← 发全零数据，灯熄灭
+
+问题出在浮空区间——在 main() 执行之前，PB15 已经浮空了很长时间（SystemInit 配置 PLL 就要好几毫秒）。这段时间足够 WS2812E 锁存到噪声数据，绿灯就亮了。
+
+在 main() 里写的拉低pb15操作只能缩短闪绿灯的窗口，但覆盖不到 SystemInit 和启动代码。
+
+我在SystemInit()就下拉,至此软件能做的已经做完了，再不行只能硬件加下拉电阻
+
+关键问题是 WS2812E 比 STM32 醒得快。WS2812E 是纯硬件，上电后几微秒就开始工作。STM32 要等电压稳定、振荡器起振、PLL 锁定……整个过程几十毫秒。
+在这段时间里，MCU 完全无法控制 PB15，WS2812E 早已锁存完噪声数据。
+*/
 int main(void)
-{ 
-    
+{  
     
     //NVIC_SetPriorityGrouping(3);
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);//不配置默认为4位占先
@@ -32,11 +51,9 @@ int main(void)
     adc_GL5506_ini();//光敏电阻
     
     spi_ini();
-    
-   
+      
     i2c_master_ini();
     
-
     ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上灯的复位逻辑
     //后面的 i2c_master_ini 会操作 GPIOB（PB6/PB7），虽然没有直接动 PB15，但同一组 GPIO 的寄存器读写可能产生微妙影响。加上前导复位丢失，噪声数据就一直在第一个灯里锁着。
     //复位时第一个灯闪绿灯，原因是硬件浮空，加下拉电阻解决
@@ -48,7 +65,12 @@ int main(void)
     
     while(1)
     {         
-        RTC_Show_Time();
+//        RTC_Show_Time();
+//        ws2812e_open_reset(green,red,blue,4);
+//        green+=50;
+//        red+=50;
+//        blue+=50;
+//        ws2812e_open_reset(0,0,0,4);
         Delay_Ms(1000);
 
     }   
