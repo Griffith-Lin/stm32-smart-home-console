@@ -160,7 +160,8 @@ void alarm_ini(uint8_t H12,uint8_t Hours,uint8_t Minutes,uint8_t Seconds,uint8_t
 	rtc_AlarmTypeDef.RTC_AlarmTime=rtc_TimeTypeDef;//闹钟时间配置
 	rtc_AlarmTypeDef.RTC_AlarmDateWeekDay=Weekday;//选择的是星期而不是日期，所以这里配置的是星期
 	rtc_AlarmTypeDef.RTC_AlarmDateWeekDaySel=RTC_AlarmDateWeekDaySel_WeekDay;//星期/日期选择
-	rtc_AlarmTypeDef.RTC_AlarmMask=RTC_AlarmMask_Minutes;//掩码，RTC_AlarmMask 的工作机制是：被掩码屏蔽的字段不参与闹钟比较，相当于“通配符/任意值”。
+	rtc_AlarmTypeDef.RTC_AlarmMask=RTC_AlarmMask_Minutes | RTC_AlarmMask_Hours;
+    //掩码，RTC_AlarmMask 的工作机制是：被掩码屏蔽的字段不参与闹钟比较，相当于“通配符/任意值”。
 	//闹钟产生中断事件，需要满足星期 时 分 秒与配置的相同，用掩码屏蔽分钟，意思就是满足星期 时 秒相同就可以触发中断
     
 	RTC_SetAlarm(RTC_Format_BIN,RTC_Alarm_A,&rtc_AlarmTypeDef);
@@ -168,7 +169,7 @@ void alarm_ini(uint8_t H12,uint8_t Hours,uint8_t Minutes,uint8_t Seconds,uint8_t
 	
 	exti_InitTypeDef.EXTI_Line=EXTI_Line17;//线17，从参考手册的唤醒事件管理中得知
 	exti_InitTypeDef.EXTI_LineCmd=ENABLE;
-	exti_InitTypeDef.EXTI_Mode=EXTI_Mode_Interrupt;//中断服务模式
+	exti_InitTypeDef.EXTI_Mode=EXTI_Mode_Interrupt;//中断服务模式,触发后进入NVIC中断服务程序
 	exti_InitTypeDef.EXTI_Trigger=EXTI_Trigger_Rising_Falling;//上下沿触发
     
 	EXTI_Init(&exti_InitTypeDef);

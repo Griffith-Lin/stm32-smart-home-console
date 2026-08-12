@@ -62,7 +62,7 @@ void mlx90614_test(void)
     mlx90614_slave_read(0x07,mlx90614_buf);//读标志位
     
     mlx90614_read_flag=(mlx90614_buf[1]<<8) | mlx90614_buf[0];//由高8位（DataH）和低8位（DataL）两部分组成，
-    printf("%d\r\n",mlx90614_read_flag);
+//    printf("%d\r\n",mlx90614_read_flag);
     
     
     float result=temperature_calculate(mlx90614_buf);
@@ -84,5 +84,15 @@ void rtc_test(void)
         printf("编译日期: %s 星期%d\r\n", __DATE__, compile_date.weekday);
 		printf("%s\r\n",__TIME__);
 		Delay_Ms(1000);
+}
+
+void ws2812e_test(void)
+{
+    
+        ws2812e_open_reset(green,red,blue,4);
+        green+=50;
+        red+=50;
+        blue+=50;
+        
 }
 

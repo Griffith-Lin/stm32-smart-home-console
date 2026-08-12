@@ -62,16 +62,15 @@ int main(void)
     
    
     RTC_Cal_Config();//时间初始化
-    alarm_ini(RTC_H12_PM,17,55,30,3);//闹钟初始化
+    alarm_ini(RTC_H12_PM,0,0,30,3);//闹钟初始化
     
     while(1)
     {         
         RTC_Show_Time();
-//        ws2812e_open_reset(green,red,blue,4);
-//        green+=50;
-//        red+=50;
-//        blue+=50;
-//        ws2812e_open_reset(0,0,0,4);
+
+        mlx90614_test();
+
+        
         Delay_Ms(1000);
 
     }   

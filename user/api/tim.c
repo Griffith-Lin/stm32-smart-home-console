@@ -137,3 +137,12 @@ void TIM6_DAC_IRQHandler(void)
         {tim6--;}
     }
 }
+
+
+//pb0配置为输入捕获模式
+
+
+
+
+
+

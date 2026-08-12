@@ -7,6 +7,8 @@
 #include "delay.h"
 #include "MLX90614.h"
 #include "rtc.h"
+#include "ws2812e.h"
+
 
 #include <stdio.h>
 #include <stdint.h> 
