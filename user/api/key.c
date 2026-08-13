@@ -125,16 +125,15 @@ void EXTI0_IRQHandler(void)
 //       Delay_Ms(100);
 //       GPIO_ResetBits(GPIOD,GPIO_Pin_15); 
         
-//       if(TIM3->CCR3<1000) 
-//       TIM3->CCR3+=100;
        
+        
 //       if(TIM_GetCapture3(TIM3)<1000)
 //       {
 //           
 //             motor_ccr+=100;
 //            TIM_SetCompare3(TIM3,motor_ccr);    
 //       }
-        
+//        
         
         
         
@@ -146,6 +145,8 @@ void EXTI0_IRQHandler(void)
         green+=50;
         red+=50;
         blue+=50;
+        
+        
 //        Delay_Ms(300);//消抖阻塞整个系统：延时期间CPU被锁死在中断里，所有其他中断（包括更高优先级的SysTick、UART、DMA）都无法响应。智能家居设备可能因此丢失传感器数据、通信超时、看门狗复位。
 //          抖动并未真正消除：机械按键抖动持续5-20ms。你在ISR入口延时300ms后退出，此时按键可能仍在抖动，下一次电平变化又会触发新的中断，导致多次进入ISR，green/red/blue 被累加多次——消抖完全失效。
 //          违反中断设计原则：ISR应“快进快出”，只做最少必要工作（读状态、清标志、设标志位），耗时操作必须移到主循环。

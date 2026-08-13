@@ -224,7 +224,7 @@ P → Peripheral → APB → PCLK
 H → High-performance → AHB → HCLK
 */
 
-//SetSysClock() 函数里 RCC_CFGR_PPRE1_DIVx 就是分频系数。你的是 DIV4
+//SetSysClock() 函数里 RCC_CFGR_PPRE1_DIVx 就是APB1 总线预分频器 的分频系数（AHB 时钟 HCLK 对 APB1 时钟 PCLK1 的分频系数）。你的是 DIV4
 //psc==84  arr==1000,   基准频率==1MHz  Tcnt==1us  Tperiod==1*1000==1ms
 //按键触发后为低电平
 
