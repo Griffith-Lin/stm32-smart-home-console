@@ -90,7 +90,7 @@ Keil 下载设置，换成 "Erase Full Chip" 再烧，闪灯问题还是不能解决
 
 void ws2812e_send_byte(uint8_t data)
 {
-//     __disable_irq();                    // 关全局中断，排除法，锁定问题用
+     __disable_irq();                    // 关全局中断，排除法，锁定问题用
     
     uint8_t j;
     
@@ -115,7 +115,7 @@ void ws2812e_send_byte(uint8_t data)
     }
 
     
-//    __enable_irq();                 // 开全局中断
+    __enable_irq();                 // 开全局中断
 }
 
 
