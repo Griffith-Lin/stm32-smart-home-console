@@ -17,7 +17,7 @@
 #include "i2c.h"
 #include "MLX90614.h"
 #include "rtc.h"
-
+#include "infrared.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t
