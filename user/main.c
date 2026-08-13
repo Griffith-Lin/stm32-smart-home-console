@@ -63,14 +63,14 @@ int main(void)
   
     RTC_Cal_Config();//时间初始化
     alarm_ini(RTC_H12_PM,0,0,30,3);//闹钟初始化
-    rtc_wakeup_ini();//唤醒初始化  会让彩灯停止亮
+    rtc_wakeup_ini();//唤醒初始化  
     
-//    in_cap_ini(84,1000);//输入捕获初始化     会让风扇停止转动
+    in_cap_ini(84,1000);//输入捕获初始化      会让风扇停止转动（暂时未知解决方法）    会让彩灯时序乱掉（关闭全局中断保护时序）
     
     while(1)
     {         
         
-        ws2812e_open_reset(green,red,blue,4);
+        
        
         
 
