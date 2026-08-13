@@ -209,13 +209,21 @@ void rtc_wakeup_ini(void)
     
     while(RTC_GetFlagStatus(RTC_FLAG_WUTWF)!=SET);//唤醒定时器 它的写标志。在 RTC_CR 寄存器中的WUTE位置0后，当唤醒定时器值可更改时，由硬件将该位置1。
 
-    RTC_WakeUpClockConfig(RTC_WakeUpClock_CK_SPRE_16bits);//前 4 个用的是 RTCCLK 分频（高频，精度高，但最大只能到几十秒）；后 2 个用的是 CK_SPRE（RTC 预分频器输出的 1Hz 信号，低频，精度低，但能到几十小时）。
+    RTC_WakeUpClockConfig(RTC_WakeUpClock_CK_SPRE_16bits);//前 4 个用的是 RTCCLK 直接分频（高频，精度高，但最大只能到几十秒）；后 2 个用的是经过同步和异步通道的 CK_SPRE（RTC 预分频器输出的 1Hz 信号，低频，精度低，但能到1s到18小时，18小时到36小时）。
     
-    RTC_SetWakeUpCounter(0);//WUTR  配置要计数次数  STM32 的 Wakeup 计数器是递减到 0 后再额外计一个周期才触发中断，硬件设计上是 (WUTR + 1) 个时钟周期。
+    RTC_ClearFlag(RTC_FLAG_WUTF);//根据手册，这里要清标志位。  
+    //没有硬件自动清零机制：与某些外设标志位在读寄存器或写操作时自动清零不同，WUTF 只能通过软件写 RTC_ClearFlag() 来清除。不存在任何配置步骤能隐式完成这件事。因此，显式清除不是“建议”，而是填补硬件设计空白的必要操作。
+    
+    RTC_SetWakeUpCounter(0);//WUTR  配置要计数次数（唤醒周期）  STM32 的 Wakeup 计数器是递减到 0 后再额外计一个周期才触发中断，硬件设计上是 (WUTR + 1) 个时钟周期。
     
     
     
     RTC_ITConfig(RTC_IT_WUT,ENABLE);//使能唤醒定时器中断
+    
+    
+    //中断向量表（Interrupt Vector Table, IVT）本质上是一个存储中断服务程序（ISR）入口地址的数组。
+    //在实际开发中，你不需要手动维护这张表。
+    //启动文件（如 startup_stm32f4xx.s）和链接脚本已经定义了它的结构，你只需要在 C 代码中按照规范命名中断处理函数（如 EXTI0_IRQHandler），编译器会自动将其地址填入向量表的对应位置。
     
     //嵌套向量中断控制器配置
     NVIC_InitTypeDef nvic_InitTypeDef={0};
@@ -254,7 +262,9 @@ void RTC_WKUP_IRQHandler (void)
         //如果你只清除了 RTC 内部的标志位，但 EXTI Line 22 的 Pending Bit 仍然置位。这会导致：
         //退出 ISR 后，NVIC 立即再次触发中断（因为 EXTI 挂起位还在）
         
-        printf("唤醒\r\n");
+        
+        RTC_Show_Time();
+        
     }
 }
 
