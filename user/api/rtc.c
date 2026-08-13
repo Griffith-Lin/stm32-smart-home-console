@@ -209,7 +209,7 @@ void rtc_wakeup_ini(void)
     
     while(RTC_GetFlagStatus(RTC_FLAG_WUTWF)!=SET);//唤醒定时器 它的写标志。在 RTC_CR 寄存器中的WUTE位置0后，当唤醒定时器值可更改时，由硬件将该位置1。
 
-    RTC_WakeUpClockConfig(RTC_WakeUpClock_CK_SPRE_16bits);//前 4 个用的是 RTCCLK 直接分频（高频，精度高，但最大只能到几十秒）；后 2 个用的是经过同步和异步通道的 CK_SPRE（RTC 预分频器输出的 1Hz 信号，低频，精度低，但能到1s到18小时，18小时到36小时）。
+    RTC_WakeUpClockConfig(RTC_WakeUpClock_CK_SPRE_16bits);//选择时钟源     前 4 个用的是 RTCCLK 直接分频（高频，精度高，但最大只能到几十秒）；后 2 个用的是经过同步和异步通道的 CK_SPRE（RTC 预分频器输出的 1Hz 信号，低频，精度低，但能到1s到18小时，18小时到36小时）。
     
     RTC_ClearFlag(RTC_FLAG_WUTF);//根据手册，这里要清标志位。  
     //没有硬件自动清零机制：与某些外设标志位在读寄存器或写操作时自动清零不同，WUTF 只能通过软件写 RTC_ClearFlag() 来清除。不存在任何配置步骤能隐式完成这件事。因此，显式清除不是“建议”，而是填补硬件设计空白的必要操作。

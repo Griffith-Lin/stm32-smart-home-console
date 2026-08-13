@@ -187,14 +187,7 @@ void in_cap_ini(uint16_t psc,uint16_t arr)
 触发中断：因为你之前使能了 TIM_IT_CC3，硬件会向 NVIC 发送中断请求，CPU 暂停当前工作，跳转到 TIM3_IRQHandler。
 */
     
-    
-    
-    TIM_ARRPreloadConfig(TIM3, DISABLE);
-    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-    TIM_GenerateEvent(TIM3, TIM_EventSource_Update);  
-    TIM_ITConfig(TIM3, TIM_IT_Update | TIM_IT_CC3, ENABLE); //使能中断 (同时使能 更新中断 和 通道3捕获中断)
-    
-    
+         
     NVIC_InitTypeDef nvic_InitTypeDef={0};
     
     nvic_InitTypeDef.NVIC_IRQChannel=TIM3_IRQn;//配置的是tim3的中断
@@ -204,7 +197,12 @@ void in_cap_ini(uint16_t psc,uint16_t arr)
     
     NVIC_Init(&nvic_InitTypeDef);
     
+    //EXTI是外部中断，而TIM中断是定时器内部事件中断。所以并不用配 EXTI中断
     
+    TIM_ARRPreloadConfig(TIM3, DISABLE);
+    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+    TIM_GenerateEvent(TIM3, TIM_EventSource_Update);  
+    TIM_ITConfig(TIM3, TIM_IT_Update | TIM_IT_CC3, ENABLE); //使能中断 (同时使能 更新中断 和 通道3捕获中断)
     
     
     
@@ -228,7 +226,7 @@ H → High-performance → AHB → HCLK
 
 //SetSysClock() 函数里 RCC_CFGR_PPRE1_DIVx 就是分频系数。你的是 DIV4
 //psc==84  arr==1000,   基准频率==1MHz  Tcnt==1us  Tperiod==1*1000==1ms
-
+//按键触发后为低电平
 
 void TIM3_IRQHandler(void)
 {
@@ -241,6 +239,7 @@ void TIM3_IRQHandler(void)
         tim3_count++;
     }
     
+  
     //捕获中断标志位处理
     if(TIM_GetITStatus(TIM3,TIM_IT_CC3))
     {
@@ -254,8 +253,7 @@ void TIM3_IRQHandler(void)
             
         }
         else
-        {
-            
+        {           
             if(tim3_flag==1)
             {
             tim3_flag=0;

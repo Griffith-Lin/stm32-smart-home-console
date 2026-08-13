@@ -93,6 +93,6 @@ void ws2812e_test(void)
         green+=50;
         red+=50;
         blue+=50;
-        
+        Delay_Ms(1000);
 }
 

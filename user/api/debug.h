@@ -26,4 +26,5 @@ void adc_debug_auto(void);
 void W25Qxx_test(void);
 void rtc_test(void);
 void mlx90614_test(void);
+void ws2812e_test(void);
 #endif
