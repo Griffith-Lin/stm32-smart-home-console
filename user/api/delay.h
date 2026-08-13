@@ -5,6 +5,6 @@
 
 void Delay_Us(u32 ustime);
 void Delay_Ms(u32 mstime);
-void Delay_100Ns(u32 nstime);
+void Delay_nop(u32 num);
 
 #endif

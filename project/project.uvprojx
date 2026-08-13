@@ -518,6 +518,16 @@
               <FileType>5</FileType>
               <FilePath>..\user\api\rtc.h</FilePath>
             </File>
+            <File>
+              <FileName>infrared.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\infrared.c</FilePath>
+            </File>
+            <File>
+              <FileName>infrared.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\infrared.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
