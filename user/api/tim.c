@@ -143,7 +143,7 @@ void TIM6_DAC_IRQHandler(void)
 void in_cap_ini(uint16_t psc,uint16_t arr)
 {
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
-    
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);
     
     GPIO_InitTypeDef gpio_InitTypeDef={0};
     
