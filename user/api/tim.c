@@ -35,7 +35,7 @@ void TIM6_Task_Init(uint32_t psc,uint32_t arr)
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6,ENABLE);
     
-    TIM_TimeBaseInitTypeDef tim_TimeBaseInitTypeDef;
+    TIM_TimeBaseInitTypeDef tim_TimeBaseInitTypeDef;//时基结构体
     
     
     // 标准库的 TIM_TimeBaseInit 内部默认将 UDIS(位1)=0, URS(位2)=0, OPM(位3)=0。
@@ -140,9 +140,138 @@ void TIM6_DAC_IRQHandler(void)
 
 
 //pb0配置为输入捕获模式
+void in_cap_ini(uint16_t psc,uint16_t arr)
+{
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+    
+    
+    GPIO_InitTypeDef gpio_InitTypeDef={0};
+    
+    gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_AF;
+    gpio_InitTypeDef.GPIO_PuPd=GPIO_PuPd_NOPULL;
+    gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_0;
+    
+    GPIO_PinAFConfig(GPIOB,GPIO_PinSource0,GPIO_AF_TIM3);
+    
+    GPIO_Init(GPIOB,&gpio_InitTypeDef);
+    
+   
+    
+    
+    TIM_TimeBaseInitTypeDef tim_TimeBaseInitTypeDef={0};
+    
+    tim_TimeBaseInitTypeDef.TIM_CounterMode=TIM_CounterMode_Up;
+    tim_TimeBaseInitTypeDef.TIM_ClockDivision=TIM_CKD_DIV1;
+    tim_TimeBaseInitTypeDef.TIM_Period=arr-1;
+    tim_TimeBaseInitTypeDef.TIM_Prescaler=psc-1;
+    
+    TIM_TimeBaseInit(TIM3,&tim_TimeBaseInitTypeDef);
+    
+    
+    
+    
+    TIM_ICInitTypeDef tim_ICInitTypeDef={0};
+    
+    tim_ICInitTypeDef.TIM_Channel=TIM_Channel_3;//TIM3的通道3
+    tim_ICInitTypeDef.TIM_ICPrescaler=TIM_ICPSC_DIV1;
+    tim_ICInitTypeDef.TIM_ICSelection=TIM_ICSelection_DirectTI;//TIM1是否直连IC1
+    tim_ICInitTypeDef.TIM_ICFilter=0;//过滤不管它
+    tim_ICInitTypeDef.TIM_ICPolarity=TIM_ICPolarity_BothEdge;//输入捕获的极性  上升沿捕获还是下降沿捕获，还是上下都捕获
+       
+    TIM_ICInit(TIM3,&tim_ICInitTypeDef);
+    
+/*
+配置会上升沿捕获会怎样？
+锁存计数值：将当前定时器计数器（TIM3_CNT）里的值，瞬间拷贝并锁存到通道3的捕获寄存器（TIM3_CCR3）中。
+置位标志位：将中断状态寄存器中的通道3捕获标志位（CC3IF）置 1。
+触发中断：因为你之前使能了 TIM_IT_CC3，硬件会向 NVIC 发送中断请求，CPU 暂停当前工作，跳转到 TIM3_IRQHandler。
+*/
+    
+    
+    
+    TIM_ARRPreloadConfig(TIM3, DISABLE);
+    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+    TIM_GenerateEvent(TIM3, TIM_EventSource_Update);  
+    TIM_ITConfig(TIM3, TIM_IT_Update | TIM_IT_CC3, ENABLE); //使能中断 (同时使能 更新中断 和 通道3捕获中断)
+    
+    
+    NVIC_InitTypeDef nvic_InitTypeDef={0};
+    
+    nvic_InitTypeDef.NVIC_IRQChannel=TIM3_IRQn;//配置的是tim3的中断
+    nvic_InitTypeDef.NVIC_IRQChannelPreemptionPriority=3;
+    nvic_InitTypeDef.NVIC_IRQChannelSubPriority=0;
+    nvic_InitTypeDef.NVIC_IRQChannelCmd=ENABLE;
+    
+    NVIC_Init(&nvic_InitTypeDef);
+    
+    
+    
+    
+    
+    TIM_Cmd(TIM3,ENABLE);
+}
+
+uint16_t tim3_begin=0;
+uint16_t tim3_count=0;
+uint16_t Tsum=0;
+uint8_t tim3_flag=0;
 
 
+/*
+"PCLK" 是 ARM AMBA 总线规范的术语。
+AMBA 规范里，所有挂在 APB（Advanced Peripheral Bus）总线上的外设，它们的时钟输入统一叫 PCLK（Peripheral Clock）。
+                     AHB                                                            HCLK
+
+P → Peripheral → APB → PCLK
+H → High-performance → AHB → HCLK
+*/
+
+//SetSysClock() 函数里 RCC_CFGR_PPRE1_DIVx 就是分频系数。你的是 DIV4
+//psc==84  arr==1000,   基准频率==1MHz  Tcnt==1us  Tperiod==1*1000==1ms
 
 
-
+void TIM3_IRQHandler(void)
+{
+    //更新中断标志位处理
+    if(TIM_GetITStatus(TIM3,TIM_IT_Update))
+    {
+        TIM_ClearITPendingBit(TIM3,TIM_IT_Update);
+        
+        if(tim3_flag==1)
+        tim3_count++;
+    }
+    
+    //捕获中断标志位处理
+    if(TIM_GetITStatus(TIM3,TIM_IT_CC3))
+    {
+       TIM_ClearITPendingBit(TIM3,TIM_IT_CC3);
+        
+        if(GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_0)==0)
+        {
+            tim3_flag=1;           
+            tim3_begin=TIM_GetCapture3(TIM3);
+            tim3_count=0;
+            
+        }
+        else
+        {
+            
+            if(tim3_flag==1)
+            {
+            tim3_flag=0;
+            Tsum=(tim3_count*1000-tim3_begin+TIM_GetCapture3(TIM3))/1000;//除1000变成毫秒
+            
+            if(Tsum>50)
+            printf("按下时长为%dms\r\n",Tsum);
+            
+            tim3_begin=0;
+            tim3_count=0;
+            Tsum=0;
+            }
+        }
+        
+        
+        
+    }
+}    
 

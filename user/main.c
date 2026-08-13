@@ -65,13 +65,15 @@ int main(void)
     alarm_ini(RTC_H12_PM,0,0,30,3);//ƒ÷÷”≥ı ºªØ
     rtc_wakeup_ini();
     
+    in_cap_ini(84,1000);
+    
     while(1)
     {         
-        RTC_Show_Time();
+        
 
         
        
-        Delay_Ms(1000);
+        
 
     }   
     
