@@ -67,16 +67,26 @@ int main(void)
     
     in_cap_ini(84,1000);//输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
     
-    irm_3638T_ini(84,1000);
-    printf("222\r\n");
+    irm_3638T_ini(168,30000);
+    
+    
+    uint32_t data=0;
     
     while(1)
     {         
-        
-        
+               
+        data=sht30_i2c_send(0x2c06);
+        get_tem_hu(data);
        
+        printf("0x%x\r\n",data);
+        printf("%.2f\r\n",tem_data);
+        printf("%.2f\r\n",hu_data);
+        printf("crc=0x%04x\r\n", crc_data);   // 高8位=温度CRC,低8位=湿度CRC
         
+        Delay_Ms(1000);
 
+        
+        
     }   
     
 }
