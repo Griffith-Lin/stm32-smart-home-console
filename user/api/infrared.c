@@ -1,5 +1,9 @@
 #include "infrared.h"
 
+//在STM32的时钟树（Clock Tree）中，APB1和APB2总线分频器之后，专门针对定时器挂载了一个硬件倍频器。
+//当 APB 预分频系数 = 1 时（也就是APB没有对AHB分频时）：定时器时钟 = APB 总线时钟。
+//当 APB 预分频系数 ≠ 1 时：定时器时钟 = APB 总线时钟 × 2。
+
 //PE6 IR_RX  tim9_ch2的输入捕获 
 //有红外信号时3638T输出低电平，无信号则高电平
 void irm_3638T_ini(uint16_t psc,uint16_t arr)
@@ -24,7 +28,7 @@ void irm_3638T_ini(uint16_t psc,uint16_t arr)
     tim_TimeBaseInitTypeDef.TIM_Prescaler=psc-1;
     tim_TimeBaseInitTypeDef.TIM_Period=arr-1;
     tim_TimeBaseInitTypeDef.TIM_CounterMode=TIM_CounterMode_Up;//将定时器配置为向上计数模式   因为直觉习惯
-    tim_TimeBaseInitTypeDef.TIM_ClockDivision=TIM_CKD_DIV1;//不分频  它不是定时器计数时钟的主分频，而是 定时器内部采样时钟 DTS 的分频。
+//    tim_TimeBaseInitTypeDef.TIM_ClockDivision=TIM_CKD_DIV1;//不分频  它不是定时器计数时钟的主分频，而是 定时器内部采样时钟 DTS 的分频。
     
     TIM_TimeBaseInit(TIM9,&tim_TimeBaseInitTypeDef);
     
@@ -32,8 +36,9 @@ void irm_3638T_ini(uint16_t psc,uint16_t arr)
     TIM_ICInitTypeDef tim_ICInitTypeDef={0};
     
     tim_ICInitTypeDef.TIM_Channel=TIM_Channel_2;
-    tim_ICInitTypeDef.TIM_ICPrescaler=TIM_ICPSC_DIV1;
-    tim_ICInitTypeDef.TIM_ICPolarity=TIM_ICPolarity_BothEdge;//双边沿捕获
+    tim_ICInitTypeDef.TIM_ICPrescaler=TIM_ICPSC_DIV1;//几个事件触发一次
+//    tim_ICInitTypeDef.TIM_ICPolarity=TIM_ICPolarity_BothEdge;//双边沿捕获  此方案麻烦！！
+    tim_ICInitTypeDef.TIM_ICPolarity=TIM_ICPolarity_Rising;
     tim_ICInitTypeDef.TIM_ICSelection=TIM_ICSelection_DirectTI;
 //    tim_ICInitTypeDef.TIM_ICFilter
     
@@ -65,101 +70,95 @@ void irm_3638T_ini(uint16_t psc,uint16_t arr)
     
 }
 
-uint16_t tim9_begin=0;
-uint16_t tim9_count=0;
-uint16_t T_tim9_sum=0;
-uint8_t tim9_begin_flag=0;//同步码头标志位
-uint8_t tim9_high_flag=0;//高电平标志位
 
 
-uint32_t infrared_buf=0;//接收数据的缓存区
+
+volatile uint32_t infrared_buf=0;//接收数据的缓存区
+
+uint16_t high_cnt=0;
+uint16_t count=0;//校验32位完整性
+uint8_t ir_begin_flag=0;
+uint8_t ir_command=0;
 
 //红外接收端接收到红外后，返回给芯片的是，逻辑1是560us低+1680us高，逻辑0应该是560us低+560us 高 .(接收头接收到的信号的反向的)
+//红外接收端空闲时是高电平
+//×2 倍频器只对定时器生效，非定时器外设（包括 USART）的时钟始终严格等于 PCLK 本身。
+//APB2的频率是84MHz（168MHz/84MHz！=1，定时器内部要倍频）   定时器内部倍频==84MHz*2==168MHz   定时器内部分频==168MHz/168==1MHz
+//Tcnt==1us  Tperiod==1us  *  arr >=4500us+560us(加560us是因为遇到上升沿ccr才清0）  arr>=5100，arr要比理论值设置多的多
 void TIM1_BRK_TIM9_IRQHandler(void)
 {
     if(TIM_GetITStatus(TIM9,TIM_IT_Update))
     {
         TIM_ClearITPendingBit(TIM9,TIM_IT_Update);   // ← 查了就要清,不然会一直在isr里面，跳不出去
         
-        if(tim9_high_flag==1)//高电平开始计周期
-        tim9_count++;
-        
+       
+        if(ir_begin_flag==1 && count==32)
+        {
+//            printf("total=%x\r\n",infrared_buf);     
+            ir_command = (infrared_buf>>16) & 0xff ;   
+               
+            printf("C=%d\r\n",ir_command);
+            infrared_buf=0;//清空
+            ir_begin_flag=0;//码头标志位清0
+            
+        }
     }
 
+    
+    
     if(TIM_GetITStatus(TIM9,TIM_IT_CC2))
     {
         TIM_ClearITPendingBit(TIM9,TIM_IT_CC2);
         
-        if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_6) && tim9_begin_flag==0)//还未收到码头
+                    
+        if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_6))
         {
+            TIM_SetCounter(TIM9,0);//遇到上升沿，ccr清0
             
-             //接收到高电平          
-            tim9_begin=TIM_GetCapture3(TIM3);           
-            tim9_count=0;
+            TIM9->CCER |=(1<<5);
+            TIM9->CCER &=~(1<<7);//修改为下降沿触发           
             
-            tim9_high_flag=1;//代表接收了高电平
         }
         else
         {
-            //进这里必须要先接收过高电平
-            //接收到低电平时，也就是接收完高电平时，开始计算高电平时长 
-            if(tim9_high_flag==1)
+            TIM9->CCER &=~(1<<5);
+            TIM9->CCER &=~(1<<7);//修改为上升沿触发          
+             
+            high_cnt=TIM_GetCapture2(TIM9);
+            
+            if(ir_begin_flag==0 && high_cnt > 4000 && high_cnt < 4600)
             {
-                tim9_high_flag=0;    
-                    
-                T_tim9_sum=(tim9_count*1000-tim9_begin+TIM_GetCapture2(TIM9));
-                 
-                //接收到的是4.5ms高电平（同步码头）
-                if(T_tim9_sum>4300)
+                ir_begin_flag=1;
+                count=0;
+            }
+            else if(ir_begin_flag==1)
+            {
+                infrared_buf>>=1;//先移位，后赋值，不然的话，最后整体会向右偏移一位
+                
+                if(high_cnt>500 && high_cnt<600)
                 {
-                tim9_begin_flag=1;
-                }
-                
-                tim9_begin=0;
-                tim9_count=0;
-                T_tim9_sum=0;
-
-            }
-        }
-        
-        if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_6) && tim9_begin_flag==1)//收到码头
-        {
-            
-             //接收到高电平          
-            tim9_begin=TIM_GetCapture3(TIM3);           
-            tim9_count=0;
-            
-            tim9_high_flag=1;//代表接收了高电平
-        }
-        else
-        {
-
-            if(tim9_high_flag==1)
-            {
-                tim9_high_flag=0;    
                     
-                T_tim9_sum=(tim9_count*1000-tim9_begin+TIM_GetCapture2(TIM9));
-                 
-                //根据高电平时长，判断逻辑0 1，存入infrared_buf
-                
-                
-                tim9_begin=0;
-                tim9_count=0;
-                T_tim9_sum=0;
-
+                }
+                else if(high_cnt>1500 && high_cnt<1700)
+                {
+                    infrared_buf |= 0x80000000;
+                }
+                 else
+                {
+                    //遇到非法脉宽，立即熔断，放弃本次接收！
+                    ir_begin_flag = 0;
+                    count = 0;
+                    return; // 提前退出，防止执行下方的 count++
+                }
+                count++;
             }
+            
+//             printf("%d\r\n", high_cnt);
+                       
         }
-        
-        
-        
-        
+     
     }
 }
 
-//tim9_begin_flag==1后，进入接收数据的函数，NEC遥控指令按照低位在前，高位在后的顺序发送，所以从低到高接收
-// 返回一个存储 地址码（遥控ID）、地址反码、控制码（键值）、控制反码 的32位数
-uint32_t infrared_begin(void)
-{
-    
-}
+
 
