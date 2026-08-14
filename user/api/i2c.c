@@ -75,14 +75,14 @@ void i2c_master_ack(uint8_t ack)
     {
         I2C_SDA = 1;//NACK，主机告诉从机停止发
     }
-    Delay_Us(4);
+    Delay_Us(10);
     
     I2C_SCL = 1;
-    Delay_Us(4); // 至此完整一周期
+    Delay_Us(10); // 至此完整一周期
 
     
     I2C_SCL = 0;//结束当前ACK/NACK周期： I2C协议规定，数据位（包括ACK位）在SCL高电平期间必须保持稳定。将SCL拉低标志着这个应答位的采样窗口正式关闭。
-    Delay_Us(4);//保证SCL低电平宽度： I2C标准对SCL低电平持续时间有最小值要求（Standard Mode ≥ 4.7μs，Fast Mode ≥ 1.3μs）。这个延时确保即使后续代码立即执行，也不会违反时序。
+    Delay_Us(10);//保证SCL低电平宽度： I2C标准对SCL低电平持续时间有最小值要求（Standard Mode ≥ 4.7μs，Fast Mode ≥ 1.3μs）。这个延时确保即使后续代码立即执行，也不会违反时序。
 }
 
 // 从机接收主机数据后，返回的收应答
@@ -187,14 +187,14 @@ uint8_t i2c_master_read(uint8_t ack)
         // 这就是软件模拟 I2C 的一个时钟周期。
         // I2C 的时钟全部由主机产生，从机自己没有时钟，必须靠主机在 SCL 上拉低→拉高来"喂"节拍：
         I2C_SCL = 0;
-        Delay_Us(4);
+        Delay_Us(10);
         I2C_SCL = 1;
 
         if (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7))
         {
             data |= 1;
         }
-        Delay_Us(4);
+        Delay_Us(10);
     }
     i2c_master_ack(ack);//主机发一位应答，ACK告诉从机继续发，NACK(0)告诉从机停止发
     return data;
