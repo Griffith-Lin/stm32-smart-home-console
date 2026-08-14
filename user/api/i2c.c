@@ -76,10 +76,11 @@ void i2c_master_ack(uint8_t ack)
         I2C_SDA = 1;//NACK，主机告诉从机停止发
     }
     Delay_Us(4);
+    
     I2C_SCL = 1;
     Delay_Us(4); // 至此完整一周期
 
-    //释放时钟线，为下一个I2C动作（无论是继续传输还是停止）建立确定的初始电平状态。
+    
     I2C_SCL = 0;//结束当前ACK/NACK周期： I2C协议规定，数据位（包括ACK位）在SCL高电平期间必须保持稳定。将SCL拉低标志着这个应答位的采样窗口正式关闭。
     Delay_Us(4);//保证SCL低电平宽度： I2C标准对SCL低电平持续时间有最小值要求（Standard Mode ≥ 4.7μs，Fast Mode ≥ 1.3μs）。这个延时确保即使后续代码立即执行，也不会违反时序。
 }
@@ -88,6 +89,7 @@ void i2c_master_ack(uint8_t ack)
 uint8_t i2c_master_wait_ack(void)
 {
     uint8_t ack = 0;
+    
     I2C_SCL = 0;//在释放 SDA 之前，必须先拉低 SCL，确保处于数据准备阶段。
     I2C_SDA = 1; // sda拉高，数据线空闲状态，不影响引脚输入
 
@@ -99,23 +101,28 @@ uint8_t i2c_master_wait_ack(void)
 
     if (GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7))
     {
+        ack=0;//从机没把sda拉低，从机无应答
+    }
+    else
+    {
         ack = 1;
+        
     }
     Delay_Us(4);
 
     I2C_SCL = 0;
     Delay_Us(4);
-    return ack;
+    return ack;//ack==1从机有应答，ack==0从机无应答
 }
 
 //开始条件的定义要求 SDA 从 1→0 跳变
 void i2c_master_start(void)
 {
 
-    I2C_SDA = 1; // 确保sda=1
+    I2C_SDA = 1; // 确保sda拉高
     I2C_SCL = 1; // 拉高时钟线，让从机接收数据线的数据
     Delay_Us(4);
-    I2C_SDA = 0; // 数据线恢复空闲状态
+    I2C_SDA = 0; // sda拉低，完成1到0的跳变
     Delay_Us(4);
     I2C_SCL = 0; // 拉低时钟线，衔接下次传输的时钟线状态
 }
@@ -165,7 +172,7 @@ uint8_t i2c_master_write(uint8_t data)
         Delay_Us(4); // 至此完整一周期
     }
     ack = i2c_master_wait_ack();//接收从机的收应答
-    return ack;
+    return ack;//
 }
 
 // 接收数据
