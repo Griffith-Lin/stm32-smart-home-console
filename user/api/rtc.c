@@ -263,7 +263,7 @@ void RTC_WKUP_IRQHandler (void)
         //退出 ISR 后，NVIC 立即再次触发中断（因为 EXTI 挂起位还在）
         
         
-        RTC_Show_Time();
+//        RTC_Show_Time();
         
     }
 }
