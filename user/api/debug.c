@@ -59,7 +59,7 @@ volatile uint16_t mlx90614_read_flag=0;
 void mlx90614_test(void)
 {
     
-    mlx90614_slave_read(0x07,mlx90614_buf);//读标志位
+    mlx90614_i2c_read(0x07,mlx90614_buf);//读标志位
     
     mlx90614_read_flag=(mlx90614_buf[1]<<8) | mlx90614_buf[0];//由高8位（DataH）和低8位（DataL）两部分组成，
 //    printf("%d\r\n",mlx90614_read_flag);
