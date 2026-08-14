@@ -1,9 +1,9 @@
 #include "MLX90614.h"
 
-uint8_t try_count=0;
 
-//主机写从机数据
-void mlx90614_slave_write(uint8_t data)
+
+//主机发给从机数据
+void mlx90614_i2c_send(uint8_t data)
 {
     i2c_master_start();
     
@@ -12,7 +12,7 @@ void mlx90614_slave_write(uint8_t data)
     
     
     uint8_t ack_flag=0;
-    try_count=3;
+    uint8_t try_count=3;
     //主机等从机应答，加失败重试
     do
     {
@@ -26,17 +26,16 @@ void mlx90614_slave_write(uint8_t data)
 }
 
 //主机读从机数据
-void mlx90614_slave_read(uint8_t command,volatile uint8_t *buf)
+void mlx90614_i2c_read(uint8_t command,volatile uint8_t *buf)
 {
     i2c_master_start();
     
     uint8_t id_w=(0x5A << 1) | 0;//从高位到低位传输，第0位是第8个传输的位
     uint8_t id_r=(0x5A << 1) | 1;
     
-    
-    
+        
     uint8_t ack_flag=0;
-    try_count=3;
+    uint8_t try_count=3;
     //主机等从机应答，加失败重试
     do
     {
