@@ -504,19 +504,9 @@
               <FilePath>..\user\api\MLX90614.c</FilePath>
             </File>
             <File>
-              <FileName>MLX90614.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\MLX90614.h</FilePath>
-            </File>
-            <File>
               <FileName>rtc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\rtc.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\rtc.h</FilePath>
             </File>
             <File>
               <FileName>infrared.c</FileName>
@@ -524,9 +514,14 @@
               <FilePath>..\user\api\infrared.c</FilePath>
             </File>
             <File>
-              <FileName>infrared.h</FileName>
+              <FileName>SHT30.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\SHT30.c</FilePath>
+            </File>
+            <File>
+              <FileName>SHT30.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\user\api\infrared.h</FilePath>
+              <FilePath>..\user\api\SHT30.h</FilePath>
             </File>
           </Files>
         </Group>
