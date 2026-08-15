@@ -60,6 +60,8 @@ uint32_t sht30_i2c_send(uint16_t command)
     
     I2C_SCL=1;//主机放开时钟线
     
+//    Delay_Ms(10);   // ← 新增:0x2400 不拉伸时钟,等测量完成(中等重复精度最多 4.5ms)
+    
     i2c_master_start();
     
     try_count=3;
