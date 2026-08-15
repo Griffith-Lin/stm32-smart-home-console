@@ -34,40 +34,40 @@ int main(void)
     //NVIC_SetPriorityGrouping(3);
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);//不配置默认为4位占先
     
-//    TIM6_Task_Init(84, 1000);   
-//    led_ini();
+    TIM6_Task_Init(84, 1000);   
+    led_ini();
     Usart1_Config(115200);
-//    
-//    key_ini();
-//    Exti_key_ini();
-//    sg90_PWM(84,20000);  
-//    beep_ini();
-//    
-//    motor_pwm_ini(84,1000);
-//    mortor_minspeed_open();
-//    
-//       
-//    adc_ini();
-//    adc_GL5506_ini();//光敏电阻
-//    
-//    spi_ini();
-//      
+    
+    key_ini();
+    Exti_key_ini();
+    sg90_PWM(84,20000);  
+    beep_ini();
+    
+    motor_pwm_ini(84,1000);
+    mortor_minspeed_open();
+    
+       
+    adc_ini();
+    adc_GL5506_ini();//光敏电阻
+    
+    spi_ini();
+      
     i2c_master_ini();
-//    
-//    ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上灯的复位逻辑
+    
+    ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上灯的复位逻辑
     //后面的 i2c_master_ini 会操作 GPIOB（PB6/PB7），虽然没有直接动 PB15，但同一组 GPIO 的寄存器读写可能产生微妙影响。加上前导复位丢失，噪声数据就一直在第一个灯里锁着。
     //复位时第一个灯闪绿灯，原因是硬件浮空，加下拉电阻解决
     //WS2812 的 DIN 脚内部有弱上拉（~100kΩ），会把线往上拽。但 PCB 走线本身是天线，会耦合周围的电磁噪声。结果就是 DIN 上的电压随机波动——可能刚好跨过 WS2812 的高低电平阈值，被当成数据吞进去。
     //多调用一次变色函数，解决复位时第一个灯常亮绿灯。原因可能是复位时有脏数据进入灯带
     
   
-//    RTC_Cal_Config();//时间初始化
-//    alarm_ini(RTC_H12_PM,0,0,30,3);//闹钟初始化
-//    rtc_wakeup_ini();//唤醒初始化  
-//    
-//    in_cap_ini(84,1000);//输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
-//    
-//    irm_3638T_ini(168,30000);
+    RTC_Cal_Config();//时间初始化
+    alarm_ini(RTC_H12_PM,0,0,30,3);//闹钟初始化
+    rtc_wakeup_ini();//唤醒初始化  
+    
+    in_cap_ini(84,1000);//输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
+    
+    irm_3638T_ini(168,30000);
     
     
     uint32_t data=0;
