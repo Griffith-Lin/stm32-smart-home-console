@@ -69,12 +69,12 @@ uint32_t sht30_i2c_send(uint16_t command)
     
     if(ack_flag)
     {
-        //I2C_SCL=0;//手册上写的是sht30下拉时钟线，不是你下拉时钟线！！！！！！！！！
+        //I2C_SCL=0;//手册上写的是从机sht30下拉时钟线，不是主机下拉时钟线！！！！！！！！！
         
         //一般来说，i2c通信从机控制不了scl线，这个传感器比较特殊
         //温湿度的读取异常，加了下面这两行,阻塞等待从机真正释放 SCL
         uint32_t timeout = 500000;  // 超时保护,防真卡死时主机陪葬死等。而高重复精度测量最长 ~16ms
-        while(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);//等从机真正释放 SCL,线上真的有上升沿
+        while(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);//等从机真正释放 SCL（也就是测量结束的时候）,线上真的有上升沿
                
         //先读到的是高位
         buf_data=i2c_master_read(1);//tem msb
@@ -134,6 +134,10 @@ uint32_t sht30_i2c_send(uint16_t command)
         这样 4μs 也能用、任何速度都能用——因为主机不再"假装"时钟到了。另一个方案是换 0x2400(无时钟拉伸命令)+ 读之前 Delay_Ms(10),彻底绕开这个特性。
 
         核心一句话:软件 I2C 主机只要不检查 SCL 线的真实状态,它就永远不知道自己在给从机发假时钟——0x2C06 的 CS 位允许从机拉伸时钟,你就必须尊重这条线。
+        
+        
+        等等！！
+        真正原因是，时序图中，从机拉低scl线我看成了主机拉低时钟线，写错了时序。要等从机测量结束，也就是放开scl线的时候，主机才能读，不然会死锁
         
         */
         
