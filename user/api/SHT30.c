@@ -34,13 +34,13 @@ volatile uint16_t crc_data=0;
 //写位为0，读位为1
 uint32_t sht30_i2c_send(uint16_t command)
 {
-    i2c_master_start();
-    
     uint8_t ack_flag=0;
     uint8_t try_count=3;
-    uint32_t buf_data=0;   
+    uint32_t buf_data=0; 
     
-    
+       
+    i2c_master_start();
+  
     //主机等从机应答，加失败重试
     do
     {
@@ -65,6 +65,7 @@ uint32_t sht30_i2c_send(uint16_t command)
     
     ack_flag=i2c_master_write((0x44<<1)+1);//读位
     
+
     
     if(ack_flag)
     {
@@ -142,9 +143,7 @@ uint32_t sht30_i2c_send(uint16_t command)
             crc_data|=i2c_master_read(0);
               
         i2c_master_stop();
-        
-        
-       
+             
         
     }
      return buf_data;
@@ -155,7 +154,7 @@ uint32_t sht30_i2c_send(uint16_t command)
     
 }
 
-
+//几个全局量没有中断/硬件共享,加 volatile 反而误导读者以为有。普通全局即可。
 volatile float tem_data=0;
 volatile float hu_data=0;
 //提取buf_data中的温湿度
