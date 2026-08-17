@@ -57,17 +57,13 @@ uint32_t sht30_i2c_send(uint16_t command)
    
     
     i2c_master_stop();
-    
-    I2C_SCL=1;//主机放开时钟线
-    
-
+       
+    I2C_SCL = 1;//主机放开时钟线
     
     i2c_master_start();
+      
     
-    try_count=3;
-    
-    
-   ack_flag=i2c_master_write((0x44<<1)+1);//读位
+    ack_flag=i2c_master_write((0x44<<1)+1);//读位
     
     
     if(ack_flag)
@@ -152,6 +148,9 @@ uint32_t sht30_i2c_send(uint16_t command)
         
     }
      return buf_data;
+    
+    
+    //if(!ack_flag)
  
     
 }
