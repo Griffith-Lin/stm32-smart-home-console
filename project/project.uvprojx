@@ -494,11 +494,6 @@
               <FilePath>..\user\api\i2c.c</FilePath>
             </File>
             <File>
-              <FileName>i2c.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\i2c.h</FilePath>
-            </File>
-            <File>
               <FileName>MLX90614.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\MLX90614.c</FilePath>
@@ -522,6 +517,16 @@
               <FileName>SHT30.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\user\api\SHT30.h</FilePath>
+            </File>
+            <File>
+              <FileName>lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\lcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\lcd.h</FilePath>
             </File>
           </Files>
         </Group>

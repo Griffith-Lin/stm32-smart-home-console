@@ -1,0 +1,62 @@
+#ifndef _LCD_H
+#define _LCD_H
+
+
+#include "stm32f4xx.h"
+#include "io_bit.h"
+#include "delay.h"
+
+#define LCD_BLK PDout(4)
+#define LCD_DC PDout(3)
+#define LCD_CS PBout(4)
+#define LCD_SCK PBout(3)
+#define LCD_MOSI PBout(5)
+
+/* 颜色定义开始 RGB(565)*/
+#define WHITE        0xFFFF
+#define BLACK        0x0000	  
+#define BLUE         0x001F  
+#define BRED         0XF81F
+#define GRED 	       0XFFE0
+#define GBLUE		     0X07FF
+#define RED          0xF800
+#define MAGENTA      0xF81F
+#define GREEN        0x07E0
+#define CYAN         0x7FFF
+#define YELLOW       0xFFE0
+#define BROWN 			 0XBC40 //棕色
+#define BRRED 			 0XFC07 //棕红色
+#define GRAY  			 0X8430 //灰色
+#define DARKBLUE     0X01CF	//深蓝色
+#define LIGHTBLUE    0X7D7C	//浅蓝色  
+#define GRAYBLUE     0X5458 //灰蓝色
+#define LIGHTGREEN   0X841F //浅绿色
+#define LGRAY 			 0XC618 //浅灰色(PANNEL),窗体背景色
+#define LGRAYBLUE    0XA651 //浅灰蓝色(中间层颜色)
+#define LBBLUE       0X2B12 //浅棕蓝色(选择条目的反色)
+/* 颜色定义结束 */
+
+
+void LCD_Pin_Config(void);
+void Spi_Send_byte(u8 data);
+void LCD_Send_Cmd(u8 cmd);
+void LCD_Send_Data(u8 data);
+void LCD_Send_16bit(u16 data);
+void LCD_Set_Region(u16 row_s,u16 row_e,u16 col_s,u16 col_e);
+void LCD_Clear(u16 row_s,u16 row_e,u16 col_s,u16 col_e,u16 color);
+void LCD_Init(void);
+void LCD_Set_Point(u16 row,u16 col,u16 color);
+
+
+
+void LCD_DrawLine(u16 row1,u16 col1,u16 row2,u16 col2,u16 color);
+void LCD_DrawCircle(u16 row,u16 col,u16 r,u16 color);
+void LCD_FillCircle(u16 row,u16 col,u16 r,u16 color);
+void LCD_DrawRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color);
+void LCD_FillRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color);
+void LCD_DrawTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color);
+void LCD_FillTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color);
+
+
+#endif
+

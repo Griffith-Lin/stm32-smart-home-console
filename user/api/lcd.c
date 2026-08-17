@@ -1,0 +1,426 @@
+#include "lcd.h"
+
+/*
+Function name:LCD_Pin_Config
+Description:LCD的初始化
+param:None
+retval:None
+Remarks:
+LCD_BLK(PD4):背光引脚 给高亮  通用推挽输出
+LCD_DC(PD3):	数据/命令		 通用推挽输出
+	DC=0发送命令
+	DC=1发送数据
+LCD_CS(PB4):片选     			通用推挽输出
+LCD_SCK(PB3):SPI的时钟线		通用推挽输出
+LCD_SDI(PB5):SPI的MOSI线	通用推挽输出
+*/
+void LCD_Pin_Config(void)
+{
+	GPIO_InitTypeDef gpio_InitTypeDef={0};
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);//打开PB时钟
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD,ENABLE);//打开PD时钟
+	
+	gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_OUT;//模式
+	gpio_InitTypeDef.GPIO_OType=GPIO_OType_PP;//推挽
+	gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_3|GPIO_Pin_4;//引脚
+//	gpio_InitTypeDef.GPIO_Speed=GPIO_Fast_Speed;//速度
+	GPIO_Init(GPIOD,&gpio_InitTypeDef);
+	
+	gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_OUT;//模式
+	gpio_InitTypeDef.GPIO_OType=GPIO_OType_PP;//推挽
+	gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5;//引脚
+	gpio_InitTypeDef.GPIO_Speed=GPIO_Fast_Speed;//速度
+	GPIO_Init(GPIOB,&gpio_InitTypeDef);
+	
+	LCD_CS=1;
+}
+
+/*
+Function name:Spi_Send_byte
+Description:SPI的模拟代码
+param:data---待发送的数据
+retval:None
+Remarks:
+*/
+void Spi_Send_byte(u8 data)
+{
+	u8 i;
+	for(i=0;i<8;i++)
+	{
+		LCD_SCK=0;
+		if(data & (0x80>>i))
+		{
+			LCD_MOSI=1;
+		}
+		else
+		{
+			LCD_MOSI=0;
+		}
+		LCD_SCK=1;
+	}
+}
+
+/*
+Function name:LCD_Send_Cmd
+Description:SPI发送命令
+param:cmd---待发送的命令
+retval:None
+Remarks:
+*/
+void LCD_Send_Cmd(u8 cmd)
+{
+	LCD_CS=0;
+	LCD_DC=0;
+	Spi_Send_byte(cmd);
+	LCD_CS=1;
+}
+
+/*
+Function name:LCD_Send_Data
+Description:SPI发送数据
+param:data---待发送的数据
+retval:None
+Remarks:
+*/
+void LCD_Send_Data(u8 data)
+{
+	LCD_CS=0;
+	LCD_DC=1;
+	Spi_Send_byte(data);
+	LCD_CS=1;
+}
+
+
+/*
+Function name:LCD_Send_16bit
+Description:SPI发送16bit数据
+param:data---待发送的数据
+retval:None
+Remarks:
+*/
+void LCD_Send_16bit(u16 data)
+{
+	LCD_CS=0;
+	LCD_DC=1;
+	Spi_Send_byte(data>>8);
+	Spi_Send_byte(data);
+	LCD_CS=1;
+}
+
+/*
+Function name:LCD_Set_Region
+Description:设置写入的区域
+param:row_s,row_e--起始/终止行  col_s,col_e--起始/终止列
+retval:None
+Remarks:
+*/
+void LCD_Set_Region(u16 row_s,u16 row_e,u16 col_s,u16 col_e)
+{
+	LCD_Send_Cmd(0x2B);//设置行
+	LCD_Send_16bit(row_s);
+	LCD_Send_16bit(row_e-1);
+	
+	LCD_Send_Cmd(0x2A);//设置列
+	LCD_Send_16bit(col_s);
+	LCD_Send_16bit(col_e-1);
+	
+	LCD_Send_Cmd(0x2C);//允许写入
+}
+
+
+/*
+Function name:LCD_Clear
+Description:清屏函数
+param:row_s,row_e--起始/终止行  col_s,col_e--起始/终止列  color--清屏颜色
+retval:None
+Remarks:
+*/
+void LCD_Clear(u16 row_s,u16 row_e,u16 col_s,u16 col_e,u16 color)
+{
+	u32 i,j;
+	LCD_Set_Region(row_s,row_e,col_s,col_e);
+//	for(i=row_s;i<=row_e;i++)//行
+//	{
+//		for(j=col_s;j<=col_e;j++)//列
+//		{
+//			LCD_Send_16bit(color);
+//		}
+//	}
+	for(i=0;i<=(row_e-row_s)*(col_e-col_s);i++)
+	{
+			LCD_Send_16bit(color);
+	}
+}
+
+
+//初始化函数
+void LCD_Init(void)
+{
+	LCD_Pin_Config();
+//	LCD_Set_Brightness(84,1000);//屏幕亮度调节
+	/* 复位ST7789VM驱动器 */
+//	LCD_RESET=0;
+//	Delay_ms(100);
+//	LCD_RESET=1;
+	Delay_Ms(100);
+
+	/* start initial sequence */ 
+	LCD_Send_Cmd(0x36);
+	LCD_Send_Data(0x00);
+
+	LCD_Send_Cmd(0x3A); 
+	LCD_Send_Data(0x05);
+
+	LCD_Send_Cmd(0xB2);
+	LCD_Send_Data(0x0C);
+	LCD_Send_Data(0x0C);
+	LCD_Send_Data(0x00);
+	LCD_Send_Data(0x33);
+	LCD_Send_Data(0x33); 
+
+	LCD_Send_Cmd(0xB7); 
+	LCD_Send_Data(0x35);  
+
+	LCD_Send_Cmd(0xBB);
+	LCD_Send_Data(0x19);
+
+	LCD_Send_Cmd(0xC0);
+	LCD_Send_Data(0x2C);
+
+	LCD_Send_Cmd(0xC2);
+	LCD_Send_Data(0x01);
+
+	LCD_Send_Cmd(0xC3);
+	LCD_Send_Data(0x12);   
+
+	LCD_Send_Cmd(0xC4);
+	LCD_Send_Data(0x20);  
+
+	LCD_Send_Cmd(0xC6); 
+	LCD_Send_Data(0x0F);    
+
+	LCD_Send_Cmd(0xD0); 
+	LCD_Send_Data(0xA4);
+	LCD_Send_Data(0xA1);
+
+	LCD_Send_Cmd(0xE0);
+	LCD_Send_Data(0xD0);
+	LCD_Send_Data(0x04);
+	LCD_Send_Data(0x0D);
+	LCD_Send_Data(0x11);
+	LCD_Send_Data(0x13);
+	LCD_Send_Data(0x2B);
+	LCD_Send_Data(0x3F);
+	LCD_Send_Data(0x54);
+	LCD_Send_Data(0x4C);
+	LCD_Send_Data(0x18);
+	LCD_Send_Data(0x0D);
+	LCD_Send_Data(0x0B);
+	LCD_Send_Data(0x1F);
+	LCD_Send_Data(0x23);
+
+	LCD_Send_Cmd(0xE1);
+	LCD_Send_Data(0xD0);
+	LCD_Send_Data(0x04);
+	LCD_Send_Data(0x0C);
+	LCD_Send_Data(0x11);
+	LCD_Send_Data(0x13);
+	LCD_Send_Data(0x2C);
+	LCD_Send_Data(0x3F);
+	LCD_Send_Data(0x44);
+	LCD_Send_Data(0x51);
+	LCD_Send_Data(0x2F);
+	LCD_Send_Data(0x1F);
+	LCD_Send_Data(0x1F);
+	LCD_Send_Data(0x20);
+	LCD_Send_Data(0x23);
+
+	LCD_Send_Cmd(0x21); 
+	LCD_Send_Cmd(0x11); 
+	LCD_Send_Cmd(0x29); 
+	
+    LCD_Clear(0, 320, 0, 240, BLACK);           /* 先清屏(行0~319,列0~239) */
+
+	/* 开启背光 */
+	LCD_BLK=1;
+//	TIM_SetCompare4(TIM3,1000);//PWM1 CNT<CCR有效 有效为高 CCR越大屏幕越亮
+}
+
+
+/*
+Function name:LCD_Set_Point
+Description:打点函数
+param:row,col--点的位置  color--颜色
+retval:None
+Remarks:
+*/
+void LCD_Set_Point(u16 row,u16 col,u16 color)
+{
+	LCD_Set_Region(row,row+1,col,col+1);   // 一个像素 = [row,row+1) × [col,col+1)
+	LCD_Send_16bit(color);
+}
+
+
+/* ==================== 画图函数(参考正点原子 lcd.c) ==================== */
+
+/*
+Function name: LCD_DrawLine
+Description: 画直线,Bresenham算法,整数运算无浮点
+param:row1,col1--起点  row2,col2--终点  color--颜色
+*/
+void LCD_DrawLine(u16 row1,u16 col1,u16 row2,u16 col2,u16 color)
+{
+    u16 t;
+    int xerr=0,yerr=0,delta_x,delta_y,distance;
+    int incx,incy,uRow,uCol;
+
+    delta_x = col2 - col1;          /* x方向增量 */
+    delta_y = row2 - row1;          /* y方向增量 */
+    uRow = row1;
+    uCol = col1;
+
+    if(delta_x > 0)       incx = 1;
+    else if(delta_x == 0) incx = 0;
+    else                { incx = -1; delta_x = -delta_x; }
+
+    if(delta_y > 0)       incy = 1;
+    else if(delta_y == 0) incy = 0;
+    else                { incy = -1; delta_y = -delta_y; }
+
+    if(delta_x > delta_y) distance = delta_x;
+    else                  distance = delta_y;
+
+    for(t = 0; t <= distance + 1; t++)
+    {
+        LCD_Set_Point(uRow, uCol, color);
+        xerr += delta_x;
+        yerr += delta_y;
+        if(xerr > distance) { xerr -= distance; uCol += incx; }
+        if(yerr > distance) { yerr -= distance; uRow += incy; }
+    }
+}
+
+/*
+Function name: LCD_DrawCircle
+Description: 画圆,中点画圆法,利用8对称性
+param:row,col--圆心  r--半径  color--颜色
+*/
+void LCD_DrawCircle(u16 row, u16 col, u16 r, u16 color)
+{
+    int x = 0, y = r;
+    int d = 3 - 2 * r;              /* 中点判别式初值 */
+
+    while(x <= y)
+    {
+        /* 8个对称点,只算1/8圆 */
+        LCD_Set_Point(row - y, col + x, color);
+        LCD_Set_Point(row - x, col + y, color);
+        LCD_Set_Point(row + x, col + y, color);
+        LCD_Set_Point(row + y, col + x, color);
+        LCD_Set_Point(row + y, col - x, color);
+        LCD_Set_Point(row + x, col - y, color);
+        LCD_Set_Point(row - x, col - y, color);
+        LCD_Set_Point(row - y, col - x, color);
+
+        if(d < 0)          d += 4 * x + 6;          /* 中点在圆内 */
+        else             { d += 4 * (x - y) + 10; y--; }  /* 中点在圆外 */
+        x++;
+    }
+}
+
+/*
+Function name: LCD_DrawRectangle
+Description: 画矩形(边框),四条边各画一条线
+*/
+void LCD_DrawRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color)
+{
+    LCD_DrawLine(row1, col1, row1, col2, color);
+    LCD_DrawLine(row2, col1, row2, col2, color);
+    LCD_DrawLine(row1, col1, row2, col1, color);
+    LCD_DrawLine(row1, col2, row2, col2, color);
+}
+
+/*
+Function name: LCD_DrawTriangle
+Description: 画三角形(边框),三条边
+*/
+void LCD_DrawTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color)
+{
+    LCD_DrawLine(row1, col1, row2, col2, color);
+    LCD_DrawLine(row2, col2, row3, col3, color);
+    LCD_DrawLine(row3, col3, row1, col1, color);
+}
+
+/*
+Function name: LCD_FillRectangle
+Description: 填充矩形,一次设置窗口批量刷,比逐点快得多
+*/
+void LCD_FillRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color)
+{
+    u32 i;
+    LCD_Set_Region(row1, row2, col1, col2);      /* 与 LCD_Clear 相同语义 */
+    for(i = 0; i < (u32)(row2 - row1) * (col2 - col1); i++)
+        LCD_Send_16bit(color);
+}
+
+/*
+Function name: LCD_FillCircle
+Description: 填充圆,逐行画水平弦(整数运算,无sqrt)
+*/
+void LCD_FillCircle(u16 row, u16 col, u16 r, u16 color)
+{
+    int x = 0, y = r;
+    int d = 3 - 2 * r;
+
+    while(x <= y)
+    {
+        /* 每对对称点之间填一条水平线,4条弦覆盖整个圆 */
+        LCD_DrawLine(row - y, col - x, row - y, col + x, color);
+        LCD_DrawLine(row + y, col - x, row + y, col + x, color);
+        LCD_DrawLine(row - x, col - y, row - x, col + y, color);
+        LCD_DrawLine(row + x, col - y, row + x, col + y, color);
+
+        if(d < 0)          d += 4 * x + 6;
+        else             { d += 4 * (x - y) + 10; y--; }
+        x++;
+    }
+}
+
+/*
+Function name: LCD_FillTriangle
+Description: 填充三角形,扫描线法:逐行求与三条边的交点,取左右边界填充
+*/
+void LCD_FillTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color)
+{
+    int y, xl, xr, x, i;
+    int minr = row1, maxr = row1;
+    /* 三条边 */
+    int edges[3][4] = {
+        {row1, col1, row2, col2},
+        {row2, col2, row3, col3},
+        {row3, col3, row1, col1}
+    };
+
+    if(row2 < minr) minr = row2;  if(row2 > maxr) maxr = row2;
+    if(row3 < minr) minr = row3;  if(row3 > maxr) maxr = row3;
+
+    for(y = minr; y <= maxr; y++)
+    {
+        xl = 32767;
+        xr = -32768;
+        for(i = 0; i < 3; i++)
+        {
+            int r1 = edges[i][0], c1 = edges[i][1];
+            int r2 = edges[i][2], c2 = edges[i][3];
+            /* 半开区间判跨,避免顶点被重复计入 */
+            if((r1 <= y && r2 > y) || (r2 <= y && r1 > y))
+            {
+                x = c1 + (c2 - c1) * (y - r1) / (r2 - r1);
+                if(x < xl) xl = x;
+                if(x > xr) xr = x;
+            }
+        }
+        if(xr >= xl)
+            LCD_DrawLine((u16)y, (u16)xl, (u16)y, (u16)xr, color);
+    }
+}
