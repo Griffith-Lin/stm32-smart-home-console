@@ -1,21 +1,21 @@
 #include "main.h"
 
-int fputc(int c,FILE *stream)
-    
-{
-	while((USART1->SR & (1<<7))==0);//当发送数据缓冲区不为空时，循环发送,直到发送完毕 
-	USART1->DR=c;
-	return c;
-}
+int fputc(int c, FILE *stream)
 
+{
+    while ((USART1->SR & (1 << 7)) == 0)
+        ; // 当发送数据缓冲区不为空时，循环发送,直到发送完毕
+    USART1->DR = c;
+    return c;
+}
 
 /*    WS2812E闪绿灯排查
 上电复位
   → 硬件启动（电压爬坡、振荡器起振）        ← PB15 浮空
   → Reset_Handler（汇编启动代码）            ← PB15 浮空
-  → SystemInit()（配置 HSE/PLL，耗时数ms）   ← PB15 浮空  
+  → SystemInit()（配置 HSE/PLL，耗时数ms）   ← PB15 浮空
   → .data/.bss 初始化                        ← PB15 浮空
-  → main() 第14行  ← 你的寄存器操作，PB15 才变 LOW 
+  → main() 第14行  ← 你的寄存器操作，PB15 才变 LOW
   → ...大量初始化（TIM6/LED/USART/...）...
   → ws2812e_ini()  ← 发全零数据，灯熄灭
 
@@ -29,67 +29,69 @@ int fputc(int c,FILE *stream)
 在这段时间里，MCU 完全无法控制 PB15，WS2812E 早已锁存完噪声数据。
 */
 int main(void)
-{  
-    
-    //NVIC_SetPriorityGrouping(3);
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3);//不配置默认为4位占先
-    
-    TIM6_Task_Init(84, 1000);   
+{
+
+    // NVIC_SetPriorityGrouping(3);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3); // 不配置默认为4位占先
+
+    TIM6_Task_Init(84, 1000);
     led_ini();
     Usart1_Config(115200);
-    
+
     key_ini();
     Exti_key_ini();
-    sg90_PWM(84,20000);  
+    sg90_PWM(84, 20000);
     beep_ini();
-    
-    motor_pwm_ini(84,1000);
+
+    motor_pwm_ini(84, 1000);
     mortor_minspeed_open();
-    
-       
+
     adc_ini();
-    adc_GL5506_ini();//光敏电阻
-    
+    adc_GL5506_ini(); // 光敏电阻
+
     spi_ini();
-      
+
     i2c_master_ini();
-    
-    ws2812e_ini(4);//灯是有缓存的，所以芯片复位时灯不会灭，要手动加上灯的复位逻辑
-    //后面的 i2c_master_ini 会操作 GPIOB（PB6/PB7），虽然没有直接动 PB15，但同一组 GPIO 的寄存器读写可能产生微妙影响。加上前导复位丢失，噪声数据就一直在第一个灯里锁着。
-    //复位时第一个灯闪绿灯，原因是硬件浮空，加下拉电阻解决
-    //WS2812 的 DIN 脚内部有弱上拉（~100kΩ），会把线往上拽。但 PCB 走线本身是天线，会耦合周围的电磁噪声。结果就是 DIN 上的电压随机波动——可能刚好跨过 WS2812 的高低电平阈值，被当成数据吞进去。
-    //多调用一次变色函数，解决复位时第一个灯常亮绿灯。原因可能是复位时有脏数据进入灯带
-    
-  
-    RTC_Cal_Config();//时间初始化
-    alarm_ini(RTC_H12_PM,0,0,30,3);//闹钟初始化
-    rtc_wakeup_ini();//唤醒初始化  
-    
-    in_cap_ini(84,1000);//输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
-    
-    irm_3638T_ini(168,30000);
-    
-    
-    uint32_t data=0;
-    
-    while(1)
-    {         
-            
 
-        data=sht30_i2c_send(0x2c06);//有时钟拉伸的高重复精度测量模式
-//        data = sht30_i2c_send(0x2400);//无时钟拉伸的高重复精度测量模式
+    ws2812e_ini(4); // 灯是有缓存的，所以芯片复位时灯不会灭，要手动加上灯的复位逻辑
+    // 后面的 i2c_master_ini 会操作 GPIOB（PB6/PB7），虽然没有直接动 PB15，但同一组 GPIO 的寄存器读写可能产生微妙影响。加上前导复位丢失，噪声数据就一直在第一个灯里锁着。
+    // 复位时第一个灯闪绿灯，原因是硬件浮空，加下拉电阻解决
+    // WS2812 的 DIN 脚内部有弱上拉（~100kΩ），会把线往上拽。但 PCB 走线本身是天线，会耦合周围的电磁噪声。结果就是 DIN 上的电压随机波动——可能刚好跨过 WS2812 的高低电平阈值，被当成数据吞进去。
+    // 多调用一次变色函数，解决复位时第一个灯常亮绿灯。原因可能是复位时有脏数据进入灯带
+
+    RTC_Cal_Config();                   // 时间初始化
+    alarm_ini(RTC_H12_PM, 0, 0, 30, 3); // 闹钟初始化
+    rtc_wakeup_ini();                   // 唤醒初始化
+
+    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
+
+    irm_3638T_ini(168, 30000);
+
+    LCD_Init();
+
+    uint32_t data = 0;
+
+    while (1)
+    {
+
+        data = sht30_i2c_send(0x2c06); // 有时钟拉伸的高重复精度测量模式
+        //        data = sht30_i2c_send(0x2400);//无时钟拉伸的高重复精度测量模式
         get_tem_hu(data);
-       
-        printf("0x%x\r\n",data);
-        printf("%.2f\r\n",tem_data);
-        printf("%.2f\r\n",hu_data);
-        printf("crc=0x%04x\r\n", crc_data);   // 高8位=温度CRC,低8位=湿度CRC
-              
-    
-        
-        Delay_Ms(1000);
-        
-    }   
-    
-}
 
+        printf("0x%x\r\n", data);
+        printf("%.2f\r\n", tem_data);
+        printf("%.2f\r\n", hu_data);
+        printf("crc=0x%04x\r\n", crc_data); // 高8位=温度CRC,低8位=湿度CRC
+
+        
+        LCD_DrawLine(20, 10, 200, 230, RED);        /* 直线 */
+        LCD_DrawRectangle(30, 30, 130, 130, GREEN); /* 矩形 */
+        LCD_DrawTriangle(180, 40, 160, 120, 200, 120, YELLOW);
+        LCD_DrawCircle(120, 60, 50, BLUE);          /* 圆 */
+        LCD_FillRectangle(210, 30, 250, 110, CYAN); /* 实心矩形 */
+        LCD_FillCircle(160, 180, 40, MAGENTA);      /* 实心圆 */
+        LCD_FillTriangle(60, 180, 40, 230, 80, 230, WHITE);
+
+        Delay_Ms(1000);
+    }
+}
