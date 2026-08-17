@@ -71,7 +71,10 @@ uint32_t sht30_i2c_send(uint16_t command)
     {
         //I2C_SCL=0;//手册上写的是sht30下拉时钟线，不是你下拉时钟线！！！！！！！！！
         
-        
+        //一般来说，i2c通信从机控制不了scl线，这个传感器比较特殊
+        //温湿度的读取异常，加了下面这两行,阻塞等待从机真正释放 SCL
+        uint32_t timeout = 500000;  // 超时保护,防真卡死时主机陪葬死等。而高重复精度测量最长 ~16ms
+        while(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);//等从机真正释放 SCL,线上真的有上升沿
                
         //先读到的是高位
         buf_data=i2c_master_read(1);//tem msb
@@ -84,7 +87,7 @@ uint32_t sht30_i2c_send(uint16_t command)
             crc_data<<=8;
         
         //湿度读取异常，一直是高电平。什么时候可能会出现一直高电平（数据线一直空闲），可能主机的继续发的应答，从机没有收到 。             
-        //可能是i2c延时的问题
+        //看起来像中途失步了，可能是i2c延时的问题
         /*
         
         从机只有在收到 NACK 时才会停止输出并释放总线。所以第 3 字节(T_CRC)之后的那个 ACK,从机把它误判成了 NACK。
