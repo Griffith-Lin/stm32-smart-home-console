@@ -44,7 +44,7 @@ uint32_t sht30_i2c_send(uint16_t command)
     //主机等从机应答，加失败重试
     do
     {
-        ack_flag=i2c_master_write(0x44<<1);
+        ack_flag=i2c_master_write(0x44<<1);//写位
     }
     while(!ack_flag && try_count--);//没收到就重试
     
@@ -60,19 +60,21 @@ uint32_t sht30_i2c_send(uint16_t command)
     
     I2C_SCL=1;//主机放开时钟线
     
-//    Delay_Ms(10);   // ← 新增:0x2400 不拉伸时钟,等测量完成(中等重复精度最多 4.5ms)
+
     
     i2c_master_start();
     
     try_count=3;
     
     
-   ack_flag=i2c_master_write((0x44<<1)+1);
+   ack_flag=i2c_master_write((0x44<<1)+1);//读位
     
     
     if(ack_flag)
     {
-        I2C_SCL=0;
+        //I2C_SCL=0;//手册上写的是sht30下拉时钟线，不是你下拉时钟线！！！！！！！！！
+        
+        
                
         //先读到的是高位
         buf_data=i2c_master_read(1);//tem msb
