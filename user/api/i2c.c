@@ -190,28 +190,21 @@ uint8_t i2c_master_read(uint8_t ack)
         Delay_Us(4);
         I2C_SCL = 1;
 
-//        uint16_t timeout = 5000;  // 超时保护,防真卡死时主机陪葬死等
-//        while(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);
-
-//        if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_7))
-//        {
-//            data |= 1;
-//        }
-//        Delay_Us(10);
-        
-        
-        
+        uint32_t timeout = 500000;  // 超时保护,防真卡死时主机陪葬死等。而高重复精度测量最长 ~16ms
+        while(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);
 
         if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_7))
         {
             data |= 1;
         }
-        Delay_Us(4);
-        
+        Delay_Us(10);
+            
         
     }
     i2c_master_ack(ack);//主机发一位应答，ACK告诉从机继续发，NACK(0)告诉从机停止发
     return data;
+    
+    //主机在每一个时钟沿上都等从机放线,任何停顿(第一帧的 16ms 测量、流中间的湿度补偿停顿)都自然被等待消化,不再依赖运气。
 }
 
 
