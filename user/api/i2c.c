@@ -191,13 +191,13 @@ uint8_t i2c_master_read(uint8_t ack)
         I2C_SCL = 1;
 
         uint32_t timeout = 500000;  // 超时保护,防真卡死时主机陪葬死等。而高重复精度测量最长 ~16ms
-        while(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);
+        while(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);//！！！！ 等从机真正释放 SCL,线上真的有上升沿
 
         if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_7))
         {
             data |= 1;
         }
-        Delay_Us(10);
+        Delay_Us(4);
             
         
     }
