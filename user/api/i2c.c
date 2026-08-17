@@ -78,13 +78,6 @@ void i2c_master_ack(uint8_t ack)
     Delay_Us(4);
     
     I2C_SCL = 1;
-    Delay_Us(4); // 至此完整一周期
-
-     // 关键：SDA 保持 ACK/NACK 电平的同时，等 SCL 真实变高。
-    // 从机在T块与H块之间会拉伸SCL；不等真实电平，这个ACK沿就被吞掉，
-    // 从机释放SCL时会读到主机已释放的SDA=1，误当成NACK而停发 → 湿度块0xFF
-    uint32_t timeout = 500000;  // 与 i2c_master_read 一致，覆盖最长~16ms
-    while (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);//阻塞等待从机释放scl线
     Delay_Us(4); // 从机在上升沿采样，高电平保持一会儿
     
     
@@ -199,10 +192,7 @@ uint8_t i2c_master_read(uint8_t ack)
         Delay_Us(4);
         I2C_SCL = 1;
 
-        //一般来说，i2c通信从机控制不了scl线，这个传感器比较特殊
-        //温湿度的读取异常，加了下面这两行,阻塞等待从机真正释放 SCL
-        uint32_t timeout = 500000;  // 超时保护,防真卡死时主机陪葬死等。而高重复精度测量最长 ~16ms
-        while(!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_6) && timeout--);//等从机真正释放 SCL,线上真的有上升沿
+
 
         if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_7))
         {
