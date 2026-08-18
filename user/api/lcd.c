@@ -42,9 +42,9 @@ param:data---待发送的数据
 retval:None
 Remarks:
 */
-void Spi_Send_byte(u8 data)
+void Spi_Send_byte(uint8_t data)
 {
-	u8 i;
+	uint8_t i;
 	for(i=0;i<8;i++)
 	{
 		LCD_SCK=0;
@@ -67,7 +67,7 @@ param:cmd---待发送的命令
 retval:None
 Remarks:
 */
-void LCD_Send_Cmd(u8 cmd)
+void LCD_Send_Cmd(uint8_t cmd)
 {
 	LCD_CS=0;
 	LCD_DC=0;
@@ -82,7 +82,7 @@ param:data---待发送的数据
 retval:None
 Remarks:
 */
-void LCD_Send_Data(u8 data)
+void LCD_Send_Data(uint8_t data)
 {
 	LCD_CS=0;
 	LCD_DC=1;
@@ -98,7 +98,7 @@ param:data---待发送的数据
 retval:None
 Remarks:
 */
-void LCD_Send_16bit(u16 data)
+void LCD_Send_16bit(uint16_t data)
 {
 	LCD_CS=0;
 	LCD_DC=1;
@@ -114,7 +114,7 @@ param:row_s,row_e--起始/终止行  col_s,col_e--起始/终止列
 retval:None
 Remarks:
 */
-void LCD_Set_Region(u16 row_s,u16 row_e,u16 col_s,u16 col_e)
+void LCD_Set_Region(uint16_t row_s,uint16_t row_e,uint16_t col_s,uint16_t col_e)
 {
 	LCD_Send_Cmd(0x2B);//设置行
 	LCD_Send_16bit(row_s);
@@ -135,7 +135,7 @@ param:row_s,row_e--起始/终止行  col_s,col_e--起始/终止列  color--清屏颜色
 retval:None
 Remarks:
 */
-void LCD_Clear(u16 row_s,u16 row_e,u16 col_s,u16 col_e,u16 color)
+void LCD_Clear(uint16_t row_s,uint16_t row_e,uint16_t col_s,uint16_t col_e,uint16_t color)
 {
 	u32 i,j;
 	LCD_Set_Region(row_s,row_e,col_s,col_e);
@@ -246,6 +246,33 @@ void LCD_Init(void)
 //	TIM_SetCompare4(TIM3,1000);//PWM1 CNT<CCR有效 有效为高 CCR越大屏幕越亮
 }
 
+//打印字模
+void LCD_printf_font(uint16_t row, uint16_t col, uint8_t font_size,const uint16_t *data, uint16_t font_color,uint16_t back_color)
+{
+    u8 wide;
+	u8 i,j,k;
+	wide=font_size/8;//转为字节
+
+	for(i=0;i<font_size;i++)//行
+	{
+		for(j=0;j<wide;j++)//这个字的第i行的第几个字节
+		{
+			for(k=0;k<8;k++)//把字节拆成位
+			{
+				if(data[i*wide+j]&(0x80>>k))
+				{
+					LCD_Set_Point(row+i,col+k+8*j,font_color);
+				}
+				else
+				{
+					LCD_Set_Point(row+i,col+k+8*j,back_color);
+				}
+			}
+		}
+	}
+}
+
+
 
 /*
 Function name:LCD_Set_Point
@@ -254,7 +281,8 @@ param:row,col--点的位置  color--颜色
 retval:None
 Remarks:
 */
-void LCD_Set_Point(u16 row,u16 col,u16 color)
+
+void LCD_Set_Point(uint16_t row,uint16_t col,uint16_t color)
 {
 	LCD_Set_Region(row,row+1,col,col+1);   // 一个像素 = [row,row+1) × [col,col+1)
 	LCD_Send_16bit(color);
@@ -268,9 +296,9 @@ Function name: LCD_DrawLine
 Description: 画直线,Bresenham算法,整数运算无浮点
 param:row1,col1--起点  row2,col2--终点  color--颜色
 */
-void LCD_DrawLine(u16 row1,u16 col1,u16 row2,u16 col2,u16 color)
+void LCD_DrawLine(uint16_t row1,uint16_t col1,uint16_t row2,uint16_t col2,uint16_t color)
 {
-    u16 t;
+    uint16_t t;
     int xerr=0,yerr=0,delta_x,delta_y,distance;
     int incx,incy,uRow,uCol;
 
@@ -305,7 +333,7 @@ Function name: LCD_DrawCircle
 Description: 画圆,中点画圆法,利用8对称性
 param:row,col--圆心  r--半径  color--颜色
 */
-void LCD_DrawCircle(u16 row, u16 col, u16 r, u16 color)
+void LCD_DrawCircle(uint16_t row, uint16_t col, uint16_t r, uint16_t color)
 {
     int x = 0, y = r;
     int d = 3 - 2 * r;              /* 中点判别式初值 */
@@ -332,7 +360,7 @@ void LCD_DrawCircle(u16 row, u16 col, u16 r, u16 color)
 Function name: LCD_DrawRectangle
 Description: 画矩形(边框),四条边各画一条线
 */
-void LCD_DrawRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color)
+void LCD_DrawRectangle(uint16_t row1,uint16_t col1,uint16_t row2,uint16_t col2,uint16_t color)
 {
     LCD_DrawLine(row1, col1, row1, col2, color);
     LCD_DrawLine(row2, col1, row2, col2, color);
@@ -344,7 +372,7 @@ void LCD_DrawRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color)
 Function name: LCD_DrawTriangle
 Description: 画三角形(边框),三条边
 */
-void LCD_DrawTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color)
+void LCD_DrawTriangle(uint16_t row1,uint16_t col1,uint16_t row2,uint16_t col2,uint16_t row3,uint16_t col3,uint16_t color)
 {
     LCD_DrawLine(row1, col1, row2, col2, color);
     LCD_DrawLine(row2, col2, row3, col3, color);
@@ -355,7 +383,7 @@ void LCD_DrawTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 
 Function name: LCD_FillRectangle
 Description: 填充矩形,一次设置窗口批量刷,比逐点快得多
 */
-void LCD_FillRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color)
+void LCD_FillRectangle(uint16_t row1,uint16_t col1,uint16_t row2,uint16_t col2,uint16_t color)
 {
     u32 i;
     LCD_Set_Region(row1, row2, col1, col2);      /* 与 LCD_Clear 相同语义 */
@@ -367,7 +395,7 @@ void LCD_FillRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color)
 Function name: LCD_FillCircle
 Description: 填充圆,逐行画水平弦(整数运算,无sqrt)
 */
-void LCD_FillCircle(u16 row, u16 col, u16 r, u16 color)
+void LCD_FillCircle(uint16_t row, uint16_t col, uint16_t r, uint16_t color)
 {
     int x = 0, y = r;
     int d = 3 - 2 * r;
@@ -390,7 +418,7 @@ void LCD_FillCircle(u16 row, u16 col, u16 r, u16 color)
 Function name: LCD_FillTriangle
 Description: 填充三角形,扫描线法:逐行求与三条边的交点,取左右边界填充
 */
-void LCD_FillTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color)
+void LCD_FillTriangle(uint16_t row1,uint16_t col1,uint16_t row2,uint16_t col2,uint16_t row3,uint16_t col3,uint16_t color)
 {
     int y, xl, xr, x, i;
     int minr = row1, maxr = row1;
@@ -421,6 +449,6 @@ void LCD_FillTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 
             }
         }
         if(xr >= xl)
-            LCD_DrawLine((u16)y, (u16)xl, (u16)y, (u16)xr, color);
+            LCD_DrawLine((uint16_t)y, (uint16_t)xl, (uint16_t)y, (uint16_t)xr, color);
     }
 }

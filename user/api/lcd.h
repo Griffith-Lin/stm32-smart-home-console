@@ -58,5 +58,8 @@ void LCD_DrawTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 
 void LCD_FillTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color);
 
 
+void LCD_printf_font(uint16_t row, uint16_t col, uint8_t font_size,const uint16_t *data, uint16_t font_color,uint16_t back_color);
+
+
 #endif
 
