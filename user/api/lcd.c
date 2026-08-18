@@ -249,8 +249,8 @@ void LCD_Init(void)
 //打印字模
 void LCD_printf_font(uint16_t row, uint16_t col, uint8_t font_size,const uint16_t *data, uint16_t font_color,uint16_t back_color)
 {
-    u8 wide;
-	u8 i,j,k;
+    uint8_t wide;
+	uint8_t i,j,k;
 	wide=font_size/8;//转为字节
 
 	for(i=0;i<font_size;i++)//行
@@ -287,6 +287,59 @@ void LCD_Set_Point(uint16_t row,uint16_t col,uint16_t color)
 	LCD_Set_Region(row,row+1,col,col+1);   // 一个像素 = [row,row+1) × [col,col+1)
 	LCD_Send_16bit(color);
 }
+
+
+
+//图片显示函数
+/*
+数据头如下
+typedef struct _HEADCOLOR
+{
+   unsigned char scan;
+   unsigned char gray;
+   unsigned short w;
+   unsigned short h;
+   unsigned char is565;
+   unsigned char rgb;
+}HEADCOLOR; 
+*/
+void LCD_Dis_Pic(uint16_t row,uint16_t col,const uint8_t *pic)
+{
+	u32 i;
+	uint16_t w,h;
+	w=pic[2]<<8|pic[3];
+	h=pic[4]<<8|pic[5];
+	LCD_Set_Region(row,row+h,col,col+w);
+	for(i=0;i<=h*w-1;i++)
+	{
+			LCD_Send_16bit(pic[8+2*i]<<8|pic[9+2*i]);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ==================== 画图函数(参考正点原子 lcd.c) ==================== */

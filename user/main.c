@@ -69,18 +69,15 @@ int main(void)
 
     LCD_Init();
 
-    
+
+    LCD_Dis_Pic(0,0,gImage_111);
 
     while (1)
     {
 
-
-
         
-
         
-        LCD_printf_font(50,50,16,arr_font111,WHITE,RED);
         
-        Delay_Ms(4000);
+        Delay_Ms(1000);
     }
 }
