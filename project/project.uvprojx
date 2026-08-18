@@ -514,11 +514,6 @@
               <FilePath>..\user\api\SHT30.c</FilePath>
             </File>
             <File>
-              <FileName>SHT30.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\SHT30.h</FilePath>
-            </File>
-            <File>
               <FileName>lcd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\lcd.c</FilePath>
@@ -527,6 +522,16 @@
               <FileName>lcd.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\user\api\lcd.h</FilePath>
+            </File>
+            <File>
+              <FileName>font.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\font.c</FilePath>
+            </File>
+            <File>
+              <FileName>font.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\font.h</FilePath>
             </File>
           </Files>
         </Group>
