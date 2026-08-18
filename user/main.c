@@ -63,35 +63,24 @@ int main(void)
     alarm_ini(RTC_H12_PM, 0, 0, 30, 3); // 闹钟初始化
     rtc_wakeup_ini();                   // 唤醒初始化
 
-    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
+//    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
 
     irm_3638T_ini(168, 30000);
 
     LCD_Init();
 
-    uint32_t data = 0;
+    
 
     while (1)
     {
 
-        data = sht30_i2c_send(0x2c06); // 有时钟拉伸的高重复精度测量模式
-        //        data = sht30_i2c_send(0x2400);//无时钟拉伸的高重复精度测量模式
-        get_tem_hu(data);
 
-        printf("0x%x\r\n", data);
-        printf("%.2f\r\n", tem_data);
-        printf("%.2f\r\n", hu_data);
-        printf("crc=0x%04x\r\n", crc_data); // 高8位=温度CRC,低8位=湿度CRC
 
         
-        LCD_DrawLine(20, 10, 200, 230, RED);        /* 直线 */
-        LCD_DrawRectangle(30, 30, 130, 130, GREEN); /* 矩形 */
-        LCD_DrawTriangle(180, 40, 160, 120, 200, 120, YELLOW);
-        LCD_DrawCircle(120, 60, 50, BLUE);          /* 圆 */
-        LCD_FillRectangle(210, 30, 250, 110, CYAN); /* 实心矩形 */
-        LCD_FillCircle(160, 180, 40, MAGENTA);      /* 实心圆 */
-        LCD_FillTriangle(60, 180, 40, 230, 80, 230, WHITE);
 
-        Delay_Ms(1000);
+        
+        LCD_printf_font(50,50,16,arr_font111,WHITE,RED);
+        
+        Delay_Ms(4000);
     }
 }
