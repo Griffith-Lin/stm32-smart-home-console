@@ -8,6 +8,8 @@
 #include "MLX90614.h"
 #include "rtc.h"
 #include "ws2812e.h"
+#include "SHT30.h"
+
 
 
 #include <stdio.h>

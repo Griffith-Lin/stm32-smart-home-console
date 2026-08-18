@@ -96,3 +96,18 @@ void ws2812e_test(void)
         Delay_Ms(1000);
 }
 
+
+void sht31_test(void)
+{
+    uint32_t data = 0;
+
+    data = sht30_i2c_send(0x2c06); // 有时钟拉伸的高重复精度测量模式
+    //        data = sht30_i2c_send(0x2400);//无时钟拉伸的高重复精度测量模式
+    get_tem_hu(data);
+
+    printf("0x%x\r\n", data);
+    printf("%.2f\r\n", tem_data);
+    printf("%.2f\r\n", hu_data);
+    printf("crc=0x%04x\r\n", crc_data); // 高8位=温度CRC,低8位=湿度CRC
+}
+
