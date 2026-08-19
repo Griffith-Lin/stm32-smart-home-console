@@ -73,14 +73,30 @@ int main(void)
     LCD_Dis_Pic(0,0,gImage_111);
     LCD_printf_font(30,30,18,arr_font111,RED,WHITE);
 
+    LCD_Dis_Pic(200,10,gImage_fan_add);
+    LCD_Dis_Pic(200,150,gImage_fan_subtract);
+
+    CST816S_Init();
+
     while (1)
     {
+        
+        if (TP_tint_flag || CTP_INT == 0)
+        {
+            
+            CST816S_Scan();
+        }
+
         LCD_Dis_Pic(0,0,gImage_gif0);
-        Delay_Ms(500);
+        Delay_Ms(5);
         LCD_Dis_Pic(0,0,gImage_gif1);
-        Delay_Ms(500);
+        Delay_Ms(5);
         LCD_Dis_Pic(0,0,gImage_gif2);
-        Delay_Ms(500);
+        Delay_Ms(5);
+
+        
+
+
         
     }
 }

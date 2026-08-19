@@ -533,6 +533,16 @@
               <FileType>5</FileType>
               <FilePath>..\user\api\font.h</FilePath>
             </File>
+            <File>
+              <FileName>tc_iic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\tc_iic.c</FilePath>
+            </File>
+            <File>
+              <FileName>tc_iic.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\tc_iic.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

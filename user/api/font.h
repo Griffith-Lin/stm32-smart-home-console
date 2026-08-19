@@ -14,4 +14,7 @@ extern const unsigned char gImage_1[106408];
 extern const unsigned char gImage_gif0[60008];
 extern const unsigned char gImage_gif1[60008];
 extern const unsigned char gImage_gif2[60008];
+
+extern const unsigned char gImage_fan_add[6088];
+extern const unsigned char gImage_fan_subtract[6088];
 #endif

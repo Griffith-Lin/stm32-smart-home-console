@@ -72,13 +72,20 @@ void Exti_key_ini(void)
 //    SYSCFG->EXTICR[0] &= ~(0xf<<4);
 //    SYSCFG->EXTICR[0] |= (1<<4);
     
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB,EXTI_PinSource1);
+//    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB,EXTI_PinSource1);
       
+    
+    
+    
+    
 //    EXTI->RTSR |= (1<<1);//EXTI1（对应的是尾号为1的io口）
 //    EXTI->IMR |= (1<<1);
     
-    exti_InitTypeDef.EXTI_Line=EXTI_Line1; 
-    EXTI_Init(&exti_InitTypeDef);
+//    exti_InitTypeDef.EXTI_Line=EXTI_Line1; 
+//    EXTI_Init(&exti_InitTypeDef);
+        
+        
+        
         
         
 //    NVIC_SetPriority(EXTI0_IRQn,14);//配置EXTI0的优先级，111 0 占先位数的十进制值为2（最前面3位），次级位数的十进制值为0（后面1位）
@@ -154,8 +161,4 @@ void EXTI0_IRQHandler(void)
 }
 
 
-void EXTI1_IRQHandler(void)
-{
-    
-}
 

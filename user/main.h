@@ -21,6 +21,7 @@
 #include "SHT30.h"
 #include "lcd.h"
 #include "font.h"
+#include "tc_iic.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t
