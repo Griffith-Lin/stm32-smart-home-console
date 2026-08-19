@@ -237,7 +237,7 @@ void  CST816S_Init(void)
 
 
 mt_tp_dev tp_dev;
-
+uint16_t motor_speed=0;
 
 u8 CST816S_Scan()
 {
@@ -247,7 +247,7 @@ u8 CST816S_Scan()
     u8 temp;
     u8 tempsta;
     u8 mode;
-    static uint16_t motor_speed=0;
+    
     static u8 t=0;//控制查询间隔,从而降低CPU占用率
     t++;
     if((t%10)==0||t<10||TP_tint_flag) //空闲时,每进入10次CTP_Scan函数才检测1次,从而节省CPU使用率
@@ -274,35 +274,7 @@ u8 CST816S_Scan()
                     tp_dev.y[i]=((buf[2]&0x0F)<<8) | buf[3];
                            
 
-                     //触摸时，pd1触发中断
-                    if(tp_dev.x[i]<100)
-                    {                
-//                        if (motor_speed==0)
-//                        motor_speed+=100;    
-                        
-                        motor_speed+=300;
-                        
-                        if(motor_speed>1000)
-                        motor_speed=1000;
-                        
-                        Motor_Control(motor_speed);
-                        
-                        
-                    }
-                    else
-                    {
-                        if(motor_speed>100)
-                        {
-                        motor_speed-=300;
-                        }
-                        else
-                        {
-                        motor_speed=0;
-                        }
-                        
-                        Motor_Control(motor_speed);
-                        
-                    }
+                    
                     
                                    
                     printf("x[%d]:%d,y[%d]:%d\r\n",i,tp_dev.x[i],i,tp_dev.y[i]);
@@ -359,6 +331,35 @@ void EXTI1_IRQHandler(void)
     {
         EXTI_ClearITPendingBit(EXTI_Line1);
         TP_tint_flag=1;
+        CST816S_Scan();
+        
+         //触摸时，pd1触发中断
+            if(tp_dev.x[0]<100)
+            {                  
+                
+                motor_speed+=300;
+                
+                if(motor_speed>1000)
+                motor_speed=1000;
+                
+                Motor_Control(motor_speed);
+                
+                
+            }
+            else
+            {
+                if(motor_speed>100)
+                {
+                motor_speed-=300;
+                }
+                else
+                {
+                motor_speed=0;
+                }
+                
+                Motor_Control(motor_speed);
+                
+            }
         
     }
 }
