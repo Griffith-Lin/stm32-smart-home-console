@@ -250,7 +250,7 @@ u8 CST816S_Scan()
     static uint16_t motor_speed=0;
     static u8 t=0;//控制查询间隔,从而降低CPU占用率
     t++;
-    if((t%10)==0||t<10) //空闲时,每进入10次CTP_Scan函数才检测1次,从而节省CPU使用率
+    if((t%10)==0||t<10||TP_tint_flag) //空闲时,每进入10次CTP_Scan函数才检测1次,从而节省CPU使用率
 		{ 
         CST816S_RD_DATA(0x02,1,&mode);	//读取手指个数
         if(mode&0X80&&((mode&0XF)<6)) //mode & 0x80;芯片数据更新标志,置 1 代表有新触摸数据;
