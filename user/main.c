@@ -81,18 +81,14 @@ int main(void)
     while (1)
     {
         
-        if (TP_tint_flag || CTP_INT == 0)
-        {
-            
-            CST816S_Scan();
-        }
+
 
         LCD_Dis_Pic(0,0,gImage_gif0);
-        Delay_Ms(5);
+        Sys_delay_ms(5);
         LCD_Dis_Pic(0,0,gImage_gif1);
-        Delay_Ms(5);
+        Sys_delay_ms(5);
         LCD_Dis_Pic(0,0,gImage_gif2);
-        Delay_Ms(5);
+        Sys_delay_ms(5);
 
         
 
