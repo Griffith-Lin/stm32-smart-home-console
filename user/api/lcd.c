@@ -236,7 +236,7 @@ void LCD_Init(void)
 	LCD_Send_Cmd(0x11);
 	LCD_Send_Cmd(0x29);
 
-	LCD_Clear(0, 320, 0, 240, BLACK); /* 先清屏(行0~319,列0~239) */
+	LCD_Clear(0, 320, 0, 240, WHITE); /* 先清屏(行0~319,列0~239) */
 
 	/* 开启背光 */
 	LCD_BLK = 1;

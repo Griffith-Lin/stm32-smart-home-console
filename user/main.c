@@ -70,18 +70,19 @@ int main(void)
     LCD_Init();
 
 
-    LCD_Dis_Pic(0,0,gImage_111);
-    LCD_printf_font(30,30,18,arr_font111,RED,WHITE);
+//    LCD_Dis_Pic(0,0,gImage_111);
+//    LCD_printf_font(30,30,18,arr_font111,RED,WHITE);
 
-    LCD_Dis_Pic(200,10,gImage_fan_add);
-    LCD_Dis_Pic(200,150,gImage_fan_subtract);
+//    LCD_Dis_Pic(200,10,gImage_fan_add);
+//    LCD_Dis_Pic(200,150,gImage_fan_subtract);
 
     CST816S_Init();
 
 //	DMA_Font_Config();
 //	Font_Load();//专门用于字库下载的函数，死循环判断标志位
 
-	LCD_Font_Dis_Ascii(50,100,32,DARKBLUE,WHITE,'A');
+    LCD_Font_Dis_Ascii(50,150,32,DARKBLUE,WHITE,'Q');
+	LCD_Font_Dis_Ascii(50,100,32,DARKBLUE,WHITE,'Q');
 	LCD_Font_Dis_Ascii(100,100,32,DARKBLUE,WHITE,'Q');
 	LCD_Font_Dis_Font(150,100,32,RED,WHITE,(u8 *)"信");
 	LCD_Font_Dis_Font(200,100,32,RED,WHITE,(u8 *)"嵌");
