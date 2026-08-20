@@ -80,7 +80,7 @@ int main(void)
 
     while (1)
     {
-        
+
 
 
         LCD_Dis_Pic(0,0,gImage_gif0);

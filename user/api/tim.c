@@ -73,7 +73,7 @@ void TIM6_Task_Init(uint32_t psc,uint32_t arr)
     NVIC_Init(&NVIC_InitStructure);
     
     
-//    TIM_Cmd(TIM6, ENABLE);//在延时函数里使能和禁能，能减小能耗
+    TIM_Cmd(TIM6, ENABLE);//在延时函数里使能和禁能，能减小能耗
 }
 
 
@@ -126,12 +126,17 @@ void TIM6_delay(uint32_t ms)
 //}
 
 
+volatile uint32_t tim6_tick_ms = 0;
+volatile uint32_t last_touch_ms = 0;      
+
 //中断外面用TIM_GetFlagStatus,中断里面用TIM_GetITStatus
 void TIM6_DAC_IRQHandler(void)
 {
     if(TIM_GetITStatus(TIM6, TIM_IT_Update)==SET)
     {
         TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
+        tim6_tick_ms++;
+        
         
         if (tim6 > 0) 
         {tim6--;}

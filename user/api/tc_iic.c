@@ -248,10 +248,7 @@ u8 CST816S_Scan()
     u8 tempsta;
     u8 mode;
     
-    static u8 t=0;//控制查询间隔,从而降低CPU占用率
-    t++;
-    if((t%10)==0||t<10||TP_tint_flag) //空闲时,每进入10次CTP_Scan函数才检测1次,从而节省CPU使用率
-		{ 
+
         CST816S_RD_DATA(0x02,1,&mode);	//读取手指个数
         if(mode&0X80&&((mode&0XF)<6)) //mode & 0x80;芯片数据更新标志,置 1 代表有新触摸数据;
 				{
@@ -288,7 +285,7 @@ u8 CST816S_Scan()
 								{	
                     tp_dev.x[0]=tp_dev.x[1];
                     tp_dev.y[0]=tp_dev.y[1];
-                    t=0;				//触发一次,则会最少连续监测10次,从而提高命中率
+
                 } 
 								else //非法数据,则忽略此次数据(还原原来的)
 								{				
@@ -298,26 +295,26 @@ u8 CST816S_Scan()
                     tp_dev.sta=tempsta;	//恢复tp_dev.sta
                 }
             } 
-						else t=0;					//触发一次,则会最少连续监测10次,从而提高命中率
+
         }
-    } 
-		else //无触摸点按下
-		{ 
-        if(tp_dev.sta&0x81) //之前是被按下的
-				{	
-            tp_dev.sta&=~(1<<7);	//标记按键松开
-            tp_dev.x[0]=0;
-            tp_dev.y[0]=0;
-            tp_dev.sta&=0XE0;	//清除点有效标记
-        } 
-				else //之前就没有被按下
-				{					
-            tp_dev.x[0]=0;
-            tp_dev.y[0]=0;
-            tp_dev.sta&=0XE0;	//清除点有效标记
-        }
-    }
-    if(t>240)t=10;//重新从10开始计数
+   
+//		else //无触摸点按下
+//		{ 
+//        if(tp_dev.sta&0x81) //之前是被按下的
+//				{	
+//            tp_dev.sta&=~(1<<7);	//标记按键松开
+//            tp_dev.x[0]=0;
+//            tp_dev.y[0]=0;
+//            tp_dev.sta&=0XE0;	//清除点有效标记
+//        } 
+//				else //之前就没有被按下
+//				{					
+//            tp_dev.x[0]=0;
+//            tp_dev.y[0]=0;
+//            tp_dev.sta&=0XE0;	//清除点有效标记
+//        }
+//    }
+
     return res;
 }
 
@@ -327,40 +324,31 @@ volatile uint8_t TP_tint_flag=0;
 
 void EXTI1_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(EXTI_Line1))
+     if(EXTI_GetITStatus(EXTI_Line1))
     {
         EXTI_ClearITPendingBit(EXTI_Line1);
-        TP_tint_flag=1;
-        CST816S_Scan();
-        
-         //触摸时，pd1触发中断
-            if(tp_dev.x[0]<100)
-            {                  
-                
-                motor_speed+=300;
-                
-                if(motor_speed>1000)
-                motor_speed=1000;
-                
-                Motor_Control(motor_speed);
-                
-                
-            }
-            else
+
+        if(tim6_tick_ms - last_touch_ms < 200)  /* 减慢按住期间的重报 */
+        {
+            CST816S_WR_DATA(0x02,0);            /* 只清芯片标志,让INT回高——否则下次按下没有边沿 */
+            return;
+        }
+        last_touch_ms = tim6_tick_ms;           /* 记录本次有效按下 */
+
+        if(CST816S_Scan()==1)                   /* 读到有效触点才动作 */
+        {
+            if(tp_dev.x[0]<100)                 
             {
-                if(motor_speed>100)
-                {
-                motor_speed-=300;
-                }
-                else
-                {
-                motor_speed=0;
-                }
-                
-                Motor_Control(motor_speed);
-                
+                if(motor_speed<=700) motor_speed+=300;
+                else                  motor_speed=1000;
             }
-        
+            else                                
+            {
+                if(motor_speed>300) motor_speed-=300;
+                else                  motor_speed=0;
+            }
+            Motor_Control(motor_speed);
+        }
     }
 }
 

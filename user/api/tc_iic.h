@@ -22,6 +22,10 @@
 #define CTP_SDA_IN   GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_9)
 
 
+extern volatile uint32_t tim6_tick_ms;
+extern volatile uint32_t last_touch_ms;    
+
+
 typedef struct
 {
 	u16 x[2]; 
@@ -45,3 +49,4 @@ void  CST816S_Init(void);
 u8 CST816S_Scan(void);
 
 #endif
+
