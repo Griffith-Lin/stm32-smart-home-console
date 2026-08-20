@@ -169,8 +169,8 @@ void dma2_stream2_ini(uint8_t ndtr,uint32_t m0ar)
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2,ENABLE);//使能DMA2时钟
     DMA_DeInit(DMA2_Stream2);                          //复位数据流2(相当于手动清零CR/NDTR/PAR/M0AR)
     
-    USART_DMACmd(USART1,USART_DMAReq_Rx,ENABLE);       //USART1->CR3 |= (1<<7) -> 接收DMA请求使能
-    //注意:bit7(DMAR)是"接收"DMA使能;bit6(DMAT)才是发送——你的stream7函数里设的也是bit7
+    USART_DMACmd(USART1,USART_DMAReq_Rx,ENABLE);       //接收DMA请求使能
+    
     
     DMA_InitTypeDef dma_InitTypeDef={0};
     
@@ -203,6 +203,6 @@ void dma2_stream2_ini(uint8_t ndtr,uint32_t m0ar)
     
     NVIC_Init(&nvic_InitTypeDef);
     
-    DMA_Cmd(DMA2_Stream2,ENABLE);//使能DMA2数据流2(相当于 CR |=(1<<0))
+    DMA_Cmd(DMA2_Stream2,ENABLE);
 }
 
