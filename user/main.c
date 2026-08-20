@@ -79,7 +79,7 @@ int main(void)
     CST816S_Init();
 
 //	DMA_Font_Config();
-//	Font_Load();//字库下载、不下载时屏蔽掉 下载完成后一定要在断电之后屏蔽掉再重新下一次代码
+//	Font_Load();//专门用于字库下载的函数，死循环判断标志位
 
 	LCD_Font_Dis_Ascii(50,100,32,DARKBLUE,WHITE,'A');
 	LCD_Font_Dis_Ascii(100,100,32,DARKBLUE,WHITE,'Q');

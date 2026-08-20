@@ -3,26 +3,7 @@
 
 #include "stm32f4xx.h"
 
-#define BUFFSIZE 4096
 
-enum
-{
-	Free_IT,
-	DMA_IT,
-	Usart_IT
-};
-	
-
-typedef struct
-{
-	u8 buff[2][BUFFSIZE];
-	u8 sta;
-	u32 addr;
-	u32 len;
-	u8 flag;
-}Font;
-
-extern Font font;
 
 extern const uint16_t arr_font111[256];
 
