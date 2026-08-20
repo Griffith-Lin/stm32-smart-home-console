@@ -415,7 +415,14 @@ void LCD_Font_Dis_Font(uint16_t row, uint16_t col, uint8_t font_size, uint16_t f
 //ÖÐÓ¢ÎÄ¿É»ìÐ´
 void LCD_Font_Dis(uint16_t row, uint16_t col, uint8_t font_size, uint16_t font_color, uint16_t back_color, uint8_t *font)
 {
-    
+    if(*font<161)
+    {
+    LCD_Font_Dis_Ascii(row,col,font_size,font_color,back_color,*font);       
+    }
+    else
+    {
+    LCD_Font_Dis_Font(row,col,font_size,font_color,back_color,font);
+    }
 }
 
 

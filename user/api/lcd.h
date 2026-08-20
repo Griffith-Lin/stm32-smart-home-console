@@ -63,9 +63,15 @@ void LCD_Dis_Ascii(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8
 void LCD_Dis_Font(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 *buff);
 void LCD_Font_Dis_Ascii(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 asc);
 void LCD_Font_Dis_Font(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 *font);
+void LCD_Font_Dis(uint16_t row, uint16_t col, uint8_t font_size, uint16_t font_color, uint16_t back_color, uint8_t *font);
+
+
+
 
 void LCD_printf_font(uint16_t row, uint16_t col, uint8_t font_size,const uint16_t *data, uint16_t font_color,uint16_t back_color);
 
 void LCD_Dis_Pic(uint16_t row,uint16_t col,const uint8_t *pic);
+
+
 #endif
 

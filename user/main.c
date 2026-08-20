@@ -85,7 +85,9 @@ int main(void)
 	LCD_Font_Dis_Ascii(100,100,32,DARKBLUE,WHITE,'Q');
 	LCD_Font_Dis_Font(150,100,32,RED,WHITE,(u8 *)"ÐÅ");
 	LCD_Font_Dis_Font(200,100,32,RED,WHITE,(u8 *)"Ç¶");
-
+    
+//    LCD_Font_Dis(50,100,32,DARKBLUE,WHITE,(u8 *)'A');
+//    LCD_Font_Dis(200,100,32,RED,WHITE,(u8 *)"Ç¶");
     while (1)
     {
 
