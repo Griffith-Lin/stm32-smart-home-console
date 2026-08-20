@@ -87,6 +87,9 @@ void spi_ini(void)
     
     GPIO_Init(GPIOA,&gpio_InitTypeDef);
     
+     SPI_CS = 1;      // ★ 片选输出必须初始化为高(未选中),否则复位后第一次事务无下降沿
+    
+    
     gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_7;
     gpio_InitTypeDef.GPIO_Mode=GPIO_Mode_OUT;
     gpio_InitTypeDef.GPIO_Speed=GPIO_Low_Speed;
