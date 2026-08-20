@@ -78,7 +78,13 @@ int main(void)
 
     CST816S_Init();
 
+//	DMA_Font_Config();
+//	Font_Load();//字库下载、不下载时屏蔽掉 下载完成后一定要在断电之后屏蔽掉再重新下一次代码
 
+	LCD_Font_Dis_Ascii(50,100,32,DARKBLUE,WHITE,'A');
+	LCD_Font_Dis_Ascii(100,100,32,DARKBLUE,WHITE,'Q');
+	LCD_Font_Dis_Font(150,100,32,RED,WHITE,(u8 *)"信");
+	LCD_Font_Dis_Font(200,100,32,RED,WHITE,(u8 *)"嵌");
 
     while (1)
     {

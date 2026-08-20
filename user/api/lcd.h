@@ -5,6 +5,7 @@
 #include "stm32f4xx.h"
 #include "io_bit.h"
 #include "delay.h"
+#include "w25qxx.h"
 
 #define LCD_BLK PDout(4)
 #define LCD_DC PDout(3)
@@ -57,6 +58,11 @@ void LCD_FillRectangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 color);
 void LCD_DrawTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color);
 void LCD_FillTriangle(u16 row1,u16 col1,u16 row2,u16 col2,u16 row3,u16 col3,u16 color);
 
+
+void LCD_Dis_Ascii(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 *buff);
+void LCD_Dis_Font(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 *buff);
+void LCD_Font_Dis_Ascii(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 asc);
+void LCD_Font_Dis_Font(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 *font);
 
 void LCD_printf_font(uint16_t row, uint16_t col, uint8_t font_size,const uint16_t *data, uint16_t font_color,uint16_t back_color);
 

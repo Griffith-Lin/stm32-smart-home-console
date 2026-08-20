@@ -23,6 +23,7 @@
 #include "font.h"
 #include "tc_iic.h"
 #include "sys.h"
+#include "dma.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t

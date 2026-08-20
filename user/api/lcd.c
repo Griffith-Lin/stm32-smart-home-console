@@ -321,6 +321,96 @@ void LCD_Dis_Pic(uint16_t row,uint16_t col,const uint8_t *pic)
 
 
 
+/*
+Function name:LCD_Font_Dis_Ascii
+Description:字符显示函数---字库支持
+param:row,col--左上角坐标  font_size--字体大小  font_color--字体颜色  back_color--背景颜色  asc--想要显示的字符
+retval:None
+Remarks:
+*/
+void LCD_Font_Dis_Ascii(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 asc)
+{
+	u16 i,j,k;
+	u8 width=0;
+	u8 buff[100];//最少给64字节
+	u32 addr=0;
+	width=font_size/2/8;
+	if(font_size/2%8)
+	{
+		width+=1;
+	}
+	switch(font_size)
+	{
+		case 16:addr+=0x00000000;break;
+		case 24:addr+=0x0004064C;break;
+		case 32:addr+=0x000D1A68;break;
+	}
+	addr=addr+asc*font_size*width;
+	W25Qxx_Read_Bytes(addr,buff,font_size*width);
+	
+	for(i=0;i<font_size;i++)//行
+	{
+		for(j=0;j<width;j++)//列
+		{
+			for(k=0;k<8;k++)//把字节拆成位
+			{
+				if(buff[i*width+j]&(0x80>>k))
+				{
+					LCD_Set_Point(row+i,col+k+8*j,font_color);
+				}
+				else
+				{
+					LCD_Set_Point(row+i,col+k+8*j,back_color);
+				}
+			}
+		}
+	}
+}
+
+
+/*
+Function name:LCD_Font_Dis_Font
+Description:汉字显示函数---需要字库支持
+param:row,col--左上角坐标  font_size--字体大小  font_color--字体颜色  back_color--背景颜色  font--需要显示的汉字
+retval:None
+Remarks:
+*/
+void LCD_Font_Dis_Font(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 *font)
+{
+	u16 i,j,k;
+	u8 width=0;
+	u8 buff[200];//最少给128字节
+	u32 addr=0;
+	width=font_size/8;
+	switch(font_size)
+	{
+		case 16:addr+=0x00000806;break;
+		case 24:addr+=0x00041E52;break;
+		case 32:addr+=0x000D3A6E;break;
+	}
+	addr=addr+((font[0]-0xA1)*94+(font[1]-0xA1))*font_size*width;
+	W25Qxx_Read_Bytes(addr,buff,font_size*width);
+	
+	for(i=0;i<font_size;i++)//行
+	{
+		for(j=0;j<width;j++)//列
+		{
+			for(k=0;k<8;k++)//把字节拆成位
+			{
+				if(buff[i*width+j]&(0x80>>k))
+				{
+					LCD_Set_Point(row+i,col+k+8*j,font_color);
+				}
+				else
+				{
+					LCD_Set_Point(row+i,col+k+8*j,back_color);
+				}
+			}
+		}
+	}
+}
+
+
 
 
 
