@@ -78,17 +78,14 @@ int main(void)
 
     CST816S_Init();
 
+
+
     while (1)
     {
 
 
 
-        LCD_Dis_Pic(0,0,gImage_gif0);
-        Sys_delay_ms(5);
-        LCD_Dis_Pic(0,0,gImage_gif1);
-        Sys_delay_ms(5);
-        LCD_Dis_Pic(0,0,gImage_gif2);
-        Sys_delay_ms(5);
+
 
         
 

@@ -1,16 +1,7 @@
 #ifndef __DEBUG_
 #define __DEBUG_
 
-#include "stm32f4xx.h"
-#include "tim.h"
-#include "W25Qxx.h"
-#include "delay.h"
-#include "MLX90614.h"
-#include "rtc.h"
-#include "ws2812e.h"
-#include "SHT30.h"
-
-
+#include "main.h"
 
 #include <stdio.h>
 #include <stdint.h> 

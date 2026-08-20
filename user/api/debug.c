@@ -111,3 +111,13 @@ void sht31_test(void)
     printf("crc=0x%04x\r\n", crc_data); // 高8位=温度CRC,低8位=湿度CRC
 }
 
+
+void lcd_test(void)
+{
+        LCD_Dis_Pic(0,0,gImage_gif0);
+        Sys_delay_ms(5);
+        LCD_Dis_Pic(0,0,gImage_gif1);
+        Sys_delay_ms(5);
+        LCD_Dis_Pic(0,0,gImage_gif2);
+        Sys_delay_ms(5);
+}
