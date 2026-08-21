@@ -77,18 +77,28 @@ void RTC_Set_Date(uint8_t Year,uint8_t Month,uint8_t Date,uint8_t WeekDay)
 
 
 
+RTC_TimeTypeDef RTC_Time={0};
+RTC_DateTypeDef RTC_Date={0};
+
+uint8_t rtc_date[50]={0};
+uint8_t rtc_time[50]={0};
+
 void RTC_Show_Time(void)
 {
-	RTC_TimeTypeDef RTC_Time={0};
-	RTC_DateTypeDef RTC_Date={0};
+
     
     //指定返回参数格式为BIN还是BCD
 	RTC_GetTime(RTC_Format_BIN,&RTC_Time);
 	RTC_GetDate(RTC_Format_BIN,&RTC_Date);
-	
+    
+    sprintf((char*)rtc_date,"%2d年-%2d月-%2d日 星期%d",2000+RTC_Date.RTC_Year,RTC_Date.RTC_Month,RTC_Date.RTC_Date,RTC_Date.RTC_WeekDay);
+    sprintf((char*)rtc_time,"%02d:%02d:%02d",RTC_Time.RTC_Hours,RTC_Time.RTC_Minutes,RTC_Time.RTC_Seconds); 
+	//用%02d时为了固定显示宽度，防止位数变化时，末尾的区域刷新不到
     
 	printf("%d年-%d月-%d日 星期%d\t",2000+RTC_Date.RTC_Year,RTC_Date.RTC_Month,RTC_Date.RTC_Date,RTC_Date.RTC_WeekDay);
 	printf("%d:%d:%d\r\n",RTC_Time.RTC_Hours,RTC_Time.RTC_Minutes,RTC_Time.RTC_Seconds);
+    
+    
 }
 
 
@@ -263,7 +273,7 @@ void RTC_WKUP_IRQHandler (void)
         //退出 ISR 后，NVIC 立即再次触发中断（因为 EXTI 挂起位还在）
         
         
-//        RTC_Show_Time();
+        RTC_Show_Time();
         
     }
 }

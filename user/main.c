@@ -84,14 +84,21 @@ int main(void)
     uint8_t tem_dis[20]={0};
     uint8_t hu_dis[20]={0};
 
+
+    
     
     uint8_t arr[20]="hello你好";
 //    LCD_Roll_Dis(100,24,RED,WHITE,arr,1);//死循环
     while (1)    
     {
 
-     sht31_test();   
+     rtc_test();         
+    LCD_Font_Dis(50,30,16,RED,WHITE,rtc_date);
+    LCD_Font_Dis(100,100,24,RED,WHITE,rtc_time);
         
+        
+        
+    sht31_test();                 
     sprintf((char *)tem_dis, "温度：%.2f", tem_data);
     sprintf((char *)hu_dis,  "湿度：%.2f", hu_data);     
 
@@ -99,6 +106,6 @@ int main(void)
     LCD_Font_Dis(150,100,24,RED,WHITE,tem_dis);
     LCD_Font_Dis(200,100,24,RED,WHITE,hu_dis);  
 
-     Delay_Ms(1000);
+     
     }
 }

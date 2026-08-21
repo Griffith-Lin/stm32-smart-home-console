@@ -74,16 +74,16 @@ void mlx90614_test(void)
 
 void rtc_test(void)
 {
-//      RTC_Show_Time();
+//       RTC_Show_Time();//在唤醒时钟里面调用
 //		Delay_Ms(1000);
         
         
-        //是编译期宏，格式固定为 "Aug 11 2026"（月 日 年）
+        //__DATE__是编译期宏，格式固定为 "Aug 11 2026"（月 日 年）
 //		printf("%s\r\n",__DATE__);
-        const char *week[] = {"日", "一", "二", "三", "四", "五", "六"};
-        printf("编译日期: %s 星期%d\r\n", __DATE__, compile_date.weekday);
-		printf("%s\r\n",__TIME__);
-		Delay_Ms(1000);
+//        const char *week[] = {"日", "一", "二", "三", "四", "五", "六"};
+//        printf("编译日期: %s 星期%d\r\n", __DATE__, compile_date.weekday);
+//		printf("%s\r\n",__TIME__);
+//		Delay_Ms(1000);
 }
 
 void ws2812e_test(void)

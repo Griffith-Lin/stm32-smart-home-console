@@ -22,6 +22,13 @@ extern volatile struct COMPILE_time compile_time;
 extern volatile struct COMPILE_data compile_date;
 
 
+extern RTC_TimeTypeDef RTC_Time;
+extern RTC_DateTypeDef RTC_Date;
+
+extern uint8_t rtc_date[50];
+extern uint8_t rtc_time[50];
+
+
 void RTC_Cal_Config(void);
 void RTC_Set_Time(uint8_t H12,uint8_t Hours,uint8_t Minutes,uint8_t Seconds);
 void RTC_Set_Date(uint8_t Year,uint8_t Month,uint8_t Date,uint8_t WeekDay);
