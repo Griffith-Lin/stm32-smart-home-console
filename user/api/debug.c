@@ -102,7 +102,7 @@ void sht31_test(void)
     uint32_t data = 0;
 
     data = sht30_i2c_send(0x2c06); // 有时钟拉伸的高重复精度测量模式
-    //        data = sht30_i2c_send(0x2400);//无时钟拉伸的高重复精度测量模式
+    //data = sht30_i2c_send(0x2400);//无时钟拉伸的高重复精度测量模式
     get_tem_hu(data);
 
     printf("0x%x\r\n", data);
