@@ -131,17 +131,17 @@ uint8_t usart1_rev_byte(void)
 
 
 volatile uint8_t usart_flag=0;
-volatile uint8_t str_buf[100];
+volatile uint8_t str_buf[100];//用来接收串口数据
 
 void USART1_IRQHandler(void) 
 {
-    static uint16_t i=0;
-    if(USART_GetITStatus(USART1,USART_IT_RXNE))//接收中断
-    {
-        USART_ClearITPendingBit(USART1,USART_IT_RXNE);//清除标志位
-        str_buf[i++]=USART_ReceiveData(USART1);
-    }
-    
+//    static uint16_t i=0;
+//    if(USART_GetITStatus(USART1,USART_IT_RXNE))//接收中断
+//    {
+//        USART_ClearITPendingBit(USART1,USART_IT_RXNE);//清除标志位
+//        str_buf[i++]=USART_ReceiveData(USART1);
+//    }
+//    
     
     if(USART_GetITStatus(USART1,USART_IT_IDLE))//空闲中断
     {
@@ -150,8 +150,8 @@ void USART1_IRQHandler(void)
         temp=USART1->DR;
         (void)tmp;
         
-         str_buf[i]='\0';
-        i=0;
+//         str_buf[i]='\0';
+//        i=0;
         usart_flag=1;
     }
 }
