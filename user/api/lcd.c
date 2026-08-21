@@ -415,23 +415,104 @@ void LCD_Font_Dis_Font(uint16_t row, uint16_t col, uint8_t font_size, uint16_t f
 //中英文可混写
 void LCD_Font_Dis(uint16_t row, uint16_t col, uint8_t font_size, uint16_t font_color, uint16_t back_color, uint8_t *font)
 {
-    if(*font<161)
-    {
-    LCD_Font_Dis_Ascii(row,col,font_size,font_color,back_color,*font);       
+    while(*font!='\0')
+    {             
+        if(*font<161)
+        {
+        LCD_Font_Dis_Ascii(row,col,font_size,font_color,back_color,*font);   
+        col+=font_size/2;
+        font++;
+        }
+        else
+        {
+        LCD_Font_Dis_Font(row,col,font_size,font_color,back_color,font);
+        col+=font_size;
+        font+=2;
+        }
     }
-    else
-    {
-    LCD_Font_Dis_Font(row,col,font_size,font_color,back_color,font);
-    }
+    //判断最后一位是什么英文还是中文，将col还原成真实结尾
 }
 
 
+//void LCD_Font_roll(uint16_t row, uint16_t col, uint8_t font_size, uint16_t font_color, uint16_t back_color, uint8_t *font)
+//{
+//    uint16_t row_tmp=row;
+//    uint16_t col_tmp=col;
+//    
+//    LCD_Font_Dis(row_tmp,col_tmp,font_size,font_color,back_color,font);
+//    
+//}
 
 
 
 
 
 
+/*
+Function name:LCD_Dis_Str_Roll
+Description:字符串显示函数---支持滚屏显示的
+param:row,col--左上角坐标  font_size--字体大小  font_color--字体颜色  back_color--背景颜色  str--需要显示的字符串首地址
+retval:None
+Remarks:
+*/
+void LCD_Dis_Str_Roll(u16 row,u16 col,u8 font_size,u16 font_color,u16 back_color,u8 *str)
+{
+	u8 width=0;
+	width=font_size/2/8;
+	if(font_size/2%8)
+	{
+		width+=1;
+	}
+	while(*str!='\0')
+	{
+		if(*str>0xa0)//汉字
+		{
+//			if(col>240-font_size)
+//			{
+//				row+=font_size;
+//				col=0;
+//			}
+			LCD_Font_Dis_Font(row,col,font_size,font_color,back_color,str);
+			str+=2;
+			col+=font_size;
+		}
+		else//字符
+		{
+//			if(col>240-width*8)
+//			{
+//				row+=font_size;
+//				col=0;
+//			}
+			LCD_Font_Dis_Ascii(row,col,font_size,font_color,back_color,*str);
+			str+=1;
+			col+=width*8;
+		}
+	}
+}
+
+
+/*
+Function name:LCD_Roll_Dis
+Description:滚动显示---需要字库支持
+param:row--行  font_size--字体大小  font_color--字体颜色  back_color--背景颜色  str--需要显示的字符串首地址 speed--速度
+retval:None
+Remarks:
+*/
+void LCD_Roll_Dis(u16 row,u8 font_size,u16 font_color,u16 back_color,u8 *str,u8 speed)
+{
+	u16 col=240;
+	while(1)
+	{
+		LCD_Dis_Str_Roll(row,col,font_size,font_color,back_color,str);
+		if(col==0)
+		{
+			col=240;
+			LCD_Clear(row,row+font_size,0,240,back_color);
+		}
+		col--;
+		Delay_Ms(speed);
+	}
+}
 
 
 
