@@ -121,3 +121,25 @@ void lcd_test(void)
         LCD_Dis_Pic(0,0,gImage_gif2);
         Sys_delay_ms(5);
 }
+
+
+
+uint8_t tem_dis[20]={0};
+uint8_t hu_dis[20]={0};
+
+void lcd_test2(void)
+{
+     rtc_test();         
+    LCD_Font_Dis(50,30,16,RED,WHITE,rtc_date);
+    LCD_Font_Dis(100,100,24,RED,WHITE,rtc_time);
+        
+        
+        
+    sht31_test();                 
+    sprintf((char *)tem_dis, "ÎÂ¶È£º%.2f", tem_data);
+    sprintf((char *)hu_dis,  "Êª¶È£º%.2f", hu_data);     
+
+        
+    LCD_Font_Dis(150,100,24,RED,WHITE,tem_dis);
+    LCD_Font_Dis(200,100,24,RED,WHITE,hu_dis);  
+}

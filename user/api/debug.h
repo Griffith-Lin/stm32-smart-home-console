@@ -7,6 +7,9 @@
 #include <stdint.h> 
 
 
+extern uint8_t tem_dis[20];
+extern uint8_t hu_dis[20];
+
 extern uint8_t tmp;
 extern uint8_t gl5506_flag;
 
