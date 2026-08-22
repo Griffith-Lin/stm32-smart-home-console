@@ -95,8 +95,8 @@ void RTC_Show_Time(void)
     sprintf((char*)rtc_time,"%02d:%02d:%02d",RTC_Time.RTC_Hours,RTC_Time.RTC_Minutes,RTC_Time.RTC_Seconds); 
 	//用%02d时为了固定显示宽度，防止位数变化时，末尾的区域刷新不到
     
-	printf("%d年-%d月-%d日 星期%d\t",2000+RTC_Date.RTC_Year,RTC_Date.RTC_Month,RTC_Date.RTC_Date,RTC_Date.RTC_WeekDay);
-	printf("%d:%d:%d\r\n",RTC_Time.RTC_Hours,RTC_Time.RTC_Minutes,RTC_Time.RTC_Seconds);
+//	printf("%d年-%d月-%d日 星期%d\t",2000+RTC_Date.RTC_Year,RTC_Date.RTC_Month,RTC_Date.RTC_Date,RTC_Date.RTC_WeekDay);
+//	printf("%d:%d:%d\r\n",RTC_Time.RTC_Hours,RTC_Time.RTC_Minutes,RTC_Time.RTC_Seconds);
     
     
 }

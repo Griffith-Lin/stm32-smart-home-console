@@ -160,7 +160,7 @@ void spi1_sd_Init(void)
     
         
 	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;	//二分频
-	SPI_InitStruct.SPI_CPHA = SPI_CPHA_2Edge;						//第二个时钟边沿采样
+	SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;						//第一个时钟边沿（高边沿）采样
 //	SPI_InitStruct.SPI_CPOL = SPI_CPOL_High;						//时钟空闲为高
     SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;						//时钟空闲为低 
 	SPI_InitStruct.SPI_CRCPolynomial = 0x7;							//CRC多项式
