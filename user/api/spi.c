@@ -18,7 +18,7 @@
 //*/
 
 ////结合从机SPI的主机代码流程分析:
-//void spi_ini(void)
+//void spi1_w25_ini(void)
 //{
 //    //打开时钟（SPI1 PA PB）
 //    RCC->APB2ENR |=(1<<12);//使能spi1时钟
@@ -70,7 +70,7 @@ pa6 SPI1_MISO
 pa7 SPI1_MOSI
 
 */
-void spi_ini(void)
+void spi1_w25_ini(void)
 {
     
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);
@@ -135,6 +135,41 @@ uint8_t SPI_Echo(uint8_t data)
 
 
 
+
+
+//pa4 sd_cs   pa5 spi1_sck   pa6 spi1_miso   pa7 spi1_mosi
+void spi1_sd_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure = {0};
+	SPI_InitTypeDef SPI_InitStruct		= {0};
+	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);	//开外设时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,  ENABLE);
+	
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_SPI1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource6, GPIO_AF_SPI1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_SPI1);
+	
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;		//复用模式
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;		//推挽输出
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	//50MHz
+	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;	//浮空
+	GPIO_Init(GPIOA, &GPIO_InitStructure);				//初始化
+
+	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;	//二分频
+	SPI_InitStruct.SPI_CPHA = SPI_CPHA_2Edge;						//第二个时钟边沿采样
+	SPI_InitStruct.SPI_CPOL = SPI_CPOL_High;						//时钟空闲为高
+	SPI_InitStruct.SPI_CRCPolynomial = 0x7;							//CRC多项式
+	SPI_InitStruct.SPI_DataSize  = SPI_DataSize_8b;					//八位数据帧格式
+	SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;	//双线双向全双工
+	SPI_InitStruct.SPI_FirstBit  = SPI_FirstBit_MSB;				//高位先发
+	SPI_InitStruct.SPI_Mode = SPI_Mode_Master;						//主模式
+	SPI_InitStruct.SPI_NSS  = SPI_NSS_Soft;							//软件管理
+	SPI_Init(SPI1, &SPI_InitStruct);
+	
+	SPI_Cmd(SPI1, ENABLE);											//使能外设
+}
 
 
 
