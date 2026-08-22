@@ -137,7 +137,8 @@ uint8_t SPI_Echo(uint8_t data)
 
 
 
-//pa4 sd_cs   pa5 spi1_sck   pa6 spi1_miso   pa7 spi1_mosi
+//pa4 sd_cs   pa5 spi1_sck   pa6 spi1_miso   pa7 spi1_mosi   
+//sp0
 void spi1_sd_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure = {0};
@@ -156,16 +157,18 @@ void spi1_sd_Init(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	//50MHz
 	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;	//浮空
 	GPIO_Init(GPIOA, &GPIO_InitStructure);				//初始化
-
+    
+        
 	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;	//二分频
 	SPI_InitStruct.SPI_CPHA = SPI_CPHA_2Edge;						//第二个时钟边沿采样
-	SPI_InitStruct.SPI_CPOL = SPI_CPOL_High;						//时钟空闲为高
+//	SPI_InitStruct.SPI_CPOL = SPI_CPOL_High;						//时钟空闲为高
+    SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;						//时钟空闲为低 
 	SPI_InitStruct.SPI_CRCPolynomial = 0x7;							//CRC多项式
 	SPI_InitStruct.SPI_DataSize  = SPI_DataSize_8b;					//八位数据帧格式
 	SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;	//双线双向全双工
 	SPI_InitStruct.SPI_FirstBit  = SPI_FirstBit_MSB;				//高位先发
 	SPI_InitStruct.SPI_Mode = SPI_Mode_Master;						//主模式
-	SPI_InitStruct.SPI_NSS  = SPI_NSS_Soft;							//软件管理
+	SPI_InitStruct.SPI_NSS  = SPI_NSS_Soft;							//软件管理片选线
 	SPI_Init(SPI1, &SPI_InitStruct);
 	
 	SPI_Cmd(SPI1, ENABLE);											//使能外设
