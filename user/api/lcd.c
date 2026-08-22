@@ -417,7 +417,7 @@ void LCD_Font_Dis(uint16_t row, uint16_t col, uint8_t font_size, uint16_t font_c
 {
     while(*font!='\0')
     {             
-        if(*font<161)
+        if(*font<0xa1)//gb2312的最小区
         {
         LCD_Font_Dis_Ascii(row,col,font_size,font_color,back_color,*font);   
         col+=font_size/2;
