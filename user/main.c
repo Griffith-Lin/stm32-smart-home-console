@@ -81,10 +81,12 @@ int main(void)
 //    SD_WaitReady();SD_Initialize()中已有等待帧
     SD_Initialize();
     
+    ff_test();
+    
     while (1)    
     {
            
-
+        
     }
     
     

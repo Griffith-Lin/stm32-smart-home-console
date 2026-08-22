@@ -159,3 +159,49 @@ void sd_test(void)
     Delay_Ms(1000);
 }
 
+
+
+/* ================= FatFs 简易测试 ================= */
+/* 流程:挂载 -> 创建写 -> 关闭 -> 重开读 -> 打印 -> 关闭 */
+
+FATFS fs;      /* 文件系统对象(约 560B) */
+FIL   fil;     /* 文件对象(约 544B)    */
+/* 这两个加起来超过 Keil 默认 1KB 栈,必须放全局或 static,不能放函数栈上 */
+
+void ff_test(void)
+{
+    FRESULT fr;
+    UINT    bw, br;
+    char    rbuf[64];
+    char    wbuf[] = "hello FatFs!\r\n";
+
+    /* 1. 挂载:把 SD 卡绑定为逻辑盘 "0:",opt=1 表示立即挂载
+          首次挂载时 FatFs 会自动调用 disk_initialize -> SD_Initialize */
+    fr = f_mount(&fs, "0:", 1);
+    printf("f_mount : %d\r\n", fr);       /* 0=FR_OK; 13=卡没格式化成FAT */
+
+    /* 2. 打开文件:FA_CREATE_ALWAYS = 不存在就创建,存在就清空重写 */
+    fr = f_open(&fil, "0:/hello.txt", FA_CREATE_ALWAYS | FA_WRITE);
+    printf("f_open W: %d\r\n", fr);
+
+    /* 3. 写文件,sizeof-1 是不把结尾 \0 写进去 */
+    fr = f_write(&fil, wbuf, sizeof(wbuf)-1, &bw);
+    printf("f_write : %d, wrote=%d\r\n", fr, bw);
+
+    /* 4. 关闭:必须调,不然 FAT 表和数据还停在内部缓冲,没真正落盘 */
+    fr = f_close(&fil);
+    printf("f_close : %d\r\n", fr);
+
+    /* 5. 重新打开读 */
+    fr = f_open(&fil, "0:/hello.txt", FA_READ);
+    printf("f_open R: %d\r\n", fr);
+
+    /* 6. 读文件 */
+    fr = f_read(&fil, rbuf, sizeof(rbuf)-1, &br);
+    rbuf[br] = '\0';                     /* f_read 不补 \0,手动补再打印 */
+    printf("f_read  : %d, read=%d -> %s", fr, br, rbuf);
+
+    /* 7. 关闭 */
+    f_close(&fil);
+}
+
