@@ -78,7 +78,7 @@ int main(void)
     uint8_t arr[20]="hello你好";
 //    LCD_Roll_Dis(100,24,RED,WHITE,arr,1);//死循环
 
-//    SD_WaitReady();//SD_Initialize()中已有等待帧
+//    SD_WaitReady();SD_Initialize()中已有等待帧
     SD_Initialize();
     
     while (1)    

@@ -143,3 +143,19 @@ void lcd_test2(void)
     LCD_Font_Dis(150,100,24,RED,WHITE,tem_dis);
     LCD_Font_Dis(200,100,24,RED,WHITE,hu_dis);  
 }
+
+uint8_t sd_buff[20];
+
+void sd_test(void)
+{
+    uint8_t ret = SD_GetCID(sd_buff);
+    printf("ret=%d  ", ret);        // 0=成功, 1=失败
+    //for(int i=0;i<16;i++) printf("%x",sd_buff[i]);
+    //printf("\r\n");
+    //为什么输出的是 1b534d554420202010d160ba6808627，总共31位   
+    //因为这串 31 个字符其实是， 1b 53 4d 55 44 20 20 20 10 d1 60 ba 68 0 86 27 ，中间有个0只显示了一位，改成定宽补零 + 空格就清楚了:
+    for(int i=0;i<16;i++) printf("%02x ", sd_buff[i]);
+    printf("\r\n");
+    Delay_Ms(1000);
+}
+

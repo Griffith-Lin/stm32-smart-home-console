@@ -7,6 +7,8 @@
 #include <stdint.h> 
 
 
+extern uint8_t sd_buff[20];
+
 extern uint8_t tem_dis[20];
 extern uint8_t hu_dis[20];
 

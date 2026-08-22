@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\user;..\user\api;..\startup;..\lib\inc</IncludePath>
+              <IncludePath>..\user;..\user\api;..\startup;..\lib\inc;..\user\ff14b\source</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
