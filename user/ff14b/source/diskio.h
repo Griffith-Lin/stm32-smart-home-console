@@ -2,12 +2,18 @@
 /  Low level disk interface modlue include file   (C)ChaN, 2019          /
 /-----------------------------------------------------------------------*/
 
+#include "ff.h"
+
 #ifndef _DISKIO_DEFINED
 #define _DISKIO_DEFINED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern RTC_DateStruct RTC_DateStruct;
+extern RTC_TimeStruct RTC_TimeStruct;
+
 
 /* Status of Disk Functions */
 typedef BYTE	DSTATUS;

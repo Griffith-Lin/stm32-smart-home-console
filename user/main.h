@@ -25,7 +25,8 @@
 #include "sys.h"
 #include "dma.h"
 #include "sd_driver.h"
-
+#include "diskio.h"
+#include "ff.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t
