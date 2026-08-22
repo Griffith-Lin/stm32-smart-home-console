@@ -23,7 +23,7 @@
 //#include "ff.h"			/* Declarations of FatFs API */ 在diskio.h中添加
 #include "diskio.h"		/* Declarations of device I/O functions */
 
-#define  DEV_SD  0 //定义SD卡的物理驱动器号为0
+
 
 
 /*--------------------------------------------------------------------------

@@ -26,26 +26,15 @@ DWORD get_fattime (void)
 	RTC_GetTimeDate();
 	date =
 	( (
-	(RTC_DateStruct.RTC_Year+20) << 25) |
-	(RTC_DateStruct.RTC_Month << 21 ) |
-	(RTC_DateStruct.RTC_Date << 16 ) |
-	(RTC_TimeStruct.RTC_Hours << 11 ) |
-	(RTC_TimeStruct.RTC_Minutes << 5 ) |
-	(RTC_TimeStruct.RTC_Seconds )
+	(RTC_Date.RTC_Year+20) << 25) |
+	(RTC_Date.RTC_Month << 21 ) |
+	(RTC_Date.RTC_Date << 16 ) |
+	(RTC_Time.RTC_Hours << 11 ) |
+	(RTC_Time.RTC_Minutes << 5 ) |
+	(RTC_Time.RTC_Seconds )
 	);
 	return date;
 }
-//其中RTC_GetTimeDate()函数如下、在RTC中书写即可
-RTC_DateTypeDef RTC_DateStruct;
-RTC_TimeTypeDef RTC_TimeStruct;
-void RTC_GetTimeDate(void)
-{
-	RTC_GetTime(RTC_Format_BIN, &RTC_TimeStruct);
-	RTC_GetDate(RTC_Format_BIN, &RTC_DateStruct);
-}
-
-
-
 
 
 

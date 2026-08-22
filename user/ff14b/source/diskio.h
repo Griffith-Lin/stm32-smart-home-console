@@ -2,7 +2,10 @@
 /  Low level disk interface modlue include file   (C)ChaN, 2019          /
 /-----------------------------------------------------------------------*/
 
+#include "sd_driver.h"
 #include "ff.h"
+
+#define  DEV_SD  0 //定义SD卡的物理驱动器号为0
 
 #ifndef _DISKIO_DEFINED
 #define _DISKIO_DEFINED
@@ -11,8 +14,6 @@
 extern "C" {
 #endif
 
-extern RTC_DateStruct RTC_DateStruct;
-extern RTC_TimeStruct RTC_TimeStruct;
 
 
 /* Status of Disk Functions */
