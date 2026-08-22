@@ -519,19 +519,9 @@
               <FilePath>..\user\api\lcd.c</FilePath>
             </File>
             <File>
-              <FileName>lcd.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\lcd.h</FilePath>
-            </File>
-            <File>
               <FileName>font.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\font.c</FilePath>
-            </File>
-            <File>
-              <FileName>font.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\font.h</FilePath>
             </File>
             <File>
               <FileName>tc_iic.c</FileName>
@@ -539,19 +529,9 @@
               <FilePath>..\user\api\tc_iic.c</FilePath>
             </File>
             <File>
-              <FileName>tc_iic.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\tc_iic.h</FilePath>
-            </File>
-            <File>
               <FileName>sys.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\sys.c</FilePath>
-            </File>
-            <File>
-              <FileName>sys.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\user\api\sys.h</FilePath>
             </File>
             <File>
               <FileName>dma.c</FileName>
@@ -562,6 +542,16 @@
               <FileName>dma.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\user\api\dma.h</FilePath>
+            </File>
+            <File>
+              <FileName>sd_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\sd_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>sd_driver.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\sd_driver.h</FilePath>
             </File>
           </Files>
         </Group>
