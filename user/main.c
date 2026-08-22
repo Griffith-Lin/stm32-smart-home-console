@@ -49,7 +49,7 @@ int main(void)
     adc_ini();
     adc_GL5506_ini(); // ¹âÃôµç×è
 
-    spi_ini();
+    spi1_w25_ini();
 
     i2c_master_ini();
 
