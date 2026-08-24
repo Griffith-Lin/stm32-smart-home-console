@@ -64,7 +64,7 @@ int main(void)
     alarm_ini(RTC_H12_PM, 0, 0, 30, 3); // 闹钟初始化
     rtc_wakeup_ini();                   // 唤醒初始化
 
-    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
+//    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
 
     irm_3638T_ini(168, 30000);
 
@@ -95,15 +95,17 @@ int main(void)
 	I2S2_TX_DMA_Init(NULL, NULL, WAV_I2S_TX_DMA_BUFSIZE/2); 				//配置TX DMA
 	status_dev.volume = 50;	//初始保存音量 0~63
 	WM8978_SPKvol_Set(status_dev.volume);
-     
     
+    key_scan_tim_ini();
     
     Audio_MusicPlay();//循环播放 按键切换歌曲
 
 	while(1)
 	{
 //    lcd_test2();
+        printf("111\r\n");
         
+      TIM6_delay(500);
         
 //		Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");//单曲播放
 	}

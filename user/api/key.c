@@ -13,6 +13,10 @@
 //	GPIOB->PUPDR &=~(0xf<<0);//无上下拉
 //}
 
+volatile Key_t keys[3]={0};
+//声明为keys[10]报了好多错。   L6407E = 链接器在 RAM 区找不到能放下这些 section 的地方。"报了好多错"是正常的：Keil 对每个放不下的 section 各报一条 L6407E，0x54（84 字节）是这些 section 的总和——看着吓人，其实是同一个根因：RAM 不够了
+//修复：把内存池砍到够用的尺寸（一行改动）mymalloc.h:20：#define MEM1_MAX_SIZE   100*1024    // 改前   #define MEM1_MAX_SIZE   60*1024     // 改后
+
 void key_ini(void)
 {
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
@@ -30,6 +34,13 @@ void key_ini(void)
     
     gpio_InitTypeDef.GPIO_Pin=GPIO_Pin_1;
     GPIO_Init(GPIOB,&gpio_InitTypeDef);
+    
+    
+    
+    keys[1].port = GPIOB;
+    keys[1].pin  = GPIO_Pin_1;
+    keys[1].state       = KEY_STATE_IDLE;
+    keys[1].event_flag  = KEY_EVENT_NONE;
 }
 
 
@@ -164,7 +175,7 @@ void EXTI0_IRQHandler(void)
             status_dev.PlayState=PLAY_STOP;
         
         
-        
+//        beep_one();
     
     
     }
@@ -172,3 +183,112 @@ void EXTI0_IRQHandler(void)
 
 
 
+
+
+
+void key_scan_tim_ini(void)   // main 里调用
+{
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM10, ENABLE);
+
+    TIM_TimeBaseInitTypeDef t = {0};
+    t.TIM_Prescaler         = 840 - 1;    // 84MHz/840 = 100kHz
+    t.TIM_Period            = 1000 - 1;   // 1000 tick → 10ms 中断
+    t.TIM_CounterMode       = TIM_CounterMode_Up;
+    t.TIM_ClockDivision     = TIM_CKD_DIV1;
+    TIM_TimeBaseInit(TIM10, &t);
+
+    TIM_ITConfig(TIM10, TIM_IT_Update, ENABLE);
+
+    NVIC_InitTypeDef n = {0};
+    n.NVIC_IRQChannel                   = TIM1_UP_TIM10_IRQn;
+    n.NVIC_IRQChannelPreemptionPriority = 2;   // 高于 EXTI0(3),低于播放DMA,扫描不丢
+    n.NVIC_IRQChannelSubPriority        = 0;
+    n.NVIC_IRQChannelCmd                = ENABLE;
+    NVIC_Init(&n);
+
+    TIM_Cmd(TIM10, ENABLE);
+}
+
+
+
+
+void ProcessKey(Key_t* key)
+{
+    uint8_t level = GPIO_ReadInputDataBit(key->port, key->pin);
+
+    switch(key->state)
+    {
+    case KEY_STATE_IDLE:
+        if(level == 0) {
+            key->state = KEY_STATE_DEBOUNCE;
+            key->debounce_count = 0;
+        }
+        break;
+
+    case KEY_STATE_DEBOUNCE:        // 按下消抖
+        if(level == 0) {
+            if(++key->debounce_count >= 3) {        // 30ms 连续低
+                key->state = KEY_STATE_PRESSED;
+                key->press_start_time = GetTim6Tick();
+                key->event_flag = KEY_EVENT_PRESS;
+            }
+        } else {
+            key->state = KEY_STATE_IDLE;            // 抖动,作废
+            key->debounce_count = 0;
+        }
+        break;
+
+    case KEY_STATE_PRESSED:         // 已确认按下,检测释放
+        if(level == 1) {
+            key->debounce_count = 0;
+            key->state = KEY_STATE_RELEASE;         // 先进释放消抖,别直接判事件
+        }
+        break;
+
+    case KEY_STATE_RELEASE:         // 释放消抖:连续3次为高才确认释放
+        if(level == 1) {
+            if(++key->debounce_count >= 3) {
+                uint32_t duration = GetTim6Tick() - key->press_start_time;
+                key->event_flag = (duration > LONG_PRESS_THRESHOLD)
+                                ? KEY_EVENT_LONG_PRESS : KEY_EVENT_SHORT_PRESS;
+                key->state = KEY_STATE_IDLE;
+            }
+        } else {
+            key->state = KEY_STATE_PRESSED;         // 又按回去了
+            key->debounce_count = 0;
+        }
+        break;
+    }
+}
+
+
+
+void TIM1_UP_TIM10_IRQHandler(void)
+{
+    if(TIM_GetITStatus(TIM10, TIM_IT_Update) != RESET) {
+        TIM_ClearITPendingBit(TIM10, TIM_IT_Update);
+        ProcessKey(&keys[1]);       // 只扫 PB1;keys[0] 别放 PA0(已被EXTI0占用)
+    }
+    
+    if(keys[1].event_flag == KEY_EVENT_SHORT_PRESS) {
+    keys[1].event_flag = KEY_EVENT_NONE;
+    status_dev.PlayState = PLAY_NEXT;           // 短按:下一首
+    }
+    
+    if(keys[1].event_flag == KEY_EVENT_LONG_PRESS) {
+    keys[1].event_flag = KEY_EVENT_NONE;        // 消费事件
+        
+     if(audiodev.status & 0X01)          // 正在播放 → 发暂停命令
+        status_dev.PlayState = PLAY_PAUSE;
+    else                                // 已暂停 → 发继续命令
+        status_dev.PlayState = PLAY_PLAY;
+    }
+
+}
+
+
+/*
+
+
+
+*/

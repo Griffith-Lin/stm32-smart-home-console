@@ -16,6 +16,14 @@ void beep_ini(void)
     
     GPIO_Init(GPIOD,&gpio_InitTypeDef);
     
+       
 }
 
+
+void beep_one(void)
+{
+    BEEP_ON();
+    Delay_Ms(30);
+    BEEP_OFF();
+}
 
