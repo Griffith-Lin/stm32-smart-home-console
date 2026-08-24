@@ -161,6 +161,26 @@ void sd_test(void)
 
 
 
+/*
+常见返回码(每步都打出来,哪步失败一目了然)
+返回值	含义	常见原因
+0	FR_OK 成功	—
+1	FR_DISK_ERR 底层读写错	SPI 问题、卡坏
+3	FR_NOT_READY 磁盘没就绪	没插卡、SD_Initialize 失败
+4	FR_NO_FILE	文件不存在
+8	FR_EXIST	文件已存在(FA_CREATE_NEW 时)
+13	FR_NO_FILESYSTEM	卡不是 FAT 格式
+跑之前确认:卡在电脑上格式化成 FAT32(你 ffconf.h:234 里 FF_FS_EXFAT 0,不支持 exFAT——大容量卡 Windows 默认格成 exFAT,就会报 13)。跑完后把卡插回电脑,应该能看到 hello.txt,内容是 hello FatFs!。
+
+检查你 diskio.c 时发现的两个隐患
+disk_write 的无限重试:while(res != 0) 死循环重试,卡一旦写失败(写保护/坏卡)MCU 就永远卡死在这。建议改成计数重试,比如重试 3 次后返回错误。
+GET_SECTOR_COUNT 写死了 1989632(≈1GB)。你已经有 SD_GetSectorCount()(从 CSD 读真实容量),建议换成它,否则卡容量大于 1GB 时 f_getfree 之类算空间会错。
+两个使用提示
+你的 FF_USE_STRFUNC 0,所以 f_puts/f_printf 没编译进去——测试里我用 f_write/f_read。以后想用字符串函数,把它改成 1 就行。
+用了 f_mount 之后,main.c:81-82 的 SD_WaitReady()/SD_Initialize() 就多余了(f_mount 内部会自动初始化磁盘),留着无害,但可以删掉。
+跑通这个之后,下一步可以试 f_opendir/f_readdir 列目录、f_unlink 删文件、f_lseek 随机读写——底层用法都是同一套"检查 FRESULT"模式。
+*/
+
 /* ================= FatFs 简易测试 ================= */
 /* 流程:挂载 -> 创建写 -> 关闭 -> 重开读 -> 打印 -> 关闭 */
 
@@ -185,7 +205,7 @@ void ff_test(void)
     printf("f_open W: %d\r\n", fr);
 
     /* 3. 写文件,sizeof-1 是不把结尾 \0 写进去 */
-    fr = f_write(&fil, wbuf, sizeof(wbuf)-1, &bw);
+    fr = f_write(&fil, wbuf, sizeof(wbuf)-1, &bw);//要1是因为文件结束符是EOF，而不是'\0'
     printf("f_write : %d, wrote=%d\r\n", fr, bw);
 
     /* 4. 关闭:必须调,不然 FAT 表和数据还停在内部缓冲,没真正落盘 */
