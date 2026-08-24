@@ -62,7 +62,7 @@ void Exti_key_ini(void)
     //该EXTI线配置为事件模式，触发后产生脉冲信号，可唤醒CPU但不进ISR，常用于触发ADC/DMA等外设
     exti_InitTypeDef.EXTI_Mode=EXTI_Mode_Interrupt;
     exti_InitTypeDef.EXTI_Line=EXTI_Line0;
-    exti_InitTypeDef.EXTI_Trigger=EXTI_Trigger_Rising_Falling;
+    exti_InitTypeDef.EXTI_Trigger=EXTI_Trigger_Rising;
     exti_InitTypeDef.EXTI_LineCmd=ENABLE;
     
     EXTI_Init(&exti_InitTypeDef);
@@ -125,6 +125,7 @@ volatile uint32_t motor_ccr=0;
 
 void EXTI0_IRQHandler(void)
 {
+    
     if(EXTI_GetITStatus(EXTI_Line0)==SET)
     {
         EXTI_ClearITPendingBit(EXTI_Line0);
@@ -149,14 +150,23 @@ void EXTI0_IRQHandler(void)
         
         
         
-        green+=50;
-        red+=50;
-        blue+=50;
+//        green+=50;
+//        red+=50;
+//        blue+=50;
         
         
 //        Delay_Ms(300);//消抖阻塞整个系统：延时期间CPU被锁死在中断里，所有其他中断（包括更高优先级的SysTick、UART、DMA）都无法响应。智能家居设备可能因此丢失传感器数据、通信超时、看门狗复位。
 //          抖动并未真正消除：机械按键抖动持续5-20ms。你在ISR入口延时300ms后退出，此时按键可能仍在抖动，下一次电平变化又会触发新的中断，导致多次进入ISR，green/red/blue 被累加多次——消抖完全失效。
 //          违反中断设计原则：ISR应“快进快出”，只做最少必要工作（读状态、清标志、设标志位），耗时操作必须移到主循环。
+    
+    
+        if(status_dev.PlayState == PLAY_CLEAR)      // 防抖：上次命令没被消费完，不重复置位
+            status_dev.PlayState=PLAY_STOP;
+        
+        
+        
+    
+    
     }
 }
 

@@ -3,6 +3,9 @@
 
 #include "stm32f4xx.h"
 #include "stdio.h" //ø…“‘”√printf
+
+#include "wavplay.h"
+
 #include <stddef.h>
 
 void TIM6_delay(uint32_t ms);

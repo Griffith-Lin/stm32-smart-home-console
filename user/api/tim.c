@@ -267,6 +267,11 @@ void TIM3_IRQHandler(void)
             if(Tsum>50)
             printf("按下时长为%dms\r\n",Tsum);
             
+            if(Tsum>1000)
+            {
+                status_dev.PlayState=PLAY_NEXT;
+            }
+            
             tim3_begin=0;
             tim3_count=0;
             Tsum=0;

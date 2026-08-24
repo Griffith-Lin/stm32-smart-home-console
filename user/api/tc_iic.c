@@ -339,5 +339,9 @@ void EXTI1_IRQHandler(void)
             }
             Motor_Control(motor_speed);
         }
+        
+        
+        
+        
     }
 }

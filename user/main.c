@@ -43,8 +43,8 @@ int main(void)
     sg90_PWM(84, 20000);
     beep_ini();
 
-    motor_pwm_ini(84, 1000);
-    mortor_minspeed_open();
+//    motor_pwm_ini(84, 1000);
+//    mortor_minspeed_open();
 
     adc_ini();
     adc_GL5506_ini(); // 光敏电阻
@@ -64,7 +64,7 @@ int main(void)
     alarm_ini(RTC_H12_PM, 0, 0, 30, 3); // 闹钟初始化
     rtc_wakeup_ini();                   // 唤醒初始化
 
-//    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
+    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
 
     irm_3638T_ini(168, 30000);
 
@@ -93,12 +93,14 @@ int main(void)
 	I2S2_Init(I2S_Standard_Phillips, I2S_Mode_MasterTx, I2S_CPOL_Low, I2S_DataFormat_16bextended);	//飞利浦标准,主机发送,时钟低电平有效,16位扩展帧长度
 	I2S2_SampleRate_Set(44100);	//设置采样率
 	I2S2_TX_DMA_Init(NULL, NULL, WAV_I2S_TX_DMA_BUFSIZE/2); 				//配置TX DMA
-	status_dev.volume = 63;	//初始保存音量 0~63
+	status_dev.volume = 50;	//初始保存音量 0~63
 	WM8978_SPKvol_Set(status_dev.volume);
+    
+    Audio_MusicPlay();//循环播放 按键切换歌曲
 
 	while(1)
 	{
-//		Audio_MusicPlay();//循环播放 按键切换歌曲
+    
 //		Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");//单曲播放
 	}
     
