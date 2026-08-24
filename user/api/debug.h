@@ -27,4 +27,5 @@ void mlx90614_test(void);
 void ws2812e_test(void);
 void sht31_test(void);
 void ff_test(void);
+void lcd_test2(void);
 #endif

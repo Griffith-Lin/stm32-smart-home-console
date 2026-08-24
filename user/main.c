@@ -95,8 +95,10 @@ int main(void)
 	I2S2_TX_DMA_Init(NULL, NULL, WAV_I2S_TX_DMA_BUFSIZE/2); 				//配置TX DMA
 	status_dev.volume = 50;	//初始保存音量 0~63
 	WM8978_SPKvol_Set(status_dev.volume);
+     
+    lcd_test2();
     
-    Audio_MusicPlay();//循环播放 按键切换歌曲
+//    Audio_MusicPlay();//循环播放 按键切换歌曲
 
 	while(1)
 	{

@@ -119,6 +119,8 @@ void Audio_MusicPlay(void)
 	unsigned short totwavnum 	= 0; 		//音乐文件总数
 	unsigned short curindex 	= 0;		//图片当前索引
  	unsigned short temp 		= 0;
+    
+    char music_name[200]={0};
 	
  	while(f_opendir(&wavdir, "0:/MUSIC"))	//打开音乐文件夹
  	{	    
@@ -170,6 +172,8 @@ void Audio_MusicPlay(void)
 		strcpy((char*)pname, "0:/MUSIC/");					//复制路径(目录)
 		strcat((char*)pname, (const char*)fn);  			//将文件名接在后面
 		printf("%s\r\n", fn);								//显示歌曲名字 
+        sprintf(music_name,"%s",fn);       
+        LCD_Font_Dis(30,0,16,RED,WHITE,(uint8_t*)music_name);
 		Audio_IndexShow(fn, curindex+1, totwavnum);	//显示歌曲名称、总曲数、当前曲数
 		key = Audio_PlaySong(pname); 			 			//播放这个音频文件
 		if(key == 1)				//上一曲

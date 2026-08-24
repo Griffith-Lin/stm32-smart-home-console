@@ -13,6 +13,7 @@
 #include "lcd.h"
 #include "revert.h"
 #include "ff.h"
+#include "lcd.h"
 
 //ÒôÀÖ²¥·Å¿ØÖÆÆ÷
 typedef __packed struct
