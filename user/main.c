@@ -49,7 +49,7 @@ int main(void)
     adc_ini();
     adc_GL5506_ini(); // 光敏电阻
 
-//    spi1_w25_ini();
+    spi1_w25_ini();
     spi1_sd_Init();
 
     i2c_master_ini();
@@ -98,11 +98,11 @@ int main(void)
      
     
     
-//    Audio_MusicPlay();//循环播放 按键切换歌曲
+    Audio_MusicPlay();//循环播放 按键切换歌曲
 
 	while(1)
 	{
-    lcd_test2();
+//    lcd_test2();
         
         
 //		Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");//单曲播放
