@@ -96,13 +96,15 @@ int main(void)
 	status_dev.volume = 50;	//初始保存音量 0~63
 	WM8978_SPKvol_Set(status_dev.volume);
      
-    lcd_test2();
+    
     
 //    Audio_MusicPlay();//循环播放 按键切换歌曲
 
 	while(1)
 	{
-    
+    lcd_test2();
+        
+        
 //		Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");//单曲播放
 	}
     
