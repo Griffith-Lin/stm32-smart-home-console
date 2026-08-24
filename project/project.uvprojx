@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\user;..\user\api;..\startup;..\lib\inc;..\user\ff14b\source</IncludePath>
+              <IncludePath>..\user;..\user\api;..\startup;..\lib\inc;..\user\ff14b\source;..\user\ASR_MIC</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -797,6 +797,51 @@
               <FileName>ffunicode.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\ff14b\source\ffunicode.c</FilePath>
+            </File>
+            <File>
+              <FileName>exfuns.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\ff14b\source\exfuns.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>asr_mimc</GroupName>
+          <Files>
+            <File>
+              <FileName>audioplay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\ASR_MIC\audioplay.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2s.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\ASR_MIC\i2s.c</FilePath>
+            </File>
+            <File>
+              <FileName>mymalloc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\ASR_MIC\mymalloc.c</FilePath>
+            </File>
+            <File>
+              <FileName>revert.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\ASR_MIC\revert.c</FilePath>
+            </File>
+            <File>
+              <FileName>wavplay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\ASR_MIC\wavplay.c</FilePath>
+            </File>
+            <File>
+              <FileName>wm8978.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\ASR_MIC\wm8978.c</FilePath>
+            </File>
+            <File>
+              <FileName>wmiic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\ASR_MIC\wmiic.c</FilePath>
             </File>
           </Files>
         </Group>

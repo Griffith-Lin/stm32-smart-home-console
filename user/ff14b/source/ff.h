@@ -296,7 +296,10 @@ typedef enum {
 	FR_INVALID_PARAMETER	/* (19) Given parameter is invalid */
 } FRESULT;
 
-
+FRESULT dir_sdi (	/* FR_OK(0):succeeded, !=0:error */
+	DIR* dp,		/* Pointer to directory object */
+	DWORD ofs		/* Offset of directory table */
+);
 
 /*--------------------------------------------------------------*/
 /* FatFs module application interface                           */

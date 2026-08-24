@@ -184,7 +184,7 @@ GET_SECTOR_COUNT 写死了 1989632(≈1GB)。你已经有 SD_GetSectorCount()(从 CSD 读真
 /* ================= FatFs 简易测试 ================= */
 /* 流程:挂载 -> 创建写 -> 关闭 -> 重开读 -> 打印 -> 关闭 */
 
-FATFS fs;      /* 文件系统对象(约 560B) */
+FATFS fs1;      /* 文件系统对象(约 560B) */
 FIL   fil;     /* 文件对象(约 544B)    */
 /* 这两个加起来超过 Keil 默认 1KB 栈,必须放全局或 static,不能放函数栈上 */
 
@@ -197,7 +197,7 @@ void ff_test(void)
 
     /* 1. 挂载:把 SD 卡绑定为逻辑盘 "0:",opt=1 表示立即挂载
           首次挂载时 FatFs 会自动调用 disk_initialize -> SD_Initialize */
-    fr = f_mount(&fs, "0:", 1);
+    fr = f_mount(&fs1, "0:", 1);
     printf("f_mount : %d\r\n", fr);       /* 0=FR_OK; 13=卡没格式化成FAT */
 
     /* 2. 打开文件:FA_CREATE_ALWAYS = 不存在就创建,存在就清空重写 */

@@ -83,11 +83,24 @@ int main(void)
     
     ff_test();
     
-    while (1)    
-    {
-           
-        
-    }
+	WM8978_Init();				//初始化WM8978
+	WM8978_HPvol_Set(0, 0);		//耳机音量设置
+	WM8978_SPKvol_Set(0);		//喇叭音量设置
+	WM8978_ADDA_Cfg(1, 0);		//开启DAC
+	WM8978_Input_Cfg(0, 0, 0);	//关闭输入通道
+	WM8978_Output_Cfg(1, 0);	//开启DAC输出   
+	WM8978_I2S_Cfg(2, 0);		//飞利浦标准,16位数据长度
+	I2S2_Init(I2S_Standard_Phillips, I2S_Mode_MasterTx, I2S_CPOL_Low, I2S_DataFormat_16bextended);	//飞利浦标准,主机发送,时钟低电平有效,16位扩展帧长度
+	I2S2_SampleRate_Set(44100);	//设置采样率
+	I2S2_TX_DMA_Init(NULL, NULL, WAV_I2S_TX_DMA_BUFSIZE/2); 				//配置TX DMA
+	status_dev.volume = 63;	//初始保存音量 0~63
+	WM8978_SPKvol_Set(status_dev.volume);
+
+	while(1)
+	{
+//		Audio_MusicPlay();//循环播放 按键切换歌曲
+//		Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");//单曲播放
+	}
     
     
 }

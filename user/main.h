@@ -27,6 +27,10 @@
 #include "sd_driver.h"
 #include "diskio.h"
 #include "ff.h"
+#include "wm8978.h"
+#include "mymalloc.h"
+#include "exfuns.h"
+#include "audioplay.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t
