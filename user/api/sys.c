@@ -62,3 +62,14 @@ void sysnvic_delay1(uint32_t mstime)
 	while(temp);
 }
 
+uint32_t GetSystemTick(void)
+{
+    return SysTick->VAL;
+}
+
+#include "tim.h"   // tim6_tick_ms 的 extern 在 tim.h/tc_iic.h 里
+
+uint32_t GetTim6Tick(void)
+{
+    return tim6_tick_ms;   // TIM6 1ms中断维护的毫秒计数
+}
