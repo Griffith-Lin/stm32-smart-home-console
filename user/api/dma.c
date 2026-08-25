@@ -230,16 +230,17 @@ void DMA_Font_Config(void)
 	dma_InitTypeDef.DMA_DIR=DMA_DIR_PeripheralToMemory;//搬运方向 外设到存储器
 	dma_InitTypeDef.DMA_FIFOMode=DMA_FIFOMode_Disable;//直接模式
 //	dma_InitTypeDef.DMA_FIFOThreshold=;
-	dma_InitTypeDef.DMA_Memory0BaseAddr=(uint32_t)font.buff[0];//存储器0地址
 	dma_InitTypeDef.DMA_MemoryBurst=DMA_MemoryBurst_Single;
 	dma_InitTypeDef.DMA_MemoryDataSize=DMA_MemoryDataSize_Byte;//存储器数据宽度
 	dma_InitTypeDef.DMA_MemoryInc=DMA_MemoryInc_Enable;//地址递增
-	dma_InitTypeDef.DMA_Mode=DMA_Mode_Circular;//循环模式
-	dma_InitTypeDef.DMA_PeripheralBaseAddr=(uint32_t)&(USART1->DR);//外设地址
+	dma_InitTypeDef.DMA_Mode=DMA_Mode_Circular;//循环模式 
 	dma_InitTypeDef.DMA_PeripheralBurst=DMA_PeripheralBurst_Single;
 	dma_InitTypeDef.DMA_PeripheralDataSize=DMA_PeripheralDataSize_Byte;//外设数据宽度
 	dma_InitTypeDef.DMA_PeripheralInc=DMA_PeripheralInc_Disable;//外设地址不递增
 	dma_InitTypeDef.DMA_Priority=DMA_Priority_High;//优先级
+    
+    dma_InitTypeDef.DMA_Memory0BaseAddr=(uint32_t)font.buff[0];//存储器0地址（要存到哪个缓冲区中）
+	dma_InitTypeDef.DMA_PeripheralBaseAddr=(uint32_t)&(USART1->DR);//外设地址
 	
 	DMA_Init(DMA2_Stream5,&dma_InitTypeDef);
 	

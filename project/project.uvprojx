@@ -553,6 +553,16 @@
               <FileType>5</FileType>
               <FilePath>..\user\api\sd_driver.h</FilePath>
             </File>
+            <File>
+              <FileName>hlk_v20.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\hlk_v20.c</FilePath>
+            </File>
+            <File>
+              <FileName>hlk_v20.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\hlk_v20.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
