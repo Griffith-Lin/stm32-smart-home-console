@@ -173,14 +173,15 @@ void EXTI0_IRQHandler(void)
 //          违反中断设计原则：ISR应“快进快出”，只做最少必要工作（读状态、清标志、设标志位），耗时操作必须移到主循环。
     
     
-        if(status_dev.PlayState == PLAY_CLEAR)      // 防抖：上次命令没被消费完，不重复置位
-            status_dev.PlayState=PLAY_STOP;
+    
+
+    }
         
         
 //        beep_one();
     
     
-    }
+    
 }
 
 
@@ -214,7 +215,7 @@ void key_scan_tim_ini(void)   // main 里调用
 
 
 
-void ProcessKey(Key_t* key)
+void ProcessKey(volatile Key_t* key)
 {
     uint8_t level = GPIO_ReadInputDataBit(key->port, key->pin);
 
@@ -267,30 +268,33 @@ void ProcessKey(Key_t* key)
 
 void TIM1_UP_TIM10_IRQHandler(void)
 {
-    if(TIM_GetITStatus(TIM10, TIM_IT_Update) != RESET) {
+    if(TIM_GetITStatus(TIM10, TIM_IT_Update) != RESET) 
+    {
         TIM_ClearITPendingBit(TIM10, TIM_IT_Update);
         ProcessKey(&keys[1]);       // 只扫 PB1;keys[0] 别放 PA0(已被EXTI0占用)
     }
     
-    if(keys[1].event_flag == KEY_EVENT_SHORT_PRESS) {
+    if(keys[1].event_flag == KEY_EVENT_SHORT_PRESS) 
+    {
     keys[1].event_flag = KEY_EVENT_NONE;
     status_dev.PlayState = PLAY_NEXT;           // 短按:下一首
     }
     
-    if(keys[1].event_flag == KEY_EVENT_LONG_PRESS) {
+    if(keys[1].event_flag == KEY_EVENT_LONG_PRESS) 
+    {
     keys[1].event_flag = KEY_EVENT_NONE;        // 消费事件
         
-     if(audiodev.status & 0X01)          // 正在播放 → 发暂停命令
-        status_dev.PlayState = PLAY_PAUSE;
-    else                                // 已暂停 → 发继续命令
-        status_dev.PlayState = PLAY_PLAY;
-    }
+     if(status_dev.PlayState == PLAY_CLEAR) // 命令空闲时才发新命令
+     {           
+        if(audiodev.status & 0X01)          // 正在播放 → 发暂停命令
+         status_dev.PlayState = PLAY_PAUSE;
+        else  
+        {// 已暂停 → 发继续命令
+         status_dev.PlayState = PLAY_PLAY;
+        }
+      }
 
+    }
 }
 
 
-/*
-
-
-
-*/
