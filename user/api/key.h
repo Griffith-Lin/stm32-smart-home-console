@@ -29,6 +29,7 @@ typedef struct
     uint8_t debounce_count;    // 消抖计数: 同一电平连续扫描次数,>=3(=30ms)才确认有效
     uint32_t press_start_time; // 按下确认时刻的毫秒计数(GetSystemTick返回值),用于算按压时长
     uint8_t event_flag;        // 事件标志(生产者-消费者信箱): 中断置位,主循环消费后清0
+}Key_t;
 
     extern volatile uint32_t motor_ccr;
 

@@ -13,6 +13,8 @@
 //	GPIOB->PUPDR &=~(0xf<<0);//无上下拉
 //}
 
+
+
 volatile Key_t keys[3]={0};
 //声明为keys[10]报了好多错。   L6407E = 链接器在 RAM 区找不到能放下这些 section 的地方。"报了好多错"是正常的：Keil 对每个放不下的 section 各报一条 L6407E，0x54（84 字节）是这些 section 的总和——看着吓人，其实是同一个根因：RAM 不够了
 //修复：把内存池砍到够用的尺寸（一行改动）mymalloc.h:20：#define MEM1_MAX_SIZE   100*1024    // 改前   #define MEM1_MAX_SIZE   60*1024     // 改后
