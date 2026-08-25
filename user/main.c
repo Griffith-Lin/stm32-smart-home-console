@@ -46,7 +46,7 @@ int main(void)
     sg90_PWM(84, 20000);
     beep_ini();
 
-//    motor_pwm_ini(84, 1000);
+    motor_pwm_ini(84, 1000);
 //    mortor_minspeed_open();
 
     adc_ini();
@@ -78,7 +78,7 @@ int main(void)
 //	Font_Load();//专门用于字库下载的函数，死循环判断标志位
 
     
-    uint8_t arr[20]="hello你好";
+    
 //    LCD_Roll_Dis(100,24,RED,WHITE,arr,1);//死循环
 
 //    SD_WaitReady();SD_Initialize()中已有等待帧
@@ -101,7 +101,7 @@ int main(void)
     
     key_scan_tim_ini();
     
-    Audio_MusicPlay();//循环播放 按键切换歌曲
+//    Audio_MusicPlay();//循环播放 按键切换歌曲
 
 	while(1)
 	{
