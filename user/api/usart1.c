@@ -148,7 +148,7 @@ void USART1_IRQHandler(void)
         volatile uint32_t temp;
         temp=USART1->SR;
         temp=USART1->DR;
-        (void)tmp;
+        (void)temp;
         
          str_buf[i]='\0';
         i=0;
