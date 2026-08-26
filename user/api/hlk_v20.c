@@ -67,7 +67,8 @@ uint8_t usart3_rev_byte(void)
 
 
 volatile uint8_t usart3_flag=0;
-volatile uint8_t str3_buf[100];//用来接收串口数据
+volatile uint8_t str3_buf[3];//用来接收串口数据
+volatile uint8_t hlk_getcommand_flag=0;
 
 void USART3_IRQHandler(void) 
 {
@@ -75,10 +76,8 @@ void USART3_IRQHandler(void)
     if(USART_GetITStatus(USART3,USART_IT_RXNE))//接收中断
     {
         USART_ClearITPendingBit(USART3,USART_IT_RXNE);//清除标志位
-        str3_buf[i]=USART_ReceiveData(USART3);
-        //命令词小科小科，接收串口返回数据00 35 0a
-        printf("%0x ",str3_buf[i]);
-        i++;
+        str3_buf[i++]=USART_ReceiveData(USART3);
+        
     }
     
     
@@ -88,13 +87,72 @@ void USART3_IRQHandler(void)
         temp=USART3->SR;
         temp=USART3->DR;
         (void)temp;
-        
-         str3_buf[i]='\0';
+ 
+        hlk_getcommand_flag=1;
+       
+        //命令词小科小科，接收串口返回数据00 35 0a
+        printf("%02x %02x %02x",str3_buf[0],str3_buf[1],str3_buf[2]);
+        printf("\r\n");
         i=0;
         usart3_flag=1;
     }
 }
 
+
+uint8_t hlk_getcommand(void)
+{
+    if(!hlk_getcommand_flag)
+     return 0;   
+    
+    if(str3_buf[0]==0x0)
+    {
+        if(str3_buf[2]==0xa)
+        {
+        hlk_getcommand_flag=0;
+
+        return str3_buf[1];
+        }
+    }
+    
+    return 0;
+
+}
+
+void HLK_Control(u8 cmd)
+{
+    if(!cmd)
+        return;
+    
+    
+	static u8 cnt=0;
+	switch(cmd)
+	{
+		case 0x35:
+			cnt++;
+			switch(cnt)
+			{
+				case 1:Wav_PlayRevert("0:prompt/嗨我在呢.wav");break;
+				case 2:Wav_PlayRevert("0:prompt/嗯我来了.wav");break;
+				case 3:cnt=0;Wav_PlayRevert("0:prompt/有什么可以帮助您.wav");break;
+			}
+			break;
+		case 0x01:
+			Motor_Control(1000);
+			Wav_PlayRevert("0:prompt/好的已为您打开风扇.wav");
+			break;
+		case 0x02:
+			Motor_Control(0);
+			Wav_PlayRevert("0:prompt/好的已为您关闭风扇.wav");
+			break;
+			
+		//根据自己的需求添加命令控制......
+	}
+    
+    
+        str3_buf[0]=0;
+        str3_buf[1]=0;
+        str3_buf[2]=0;
+}
 
 
 

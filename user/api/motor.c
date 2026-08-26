@@ -58,7 +58,7 @@ void mortor_minspeed_open(void)
     TIM_SetCompare3(TIM3,200);
 }
 
-void Motor_Control(uint16_t speed)
+void Motor_Control(uint16_t speed)//arr=1000
 {
     TIM_SetCompare3(TIM3,speed);
 }
