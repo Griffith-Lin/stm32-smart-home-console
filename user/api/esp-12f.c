@@ -112,9 +112,9 @@ void esp_12f_ini(void)
     usart2_send_string((uint8_t*)"AT+CWMODE=1\r\n");                       // Station 模式
     Delay_Ms(1000);
     usart2_send_string((uint8_t*)"AT+CWJAP=\"DESKTOP-HTLNPUV 4127\",\"88888888\"\r\n"); // 连 WiFi
-    Delay_Ms(15000);//等待连接
+    Delay_Ms(5000);//等待连接
     usart2_send_string((uint8_t*)"AT+CIPSTART=\"TCP\",\"192.168.11.140\",8086\r\n");
-    Delay_Ms(15000);
+    Delay_Ms(5000);
     usart2_send_string((uint8_t*)"AT+CIPMODE=1\r\n");                      // 透传模式（必须先于 CIPSEND）
     Delay_Ms(1000);
     usart2_send_string((uint8_t*)"AT+CIPSEND\r\n");                        // 进入透传，之后发的都是数据
