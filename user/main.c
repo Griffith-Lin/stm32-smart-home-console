@@ -102,6 +102,8 @@ int main(void)
     key_scan_tim_ini();
     
 //    Audio_MusicPlay();//Ñ­»·²¥·Å °´¼üÇÐ»»¸èÇú
+    usart2_ini(115200);   
+    esp_12f_ini();
 
 	while(1)
 	{
@@ -114,6 +116,9 @@ int main(void)
         
       HLK_Control(hlk_getcommand());  
 //        printf("111");
+        
+        
+        esp_analysis(str2_buf);
 	}
     
     

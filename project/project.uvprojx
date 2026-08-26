@@ -559,9 +559,14 @@
               <FilePath>..\user\api\hlk_v20.c</FilePath>
             </File>
             <File>
-              <FileName>hlk_v20.h</FileName>
+              <FileName>esp-12f.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\esp-12f.c</FilePath>
+            </File>
+            <File>
+              <FileName>esp-12f.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\user\api\hlk_v20.h</FilePath>
+              <FilePath>..\user\api\esp-12f.h</FilePath>
             </File>
           </Files>
         </Group>
