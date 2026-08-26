@@ -98,28 +98,49 @@ void usart2_rev_string_norm(uint8_t * buffer)
     
 }
 
+uint8_t idle_flag=0;
+//发送后，接收返回码，判断返回码
+uint8_t wifi_send_command(char *cmd,char *rev,uint32_t timeout)
+{
+     idle_flag = 0;                        // 关键：清掉上一帧残留标志
+    usart2_send_string((uint8_t*)cmd);    // 只发一次
 
+    uint32_t count = timeout;
+    while(!idle_flag && count > 0)        // 带超时的等待
+    {
+        Delay_Ms(1);
+        count--;
+    }
+    if(count == 0) return 1;              // 超时：模块没回
+
+    if(strstr((const char *)str2_buf, rev) != NULL)
+     return 0;                         // 应答匹配
+    
+    return 2;                             // 有应答但不匹配（比如 ERROR）
+}
 
 
 void esp_12f_ini(void)
 {
-    
     //usart2_send_string("+++");//退出透传
-    usart2_send_string((uint8_t*)"AT\r\n");                                // 先探活，同时验证波特率对不对
-    Delay_Ms(1000);
-    usart2_send_string((uint8_t*)"AT+CWQAP\r\n");                          // 断开旧连接
-    Delay_Ms(1000);
-    usart2_send_string((uint8_t*)"AT+CWMODE=1\r\n");                       // Station 模式
-    Delay_Ms(1000);
-    usart2_send_string((uint8_t*)"AT+CWJAP=\"DESKTOP-HTLNPUV 4127\",\"88888888\"\r\n"); // 连 WiFi
-    Delay_Ms(5000);//等待连接
-    usart2_send_string((uint8_t*)"AT+CIPSTART=\"TCP\",\"192.168.11.140\",8086\r\n");
-    Delay_Ms(5000);
-    usart2_send_string((uint8_t*)"AT+CIPMODE=1\r\n");                      // 透传模式（必须先于 CIPSEND）
-    Delay_Ms(1000);
-    usart2_send_string((uint8_t*)"AT+CIPSEND\r\n");                        // 进入透传，之后发的都是数据
-    Delay_Ms(1000);
     
+    wifi_send_command("AT\r\n","OK",500);                                // 先探活，同时验证波特率对不对
+    
+    wifi_send_command("AT+CWQAP\r\n","OK",500);                          // 断开旧连接
+    
+    wifi_send_command("AT+CWMODE=1\r\n","OK",500);                       // Station 模式
+    
+    wifi_send_command("AT+CWJAP=\"DESKTOP-HTLNPUV 4127\",\"88888888\"\r\n","OK",5000); // 连 WiFi
+
+    wifi_send_command("AT+CIPSTART=\"TCP\",\"192.168.11.140\",8086\r\n","OK",5000);
+
+    wifi_send_command("AT+CIPMODE=1\r\n","OK",500);                      // 透传模式（必须先于 CIPSEND）
+   
+    wifi_send_command("AT+CIPSEND\r\n","OK",500);                        // 进入透传，之后发的都是数据 Delay_Ms(1000);
+    
+    
+    
+
     
     usart2_send_string((uint8_t*)"666666\r\n"); 
     usart2_send_string((uint8_t*)"666666\r\n");
@@ -149,6 +170,7 @@ void USART2_IRQHandler(void)
         temp=USART2->SR;
         temp=USART2->DR;
         (void)temp;
+        str2_buf[i] = '\0';     // 补上，strstr 才能正确工作
 
         esp_analysis_flag=1;
         
