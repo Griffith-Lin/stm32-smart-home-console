@@ -1,5 +1,7 @@
 #include "esp-12f.h"
 
+
+
 //用usart2来接收esp返回的信息
 //usart2 apb1   u3_tx pa2   u3_rx  pa3
 void usart2_ini(uint32_t brr)
@@ -111,12 +113,12 @@ uint8_t wifi_send_command(char *cmd,char *rev,uint32_t timeout)
         Delay_Ms(1);
         count--;
     }
-    if(count == 0) return 1;              // 超时：模块没回
+    if(count == 0) return OUT;              // 超时：模块没回
 
     if(strstr((const char *)str2_buf, rev) != NULL)
-     return 0;                         // 应答匹配
+     return OK;                         // 应答匹配
     
-    return 2;                             // 有应答但不匹配（比如 ERROR）
+    return ERROR;                             // 有应答但不匹配（比如 ERROR）
 }
 
 
@@ -190,7 +192,7 @@ void esp_analysis(volatile uint8_t *buf)
         
 //    if(str2_buf[0]==1)
     
-    Wav_PlayRevert("0:prompt/嗨我在呢.wav");
+    Wav_PlayRevert((uint8_t*)"0:prompt/嗨我在呢.wav");
     esp_analysis_flag=0;
 }
 
