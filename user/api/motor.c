@@ -51,11 +51,11 @@ void motor_pwm_ini(uint32_t psc,uint32_t arr)
     
 }
 
-void mortor_minspeed_open(void)
+void mortor_minspeed_open(uint16_t ccr)
 {
     TIM_SetCompare3(TIM3,500);
     Delay_Ms(100);
-    TIM_SetCompare3(TIM3,200);
+    TIM_SetCompare3(TIM3,ccr);
 }
 
 void Motor_Control(uint16_t speed)//arr=1000

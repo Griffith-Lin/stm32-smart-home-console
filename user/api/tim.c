@@ -144,6 +144,12 @@ void TIM6_DAC_IRQHandler(void)
 }
 
 
+uint32_t GetTim6Tick(void)
+{
+    return tim6_tick_ms;   // TIM6 1ms中断维护的毫秒计数
+}
+
+
 //pb0配置为输入捕获模式
 void in_cap_ini(uint16_t psc,uint16_t arr)
 {

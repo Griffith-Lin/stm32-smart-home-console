@@ -279,7 +279,7 @@ void TIM1_UP_TIM10_IRQHandler(void)
     keys[1].event_flag = KEY_EVENT_NONE;
     status_dev.PlayState = PLAY_NEXT;           // 短按:下一首
         
-        wifi_send_command("AT+MQTTPUB=0,\"attributes\",\"{\\\"led\\\":1}\",0,0\r\n","OK",10000);
+        wifi_send_command("AT+MQTTPUB=0,\"attributes\",\"{\\\"led\\\":1}\",0,0\r\n","OK",10000);//上报给云平台
     }
     
     

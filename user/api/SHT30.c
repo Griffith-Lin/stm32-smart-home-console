@@ -164,6 +164,7 @@ uint32_t sht30_i2c_send(uint16_t command)
 //几个全局量没有中断/硬件共享,加 volatile 反而误导读者以为有。普通全局即可。
 volatile float tem_data=0;
 volatile float hu_data=0;
+char t_cmd[100]={0};
 //提取buf_data中的温湿度
 void get_tem_hu(uint32_t data)
 {
@@ -173,7 +174,142 @@ void get_tem_hu(uint32_t data)
     
     hu_data=data & (0xffff);
     hu_data=(100*hu_data)/(0xffff);
+       
+
 }
 
 
+/*
+两个定时器从 0 同时起跑：同一轮主循环里两个都会触发，温度和湿度是连着发的，不是间隔 10 秒。
+两个状态机抢同一个 idle_flag/str2_buf：tem 的应答帧会把 hu 的 busy 提前结束，反之亦然——应答对不上号，行为不可预测。
+*/
+
+//static uint8_t  pub_tem_busy = 0;          // 1=已发出，等应答
+//static uint32_t last_tem_pub = 0;
+
+//void Tcloud_tem(void)
+//{
+//    uint32_t now = GetTim6Tick();
+
+//    if (pub_tem_busy)                      // 上一条只发不等，现在这里判断有没有应答
+//    {
+//        if (idle_flag)                 // 应答帧到了（无论 OK/ERROR），本轮结束
+//        {
+//            idle_flag = 0;
+//            pub_tem_busy  = 0;
+//        }
+//        else if (now - last_tem_pub > 3000) // 兜底：3 秒没任何应答就放弃，防卡死
+//        {
+//            pub_tem_busy = 0;
+//        }
+//        return;
+//    }
+
+//    
+//    
+//    
+//    if (now - last_tem_pub < 10000)        // 10 秒周期门控
+//        return;
+//    
+//    
+//    last_tem_pub = now;
+
+//    get_tem_hu(sht30_i2c_send(0x2c06)); 
+
+//    snprintf(t_cmd, sizeof(t_cmd),
+//             "AT+MQTTPUB=0,\"attributes\",\"{\\\"tem\\\":%.2f}\",0,0\r\n",
+//             (float)tem_data);
+//    
+//   
+//    
+//    idle_flag = 0;                     // 清残留帧，防止把旧应答当成这次的
+//    usart2_send_string((uint8_t*)t_cmd); // 只发不等
+//    pub_tem_busy  = 1;
+//    
+//}
+
+//static uint8_t  pub_hu_busy = 0;          // 1=已发出，等应答
+//static uint32_t last_hu_pub = 0;
+
+//void Tcloud_hu(void)
+//{
+//    uint32_t now = GetTim6Tick();
+
+//    if (pub_hu_busy)                      // 上一条还没回
+//    {
+//        if (idle_flag)                 // 应答帧到了（无论 OK/ERROR），本轮结束
+//        {
+//            idle_flag = 0;
+//            pub_hu_busy  = 0;
+//        }
+//        else if (now - last_hu_pub > 3000) // 兜底：3 秒没任何应答就放弃，防卡死
+//        {
+//            pub_hu_busy = 0;
+//        }
+//        return;
+//    }
+
+//    if (now - last_hu_pub < 10000)        // 10 秒周期门控
+//        return;
+//    
+//    
+//    last_hu_pub = now;
+
+//    get_tem_hu(sht30_i2c_send(0x2c06)); 
+//   
+//    
+//    snprintf(t_cmd, sizeof(t_cmd),
+//             "AT+MQTTPUB=0,\"attributes\",\"{\\\"hu\\\":%.2f}\",0,0\r\n",
+//             (float)hu_data);
+
+//    
+//    idle_flag = 0;                     // 清残留帧，防止把旧应答当成这次的
+//    usart2_send_string((uint8_t*)t_cmd); // 只发不等
+//    pub_hu_busy  = 1;
+//    
+//}
+
+
+static uint8_t  pub_busy = 0;        // 1=已发出，等应答
+static uint8_t  pub_sel  = 0;        // 0=发温度 1=发湿度
+static uint32_t last_pub = 0;
+
+void Tcloud_tem_hu(void)             // 主循环每轮调用（替换原来的两个函数）
+{
+    uint32_t now = GetTim6Tick();
+
+    if (pub_busy)                    // 上一条还没回
+    {
+        if (idle_flag)               // 应答帧到了（OK/ERROR 都算），本轮结束
+        {
+            idle_flag = 0;
+            pub_busy  = 0;
+        }
+        else if (now - last_pub > 3000)  // 兜底：3 秒没应答就放弃
+        {
+            pub_busy = 0;
+        }
+        return;
+    }
+
+    if (now - last_pub < 10000)      // 10 秒门控
+        return;
+    last_pub = now;
+
+    get_tem_hu(sht30_i2c_send(0x2c06));  
+
+    if (pub_sel == 0)
+        snprintf(t_cmd, sizeof(t_cmd),
+                 "AT+MQTTPUB=0,\"attributes\",\"{\\\"tem\\\":%.2f}\",0,0\r\n",
+                 (float)tem_data);
+    else
+        snprintf(t_cmd, sizeof(t_cmd),
+                 "AT+MQTTPUB=0,\"attributes\",\"{\\\"hu\\\":%.2f}\",0,0\r\n",
+                 (float)hu_data);
+    pub_sel ^= 1;                    // 下次发另一个
+
+    idle_flag = 0;                   // 清残留帧
+    usart2_send_string((uint8_t*)t_cmd);
+    pub_busy = 1;
+}
 
