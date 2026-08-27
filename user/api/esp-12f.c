@@ -231,6 +231,9 @@ void USART2_IRQHandler(void)
 
 
 
+uint16_t fan_speed=0;
+uint16_t sg90_angle=0;
+
 //用返回的信息做判断
 void esp_analysis(void)
 {
@@ -245,10 +248,62 @@ void esp_analysis(void)
         printf("LED1_OFF\r\n");
         LED1_OFF;
     }
-    if(strstr((const char *)str2_buf,"{\"led\":1}"))
+    else if(strstr((const char *)str2_buf,"{\"led\":1}"))
     {
         printf("LED1_ON\r\n");
         LED1_ON;
+    }
+    else if(strstr((const char *)str2_buf, "{\"fan_speed\":"))   // +MQTTSUBRECV:0,"attributes/push",20,{"fan_speed":800} 匹配到字段标记
+    {
+        char *p = strstr((const char *)str2_buf, "fan_speed");
+        p = strchr(p, ':');                     // 定位冒号
+        if (p == NULL)
+            return;
+        p++;                                    // 跳过冒号
+        while (*p == ' ' || *p == '\r' || *p == '\n')  // 容忍冒号后的空格
+            p++;
+
+        fan_speed = 0;
+        while (*p >= '0' && *p <= '9')          // 逐位累加出数值
+        {
+            fan_speed = fan_speed * 10 + (*p - '0');
+            p++;
+        }
+
+        if(fan_speed<15)
+        {
+            fan_speed=15;
+        }
+        
+        if(fan_speed<30)//频率太小，一开始动不起来
+        {
+            mortor_minspeed_open(fan_speed);
+        }
+
+    
+        Motor_Control(fan_speed*10);//应用端是0到100的输入范围
+        printf("fan_speed:%u\r\n", fan_speed*10);
+    }
+    else if(strstr((const char *)str2_buf, "{\"sg90\":"))   // +MQTTSUBRECV:0,"attributes/push",20,{"fan_speed":800} 匹配到字段标记
+    {
+        char *p = strstr((const char *)str2_buf, "sg90");
+        p = strchr(p, ':');                     // 定位冒号
+        if (p == NULL)
+            return;
+        p++;                                    // 跳过冒号
+        while (*p == ' ' || *p == '\r' || *p == '\n')  // 容忍冒号后的空格
+            p++;
+
+        sg90_angle = 0;
+        while (*p >= '0' && *p <= '9')          // 逐位累加出数值
+        {
+            sg90_angle = sg90_angle * 10 + (*p - '0');
+            p++;
+        }
+        
+
+        sg90_set_angle(sg90_angle);
+        printf("sg90_angle:%u\r\n", sg90_angle);
     }
 }
 

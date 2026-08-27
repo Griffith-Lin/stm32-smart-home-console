@@ -113,10 +113,17 @@ int main(void)
         
 //		Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");//单曲播放
         
+      esp_analysis(); //判断分包平台下发的json
         
       HLK_Control(hlk_getcommand());          
-      
-      esp_analysis();
+               
+      Tcloud_tem_hu();
+        
+
+//        
+//      sht31_test();  
+//        
+//      Delay_Ms(10000);  
         
     }  
         

@@ -6,18 +6,20 @@
 #include "wavplay.h"
 #include "beep.h"
 #include "led.h"
+#include "sg90.h"
 
 #define OK 0
 #define OUT 1
 #define ERROR 2    
 
 
-
+extern uint8_t idle_flag;
 extern volatile uint8_t str2_buf[500];//用来接收串口数据
 
 uint8_t wifi_send_command(char *cmd,char *rev,uint32_t timeout);
 
 void usart2_ini(uint32_t brr);
+void usart2_send_string(volatile uint8_t *str);
 
 void esp_analysis(void);
 
