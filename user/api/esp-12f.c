@@ -107,7 +107,7 @@ uint8_t idle_flag=0;
 uint8_t wifi_send_command(char *cmd,char *rev,uint32_t timeout)
 {
                             
-	u16 cnt=0;
+	uint16_t cnt=0;
 	usart2_send_string((uint8_t*)cmd);
 	Delay_Ms(100);
 	while(1)
@@ -165,34 +165,34 @@ void esp_12f_ini(void)
     */
     
     
-    //1
+    //0
     check(wifi_send_command("AT\r\n","OK",500));                                // 先探活，同时验证波特率对不对
     
-    //2
+    //1
     check(wifi_send_command("AT+CWQAP\r\n","OK",500));                          // 断开旧连接
     
-    //3
+    //2
     check(wifi_send_command("AT+CWMODE=1\r\n","OK",500));                       // Station 模式
     
-    //4
+    //3
     check(wifi_send_command("AT+CWJAP=\"DESKTOP-HTLNPUV 4127\",\"88888888\"\r\n","OK",5000)); // 连 WiFi
 
 //    测试用
 //    wifi_send_command("AT+CIPSTART=\"TCP\",\"192.168.11.140\",8086\r\n","OK",5000);
 
-    //5
+    //4
     check(wifi_send_command("AT+CIPMODE=1\r\n","OK",500));                      // 透传模式（必须先于 CIPSEND）
       
 //    后面有mqtt指令，要先注释
 //    check(wifi_send_command("AT+CIPSEND\r\n","OK",500));                        // 进入透传，之后发的都是数据 Delay_Ms(1000);
     
-    //这两条只有第一次设置会返回ok
-    //6 7
-    check(wifi_send_command("AT+MQTTUSERCFG=0,1,\"9203454aeb1e4a4f94fd9423dac71221\",\"dwy5lftp43w54p7e\",\"nE2s7UByXC\",0,0,\"\"\r\n","OK",10000));     
-    check(wifi_send_command("AT+MQTTCONN=0,\"sh-3-mqtt.iot-api.com\",1883,1\r\n","OK",10000)); 
-   
-    //8
-    check(wifi_send_command("AT+MQTTSUB=0,\"attributes/push\",0\r\n","OK",5000));   
+    //这三条只有第一次设置会返回ok
+    //5 6 7
+    check(wifi_send_command("AT+MQTTUSERCFG=0,1,\"9203454aeb1e4a4f94fd9423dac71221\",\"dwy5lftp43w54p7e\",\"nE2s7UByXC\",0,0,\"\"\r\n","OK",10000));     //设置三元组
+    check(wifi_send_command("AT+MQTTCONN=0,\"sh-3-mqtt.iot-api.com\",1883,1\r\n","OK",10000)); //连接broker主机
+    check(wifi_send_command("AT+MQTTSUB=0,\"attributes/push\",0\r\n","OK",5000));   //订阅主题
+    
+    
    
 
 }
@@ -221,7 +221,7 @@ void USART2_IRQHandler(void)
 
         idle_flag=1;
         
-        esp_analysis_flag=1;
+        
         
         i=0;
         
@@ -232,15 +232,24 @@ void USART2_IRQHandler(void)
 
 
 //用返回的信息做判断
-void esp_analysis(volatile uint8_t *buf)
+void esp_analysis(void)
 {
-    if(esp_analysis_flag==0)
+    if(idle_flag==0)
         return;
         
-//    if(str2_buf[0]==1)
+    idle_flag=0;
+    printf("str2_buf=%s\r\n",str2_buf);
     
-    Wav_PlayRevert((uint8_t*)"0:prompt/嗨我在呢.wav");
-    esp_analysis_flag=0;
+    if(strstr((const char *)str2_buf,"{\"led\":0}"))
+    {
+        printf("LED1_OFF\r\n");
+        LED1_OFF;
+    }
+    if(strstr((const char *)str2_buf,"{\"led\":1}"))
+    {
+        printf("LED1_ON\r\n");
+        LED1_ON;
+    }
 }
 
 

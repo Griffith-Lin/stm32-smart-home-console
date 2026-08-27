@@ -115,7 +115,8 @@ int main(void)
         
         
       HLK_Control(hlk_getcommand());          
-      esp_analysis(str2_buf);
+      
+      esp_analysis();
         
     }  
         
