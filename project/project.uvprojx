@@ -519,11 +519,6 @@
               <FilePath>..\user\api\lcd.c</FilePath>
             </File>
             <File>
-              <FileName>font.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\user\api\font.c</FilePath>
-            </File>
-            <File>
               <FileName>tc_iic.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\user\api\tc_iic.c</FilePath>
