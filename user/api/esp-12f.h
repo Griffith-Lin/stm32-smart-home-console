@@ -14,6 +14,8 @@
 
 extern volatile uint8_t str2_buf[500];//用来接收串口数据
 
+uint8_t wifi_send_command(char *cmd,char *rev,uint32_t timeout);
+
 void usart2_ini(uint32_t brr);
 
 void esp_analysis(volatile uint8_t *buf);

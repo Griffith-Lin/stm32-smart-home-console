@@ -1,6 +1,8 @@
 #include "esp-12f.h"
 
-
+volatile uint8_t esp_analysis_flag=0;
+volatile uint8_t usart2_flag=0;
+volatile uint8_t str2_buf[500]={0};//用来接收串口数据
 
 //用usart2来接收esp返回的信息
 //usart2 apb1   u3_tx pa2   u3_rx  pa3
@@ -104,56 +106,99 @@ uint8_t idle_flag=0;
 //发送后，接收返回码，判断返回码
 uint8_t wifi_send_command(char *cmd,char *rev,uint32_t timeout)
 {
-     idle_flag = 0;                        // 关键：清掉上一帧残留标志
-    usart2_send_string((uint8_t*)cmd);    // 只发一次
+                            
+	u16 cnt=0;
+	usart2_send_string((uint8_t*)cmd);
+	Delay_Ms(100);
+	while(1)
+	{
+		while(!idle_flag)//未接收完成
+		{
+			cnt++;
+			Delay_Ms(1);
+			if(cnt>timeout)
+			{
+				return OUT;
+			}
+		}
+		idle_flag=0;
+		if(strstr((const char *)str2_buf,(const char *)rev)!=NULL)
+		{
+			return OK;//接收到正确码
+		}
+        if(strstr((const char *)str2_buf,(const char *)"ERROR")!=NULL)
+		{
+			return ERROR;//接收到错误码
+		}
+	}
+}
 
-    uint32_t count = timeout;
-    while(!idle_flag && count > 0)        // 带超时的等待
+uint8_t check_cnt=0;
+
+void check(uint8_t back)
+{
+    if(back==0)
     {
-        Delay_Ms(1);
-        count--;
+        printf("%d OK\r\n",check_cnt++);
     }
-    if(count == 0) return OUT;              // 超时：模块没回
-
-    if(strstr((const char *)str2_buf, rev) != NULL)
-     return OK;                         // 应答匹配
-    
-    return ERROR;                             // 有应答但不匹配（比如 ERROR）
+    else if(back==1)
+    {    
+        printf("%d OUT\r\n",check_cnt++);
+    }
+    else if(back==2)
+    {    
+        printf("%d ERROR\r\n",check_cnt++);
+    }
 }
 
 
 void esp_12f_ini(void)
 {
-    //usart2_send_string("+++");//退出透传
+//    usart2_send_string((uint8_t*)"+++");//退出透传,退出透传要求 +++ 前后有静默，
+//    Delay_Ms(1000);
+//    //+++ 不带 CRLF，不是一条完整的 AT 命令。模块（普通 AT 模式下）的解析器收到 +++ 后，只会把它当作"未完成的行"暂存在行缓冲里，一直等结束符。
+//    //然后无论隔多久，你下一条命令到达时，会和它拼成一行：
+//    check(wifi_send_command("AT\r\n","OK",500)); //这里因为前面的+++脏数据，变成了+++AT\r\n,模块识别错误，返回ERROR   
+    /*
+    不发 +++：把模块的 RST/CH_PD 引脚接到 STM32 的一个 GPIO，初始化时先硬件复位模块——模块必然从普通 AT 模式启动，永远不需要 +++。
+    这是最干净的工程做法，也彻底解决了"模块残留透传状态"这类脏状态问题。
+    */
     
-    wifi_send_command("AT\r\n","OK",500);                                // 先探活，同时验证波特率对不对
     
-    wifi_send_command("AT+CWQAP\r\n","OK",500);                          // 断开旧连接
+    //1
+    check(wifi_send_command("AT\r\n","OK",500));                                // 先探活，同时验证波特率对不对
     
-    wifi_send_command("AT+CWMODE=1\r\n","OK",500);                       // Station 模式
+    //2
+    check(wifi_send_command("AT+CWQAP\r\n","OK",500));                          // 断开旧连接
     
-    wifi_send_command("AT+CWJAP=\"DESKTOP-HTLNPUV 4127\",\"88888888\"\r\n","OK",5000); // 连 WiFi
+    //3
+    check(wifi_send_command("AT+CWMODE=1\r\n","OK",500));                       // Station 模式
+    
+    //4
+    check(wifi_send_command("AT+CWJAP=\"DESKTOP-HTLNPUV 4127\",\"88888888\"\r\n","OK",5000)); // 连 WiFi
 
-    wifi_send_command("AT+CIPSTART=\"TCP\",\"192.168.11.140\",8086\r\n","OK",5000);
+//    测试用
+//    wifi_send_command("AT+CIPSTART=\"TCP\",\"192.168.11.140\",8086\r\n","OK",5000);
 
-    wifi_send_command("AT+CIPMODE=1\r\n","OK",500);                      // 透传模式（必须先于 CIPSEND）
+    //5
+    check(wifi_send_command("AT+CIPMODE=1\r\n","OK",500));                      // 透传模式（必须先于 CIPSEND）
+      
+//    后面有mqtt指令，要先注释
+//    check(wifi_send_command("AT+CIPSEND\r\n","OK",500));                        // 进入透传，之后发的都是数据 Delay_Ms(1000);
+    
+    //这两条只有第一次设置会返回ok
+    //6 7
+    check(wifi_send_command("AT+MQTTUSERCFG=0,1,\"9203454aeb1e4a4f94fd9423dac71221\",\"dwy5lftp43w54p7e\",\"nE2s7UByXC\",0,0,\"\"\r\n","OK",10000));     
+    check(wifi_send_command("AT+MQTTCONN=0,\"sh-3-mqtt.iot-api.com\",1883,1\r\n","OK",10000)); 
    
-    wifi_send_command("AT+CIPSEND\r\n","OK",500);                        // 进入透传，之后发的都是数据 Delay_Ms(1000);
-    
-    
-    
+    //8
+    check(wifi_send_command("AT+MQTTSUB=0,\"attributes/push\",0\r\n","OK",5000));   
+   
 
-    
-    usart2_send_string((uint8_t*)"666666\r\n"); 
-    usart2_send_string((uint8_t*)"666666\r\n");
-    usart2_send_string((uint8_t*)"666666\r\n");
-    usart2_send_string((uint8_t*)"666666\r\n");
 }
 
 
-volatile uint8_t esp_analysis_flag=0;
-volatile uint8_t usart2_flag=0;
-volatile uint8_t str2_buf[500]={0};//用来接收串口数据
+
 
 void USART2_IRQHandler(void) 
 {
@@ -174,6 +219,8 @@ void USART2_IRQHandler(void)
         (void)temp;
         str2_buf[i] = '\0';     // 补上，strstr 才能正确工作
 
+        idle_flag=1;
+        
         esp_analysis_flag=1;
         
         i=0;

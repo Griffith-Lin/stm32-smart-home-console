@@ -114,12 +114,12 @@ int main(void)
 //		Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");//单曲播放
         
         
-      HLK_Control(hlk_getcommand());  
-//        printf("111");
+      HLK_Control(hlk_getcommand());          
+      esp_analysis(str2_buf);
         
+    }  
         
-        esp_analysis(str2_buf);
-	}
+
     
     
 }

@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "ws2812e.h"
 #include "sys.h"
+#include "esp-12f.h"
 
 #define KEY_EVENT_NONE 0          // 无事件
 #define KEY_EVENT_PRESS 1         // 按下确认(进入PRESSED瞬间)
