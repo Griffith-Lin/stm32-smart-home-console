@@ -6,6 +6,11 @@
 #include "wavplay.h"
 #include "beep.h"
 
+#define OK 0
+#define OUT 1
+#define ERROR 2    
+
+
 
 extern volatile uint8_t str2_buf[500];//用来接收串口数据
 
