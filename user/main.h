@@ -33,6 +33,7 @@
 #include "audioplay.h"
 #include "hlk_v20.h"
 #include "esp-12f.h"
+#include "relay.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t

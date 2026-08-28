@@ -73,6 +73,8 @@ int main(void)
 
     LCD_Init();
     CST816S_Init();
+    
+    relay_ini();
 
 //	DMA_Font_Config();
 //	Font_Load();//专门用于字库下载的函数，死循环判断标志位
@@ -101,25 +103,50 @@ int main(void)
     
     key_scan_tim_ini();
     
+    
 //    Audio_MusicPlay();//循环播放 按键切换歌曲
+    
     usart2_ini(115200);   
     esp_12f_ini();
+    
+    
 
 	while(1)
 	{
-//    lcd_test2();
         
-//      TIM6_delay(500);
-        
-//		Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");//单曲播放
+
         
       esp_analysis(); //判断分包平台下发的json
         
-      HLK_Control(hlk_getcommand());          
-               
-      Tcloud_tem_hu();
+      HLK_Control(hlk_getcommand());  
+
+
+      Tcloud_report();//上报本地json数据到云端      
+  
+
+
         
 
+/*
+状态机的骨架（busy + 门控 + 兜底）本身是标准写法，没问题。但两个独立发布者共用 idle_flag/str2_buf，一定会打起来，具体三个冲突点：
+
+冲突点
+1. 两个 10 秒定时器同时从 0 起跑：last_pub 初始都是 0，主循环第一轮两个函数都会触发 → 温湿度和 MLX 两条命令几乎同时发出。两条应答在线上乱序回来，谁消费了哪条全靠运气。
+
+2. 应答帧计数错位：tem 的 OK 可能被 mlx 的 busy 状态消费掉（反之亦然），加上模块回显会产生多余帧，帧数对不上时一个函数会被提前清 busy，另一个得靠 3 秒兜底才恢复——功能勉强不坏，但状态机完全失真。
+
+3. 最危险的：发布状态机 busy 时会吞掉下行命令。你的发布逻辑是"收到任意帧就结束 busy"——如果云端正好在这 1~2 秒窗口内下发 {"led":1} 或 {"fan_speed":800}，这个帧会被发布状态机当应答吃掉，esp_analysis 永远看不到它 → LED/风扇控制丢失。这不是概率问题，是必然会发生的事件（10 秒一发的窗口天天有）。        
+        
+*/        
+//      Tcloud_tem_hu();
+//        
+//      Tcloud_mlx90614_tem();
+        
+        
+//    lcd_test2();
+        
+//      TIM6_delay(500);   
+        
 //        
 //      sht31_test();  
 //        
