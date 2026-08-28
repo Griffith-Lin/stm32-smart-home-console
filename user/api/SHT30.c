@@ -164,7 +164,7 @@ uint32_t sht30_i2c_send(uint16_t command)
 //几个全局量没有中断/硬件共享,加 volatile 反而误导读者以为有。普通全局即可。
 volatile float tem_data=0;
 volatile float hu_data=0;
-char t_cmd[100]={0};
+//char t_cmd[100]={0};
 //提取buf_data中的温湿度
 void get_tem_hu(uint32_t data)
 {
@@ -270,46 +270,48 @@ void get_tem_hu(uint32_t data)
 //}
 
 
-static uint8_t  pub_busy = 0;        // 1=已发出，等应答
-static uint8_t  pub_sel  = 0;        // 0=发温度 1=发湿度
-static uint32_t last_pub = 0;
 
-void Tcloud_tem_hu(void)             // 主循环每轮调用（替换原来的两个函数）
-{
-    uint32_t now = GetTim6Tick();
 
-    if (pub_busy)                    // 上一条还没回
-    {
-        if (idle_flag)               // 应答帧到了（OK/ERROR 都算），本轮结束
-        {
-            idle_flag = 0;
-            pub_busy  = 0;
-        }
-        else if (now - last_pub > 3000)  // 兜底：3 秒没应答就放弃
-        {
-            pub_busy = 0;
-        }
-        return;
-    }
+//static uint8_t  pub_busy = 0;        // 1=已发出，等应答
+//static uint8_t  pub_sel  = 0;        // 0=发温度 1=发湿度
+//static uint32_t last_pub = 0;
 
-    if (now - last_pub < 10000)      // 10 秒门控
-        return;
-    last_pub = now;
+//void Tcloud_tem_hu(void)             // 主循环每轮调用（替换原来的两个函数）
+//{
+//    uint32_t now = GetTim6Tick();
 
-    get_tem_hu(sht30_i2c_send(0x2c06));  
+//    if (pub_busy)                    // 上一条还没回
+//    {
+//        if (idle_flag)               // 应答帧到了（OK/ERROR 都算），本轮结束
+//        {
+//            idle_flag = 0;
+//            pub_busy  = 0;
+//        }
+//        else if (now - last_pub > 3000)  // 兜底：3 秒没应答就放弃
+//        {
+//            pub_busy = 0;
+//        }
+//        return;
+//    }
 
-    if (pub_sel == 0)
-        snprintf(t_cmd, sizeof(t_cmd),
-                 "AT+MQTTPUB=0,\"attributes\",\"{\\\"tem\\\":%.2f}\",0,0\r\n",
-                 (float)tem_data);
-    else
-        snprintf(t_cmd, sizeof(t_cmd),
-                 "AT+MQTTPUB=0,\"attributes\",\"{\\\"hu\\\":%.2f}\",0,0\r\n",
-                 (float)hu_data);
-    pub_sel ^= 1;                    // 下次发另一个
+//    if (now - last_pub < 10000)      // 10 秒门控
+//        return;
+//    last_pub = now;
 
-    idle_flag = 0;                   // 清残留帧
-    usart2_send_string((uint8_t*)t_cmd);
-    pub_busy = 1;
-}
+//    get_tem_hu(sht30_i2c_send(0x2c06));  
+
+//    if (pub_sel == 0)
+//        snprintf(t_cmd, sizeof(t_cmd),
+//                 "AT+MQTTPUB=0,\"attributes\",\"{\\\"tem\\\":%.2f}\",0,0\r\n",
+//                 (float)tem_data);
+//    else
+//        snprintf(t_cmd, sizeof(t_cmd),
+//                 "AT+MQTTPUB=0,\"attributes\",\"{\\\"hu\\\":%.2f}\",0,0\r\n",
+//                 (float)hu_data);
+//    pub_sel ^= 1;                    // 下次发另一个
+
+//    idle_flag = 0;                   // 清残留帧
+//    usart2_send_string((uint8_t*)t_cmd);
+//    pub_busy = 1;
+//}
 
