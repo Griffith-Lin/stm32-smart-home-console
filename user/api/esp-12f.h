@@ -7,6 +7,7 @@
 #include "beep.h"
 #include "led.h"
 #include "sg90.h"
+#include "relay.h"
 
 #define OK 0
 #define OUT 1

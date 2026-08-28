@@ -233,6 +233,7 @@ void USART2_IRQHandler(void)
 
 uint16_t fan_speed=0;
 uint16_t sg90_angle=0;
+uint8_t music_play=0;
 
 //用返回的信息做判断
 void esp_analysis(void)
@@ -270,12 +271,12 @@ void esp_analysis(void)
             p++;
         }
 
-        if(fan_speed<15)
+        if(fan_speed<15 && fan_speed>0)
         {
             fan_speed=15;
         }
         
-        if(fan_speed<30)//频率太小，一开始动不起来
+        if(fan_speed<30 && fan_speed>0)//频率太小，一开始动不起来
         {
             mortor_minspeed_open(fan_speed);
         }
@@ -305,6 +306,51 @@ void esp_analysis(void)
         sg90_set_angle(sg90_angle);
         printf("sg90_angle:%u\r\n", sg90_angle);
     }
+    else if(strstr((const char *)str2_buf, "{\"music\":"))   // +MQTTSUBRECV:0,"attributes/push",20,{"fan_speed":800} 匹配到字段标记
+    {
+        char *p = strstr((const char *)str2_buf, "music");
+        p = strchr(p, ':');                     // 定位冒号
+        if (p == NULL)
+            return;
+        p++;                                    // 跳过冒号
+        while (*p == ' ' || *p == '\r' || *p == '\n')  // 容忍冒号后的空格
+            p++;
+
+        music_play = 0;        
+            
+        music_play = *p - '0';
+  
+                
+        if(music_play==0)
+        {
+        //退出音乐播放函数
+        status_dev.PlayState = PLAY_STOP;
+        }
+        else if(music_play == 1)
+        {
+//            beep_one();
+            Audio_MusicPlay();
+//        Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");
+        }
+        else if(music_play==2)
+        {
+        status_dev.PlayState = PLAY_NEXT; 
+        }
+        else if(music_play==3)
+        {
+        status_dev.PlayState =PLAY_PREVIOUS;
+        }       
+    }
+    else if(strstr((const char *)str2_buf,"{\"relay\":1}"))
+    {
+        printf("RELAY_ON\r\n");
+        RELAY_ON;
+    }
+    else if(strstr((const char *)str2_buf,"{\"relay\":0}"))
+    {
+        printf("RELAY_OFF\r\n");
+        RELAY_OFF;
+    }    
 }
 
 
