@@ -26,7 +26,7 @@ void mlx90614_i2c_send(uint8_t data)
 }
 
 //主机读从机数据
-void mlx90614_i2c_read(uint8_t command,volatile uint8_t *buf)
+void mlx90614_i2c_read(uint8_t command,uint8_t *buf)
 {
     i2c_master_start();
     
@@ -57,11 +57,60 @@ void mlx90614_i2c_read(uint8_t command,volatile uint8_t *buf)
 }
 
 
-float temperature_calculate(volatile uint8_t *buf)
+float temperature_calculate(uint8_t *buf)
 {
     float tmp=(buf[1]<<8) | buf[0];//float类型数据有32bit
     tmp=tmp*0.02-273.15;
     return tmp;
 }
+
+//uint8_t mlx90614_buf[2]={0};
+//uint16_t mlx90614_read_flag=0;
+//char t_cmd[100]={0};
+
+//static uint8_t  pub_busy = 0;        // 1=已发出，等应答
+//static uint32_t last_pub = 0;
+
+//void Tcloud_mlx90614_tem(void)
+//{
+//     uint32_t now = GetTim6Tick();
+
+//    if (pub_busy)                    // 上一条还没回
+//    {
+//        if (idle_flag)               // 应答帧到了（OK/ERROR 都算），本轮结束
+//        {
+//            idle_flag = 0;
+//            pub_busy  = 0;
+//        }
+//        else if (now - last_pub > 3000)  // 兜底：3 秒没应答就放弃
+//        {
+//            pub_busy = 0;
+//        }
+//        return;
+//    }
+
+//    if (now - last_pub < 10000)      // 10 秒门控
+//        return;
+//    last_pub = now;
+//    
+//    
+//    
+//    mlx90614_i2c_read(0x07,mlx90614_buf);//读标志位
+//    
+//    mlx90614_read_flag=(mlx90614_buf[1]<<8) | mlx90614_buf[0];//由高8位（DataH）和低8位（DataL）两部分组成，
+////    printf("%d\r\n",mlx90614_read_flag);
+//    
+//    
+//    float result=temperature_calculate(mlx90614_buf);
+//    printf("%.2f\r\n",result);
+//    
+//    snprintf(t_cmd, sizeof(t_cmd),
+//                 "AT+MQTTPUB=0,\"attributes\",\"{\\\"human_tem\\\":%.2f}\",0,0\r\n",
+//                 result);  
+//    
+//    idle_flag = 0;                   // 清残留帧
+//    usart2_send_string((uint8_t*)t_cmd);
+//    pub_busy = 1;
+//}
 
 
