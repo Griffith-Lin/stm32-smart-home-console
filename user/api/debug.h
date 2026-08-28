@@ -15,8 +15,8 @@ extern uint8_t hu_dis[20];
 extern uint8_t tmp;
 extern uint8_t gl5506_flag;
 
-extern volatile uint8_t mlx90614_buf[2];
-extern volatile uint16_t mlx90614_read_flag;
+//extern uint8_t mlx90614_buf[2];
+//extern uint16_t mlx90614_read_flag;
 
 
 void adc_debug_manual(void);
@@ -28,4 +28,6 @@ void ws2812e_test(void);
 void sht31_test(void);
 void ff_test(void);
 void lcd_test2(void);
+
+void Tcloud_report(void);  
 #endif
