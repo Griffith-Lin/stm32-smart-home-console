@@ -30,6 +30,12 @@
 //}
 
 
+/*
+ TIM6（1ms 时基）放 3 偏低
+tim.c:133-144 的 1ms tick 被按键消抖、长按计时、触摸防抖（tc_iic.c:317）依赖。不能和那些会阻塞的 ISR 同级，一旦同级 ISR 跑得久，tick 就会跳。
+时基惯例上应该给最高优先级（建议提到 0 或 1），这样系统里所有"时间"都可靠。
+*/
+
 //delay意味着阻塞，tim中断最好不要用delay命名
 void TIM6_Task_Init(uint32_t psc,uint32_t arr) 
 {
@@ -65,7 +71,7 @@ void TIM6_Task_Init(uint32_t psc,uint32_t arr)
     NVIC_InitTypeDef NVIC_InitStructure;
     
     NVIC_InitStructure.NVIC_IRQChannel=TIM6_DAC_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=3;//抢占优先级
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1;//抢占优先级
     NVIC_InitStructure.NVIC_IRQChannelSubPriority=0;//次优先级
     
     NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;

@@ -189,7 +189,7 @@ void EXTI0_IRQHandler(void)
         
 //        beep_one();
     
-    Audio_MusicPlay();
+ 
     
     
     
@@ -199,7 +199,7 @@ void EXTI0_IRQHandler(void)
 
 
 
-
+//按键是软实时，抢占优先级放 3 就行；和 TIM9 同级不互抢，
 void key_scan_tim_ini(void)   // main 里调用
 {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM10, ENABLE);
@@ -215,7 +215,7 @@ void key_scan_tim_ini(void)   // main 里调用
 
     NVIC_InitTypeDef n = {0};
     n.NVIC_IRQChannel                   = TIM1_UP_TIM10_IRQn;
-    n.NVIC_IRQChannelPreemptionPriority = 1;   
+    n.NVIC_IRQChannelPreemptionPriority = 3;   
     n.NVIC_IRQChannelSubPriority        = 0;
     n.NVIC_IRQChannelCmd                = ENABLE;
     NVIC_Init(&n);

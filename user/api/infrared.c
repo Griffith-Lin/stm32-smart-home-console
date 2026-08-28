@@ -4,6 +4,9 @@
 //当 APB 预分频系数 = 1 时（也就是APB没有对AHB分频时）：定时器时钟 = APB 总线时钟。
 //当 APB 预分频系数 ≠ 1 时：定时器时钟 = APB 总线时钟 × 2。
 
+
+//抢占优先级1 合理。NEC 数据位间隔 ~560μs，时间敏感，必须最高
+
 //PE6 IR_RX  tim9_ch2的输入捕获 
 //有红外信号时3638T输出低电平，无信号则高电平
 void irm_3638T_ini(uint16_t psc,uint16_t arr)
@@ -99,7 +102,7 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 //            printf("total=%x\r\n",infrared_buf);     
             ir_command = (infrared_buf>>16) & 0xff ;   
                
-            printf("C=%d\r\n",ir_command);
+//            printf("C=%d\r\n",ir_command);
             infrared_buf=0;//清空
             ir_begin_flag=0;//码头标志位清0
             

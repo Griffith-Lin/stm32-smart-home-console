@@ -90,9 +90,9 @@ void USART3_IRQHandler(void)
  
         hlk_getcommand_flag=1;
        
-        //命令词小科小科，接收串口返回数据00 35 0a
-        printf("%02x %02x %02x",str3_buf[0],str3_buf[1],str3_buf[2]);
-        printf("\r\n");
+//        //命令词小科小科，接收串口返回数据00 35 0a
+//        printf("%02x %02x %02x",str3_buf[0],str3_buf[1],str3_buf[2]);
+//        printf("\r\n");
         i=0;
         usart3_flag=1;
     }

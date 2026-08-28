@@ -209,7 +209,7 @@ void RTC_Alarm_IRQHandler(void)
 	{
 		RTC_ClearITPendingBit(RTC_IT_ALRA);
 		
-		printf("时间到了\r\n");
+//		printf("时间到了\r\n");
 	}
 	EXTI_ClearITPendingBit(EXTI_Line17);
 }
