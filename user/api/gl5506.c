@@ -1,5 +1,6 @@
 #include "gl5506.h"
 
+//GL5506 是一款非常经典的 硫化镉（CdS）光敏电阻，也称为“光导管”或“光敏电阻器”。
 //pc0 adc1
 void adc_GL5506_ini(void)
 {

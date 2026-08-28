@@ -234,6 +234,7 @@ void USART2_IRQHandler(void)
 uint16_t fan_speed=0;
 uint16_t sg90_angle=0;
 uint8_t music_play=0;
+uint32_t lamp=0;
 
 //用返回的信息做判断
 void esp_analysis(void)
@@ -254,6 +255,8 @@ void esp_analysis(void)
         printf("LED1_ON\r\n");
         LED1_ON;
     }
+    
+    
     else if(strstr((const char *)str2_buf, "{\"fan_speed\":"))   // +MQTTSUBRECV:0,"attributes/push",20,{"fan_speed":800} 匹配到字段标记
     {
         char *p = strstr((const char *)str2_buf, "fan_speed");
@@ -285,6 +288,8 @@ void esp_analysis(void)
         Motor_Control(fan_speed*10);//应用端是0到100的输入范围
         printf("fan_speed:%u\r\n", fan_speed*10);
     }
+    
+    
     else if(strstr((const char *)str2_buf, "{\"sg90\":"))   // +MQTTSUBRECV:0,"attributes/push",20,{"fan_speed":800} 匹配到字段标记
     {
         char *p = strstr((const char *)str2_buf, "sg90");
@@ -304,9 +309,11 @@ void esp_analysis(void)
         
 
         sg90_set_angle(sg90_angle);
-        printf("sg90_angle:%u\r\n", sg90_angle);
+        printf("sg90_angle:%d\r\n", sg90_angle);
     }
-    else if(strstr((const char *)str2_buf, "{\"music\":"))   // +MQTTSUBRECV:0,"attributes/push",20,{"fan_speed":800} 匹配到字段标记
+    
+    
+    else if(strstr((const char *)str2_buf, "{\"music\":"))   
     {
         char *p = strstr((const char *)str2_buf, "music");
         p = strchr(p, ':');                     // 定位冒号
@@ -319,7 +326,7 @@ void esp_analysis(void)
         music_play = 0;        
             
         music_play = *p - '0';
-  
+        printf("music_play=%d\r\n",music_play);
                 
         if(music_play==0)
         {
@@ -341,6 +348,8 @@ void esp_analysis(void)
         status_dev.PlayState =PLAY_PREVIOUS;
         }       
     }
+    
+    
     else if(strstr((const char *)str2_buf,"{\"relay\":1}"))
     {
         printf("RELAY_ON\r\n");
@@ -350,7 +359,41 @@ void esp_analysis(void)
     {
         printf("RELAY_OFF\r\n");
         RELAY_OFF;
-    }    
+    }  
+    
+        
+    else if(strstr((const char *)str2_buf, "{\"lamp_color\":"))   
+    {
+        char *p = strstr((const char *)str2_buf, "lamp_color");
+        p = strchr(p, ':');                     // 定位冒号
+        if (p == NULL)
+            return;
+        p++;                                    // 跳过冒号
+        while (*p == ' ' || *p == '\r' || *p == '\n')  // 容忍冒号后的空格
+            p++;
+
+        lamp = 0;
+        while (*p >= '0' && *p <= '9')          // 逐位累加出数值
+        {
+            lamp = lamp * 10 + (*p - '0');
+            p++;
+        }
+        uint8_t r = (lamp >> 16) & 0xFF; // 取高8位
+        uint8_t g = (lamp >> 8) & 0xFF;  // 取中8位
+        uint8_t b = lamp & 0xFF;         // 取低8位
+        ws2812e_open_reset(g,r,b,4);
+        printf("lamp_color:%#x\r\n", lamp);
+    }        
+    else if(strstr((const char *)str2_buf,"{\"lamp_switch\":1}"))
+    {
+        ws2812e_open_reset(255,255,255,4);
+        printf("lamp_ON\r\n");        
+    }  
+    else if(strstr((const char *)str2_buf,"{\"lamp_switch\":0}"))
+    {
+        ws2812e_open_reset(0,0,0,4);
+        printf("lamp_OFF\r\n");        
+    }   
 }
 
 

@@ -227,6 +227,7 @@ void ff_test(void)
 
 
 char t_cmd[100]={0};
+uint16_t adc_arr[2];
 static uint8_t  pub_busy = 0;        // 1=有发布在途中
 static uint8_t  pub_sel  = 0;        // 0=tem 1=hu 2=human_tem
 static uint32_t last_pub = 0;
@@ -272,11 +273,34 @@ void Tcloud_report(void)             // 主循环每轮调用，替换 Tcloud_tem_hu 和 Tc
                      "AT+MQTTPUB=0,\"attributes\",\"{\\\"human_tem\\\":%.2f}\",0,0\r\n",
                      temperature_calculate(mlx90614_buf));
             break;
+        case 3:  // gl5506光照强度
+            while(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)==RESET);//转换完成退出阻塞
+            adc_arr[0]=ADC_GetConversionValue(ADC1);
+            while(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)==RESET);//转换完成退出阻塞
+            adc_arr[1]=ADC_GetConversionValue(ADC1);
+        
+            snprintf(t_cmd, sizeof(t_cmd),
+                     "AT+MQTTPUB=0,\"attributes\",\"{\\\"illumination\\\":%.2f}\",0,0\r\n",
+                      (4095-adc_arr[1])/(float)4095 *100);
+            break;
+            
+        case 4:  // gl5506火焰指数
+            while(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)==RESET);//转换完成退出阻塞
+            adc_arr[0]=ADC_GetConversionValue(ADC1);
+            while(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)==RESET);//转换完成退出阻塞
+            adc_arr[1]=ADC_GetConversionValue(ADC1);
+        
+            snprintf(t_cmd, sizeof(t_cmd),
+                     "AT+MQTTPUB=0,\"attributes\",\"{\\\"fire\\\":%d}\",0,0\r\n",
+                      adc_arr[1]);
+            break;
     }
-    pub_sel = (pub_sel + 1) % 3;
+    pub_sel = (pub_sel + 1) % 5;//任务选择
 
     idle_flag = 0;
     usart2_send_string((uint8_t*)t_cmd);
     pub_busy = 1;
 }
+
+
 

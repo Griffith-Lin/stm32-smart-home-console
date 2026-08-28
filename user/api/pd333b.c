@@ -1,6 +1,6 @@
 #include "pd333b.h"
 
-
+//PD333B 是一款 5mm 插件式红外光敏二极管（Photodiode），常用于红外接收、对射检测或环境光感知。
 //pc1 ADC1_IN11
 void pd333b_adc_ini(void)
 {
