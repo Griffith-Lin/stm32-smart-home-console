@@ -53,8 +53,8 @@ void W25Qxx_test(void)
 
 
 
-volatile uint8_t mlx90614_buf[2]={0};
-volatile uint16_t mlx90614_read_flag=0;
+uint8_t mlx90614_buf[2]={0};
+uint16_t mlx90614_read_flag=0;
 
 void mlx90614_test(void)
 {
@@ -223,5 +223,60 @@ void ff_test(void)
 
     /* 7. 关闭 */
     f_close(&fil);
+}
+
+
+char t_cmd[100]={0};
+static uint8_t  pub_busy = 0;        // 1=有发布在途中
+static uint8_t  pub_sel  = 0;        // 0=tem 1=hu 2=human_tem
+static uint32_t last_pub = 0;
+
+void Tcloud_report(void)             // 主循环每轮调用，替换 Tcloud_tem_hu 和 Tcloud_mlx90614_tem
+{
+    uint32_t now = GetTim6Tick();
+
+    if (pub_busy)
+    {
+        if (idle_flag)               // 应答到了，本轮结束
+        {
+            idle_flag = 0;
+            pub_busy  = 0;
+        }
+        else if (now - last_pub > 3000)
+        {
+            pub_busy = 0;
+        }
+        return;
+    }
+
+    if (now - last_pub < 10000)
+        return;
+    last_pub = now;
+
+    switch (pub_sel)
+    {
+        case 0:  // SHT30 温度
+            get_tem_hu(sht30_i2c_send(0x2c06));
+            snprintf(t_cmd, sizeof(t_cmd),
+                     "AT+MQTTPUB=0,\"attributes\",\"{\\\"tem\\\":%.2f}\",0,0\r\n",
+                     (float)tem_data);
+            break;
+        case 1:  // SHT30 湿度（直接用上次读的缓存值）
+            snprintf(t_cmd, sizeof(t_cmd),
+                     "AT+MQTTPUB=0,\"attributes\",\"{\\\"hu\\\":%.2f}\",0,0\r\n",
+                     (float)hu_data);
+            break;
+        case 2:  // MLX 人体温度
+            mlx90614_i2c_read(0x07, mlx90614_buf);
+            snprintf(t_cmd, sizeof(t_cmd),
+                     "AT+MQTTPUB=0,\"attributes\",\"{\\\"human_tem\\\":%.2f}\",0,0\r\n",
+                     temperature_calculate(mlx90614_buf));
+            break;
+    }
+    pub_sel = (pub_sel + 1) % 3;
+
+    idle_flag = 0;
+    usart2_send_string((uint8_t*)t_cmd);
+    pub_busy = 1;
 }
 
