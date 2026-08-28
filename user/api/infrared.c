@@ -51,7 +51,7 @@ void irm_3638T_ini(uint16_t psc,uint16_t arr)
     NVIC_InitTypeDef nvic_InitTypeDef={0};
     
     nvic_InitTypeDef.NVIC_IRQChannel=TIM1_BRK_TIM9_IRQn;
-    nvic_InitTypeDef.NVIC_IRQChannelPreemptionPriority=3;
+    nvic_InitTypeDef.NVIC_IRQChannelPreemptionPriority=1;
     nvic_InitTypeDef.NVIC_IRQChannelSubPriority=0;
     nvic_InitTypeDef.NVIC_IRQChannelCmd=ENABLE;
     
@@ -80,6 +80,8 @@ uint16_t count=0;//校验32位完整性
 uint8_t ir_begin_flag=0;
 uint8_t ir_command=0;
 
+uint8_t deal_ir_flag=0;//接收的正确红外，处理标志
+
 //红外接收端接收到红外后，返回给芯片的是，逻辑1是560us低+1680us高，逻辑0应该是560us低+560us 高 .(接收头接收到的信号的反向的)
 //红外接收端空闲时是高电平
 //×2 倍频器只对定时器生效，非定时器外设（包括 USART）的时钟始终严格等于 PCLK 本身。
@@ -100,6 +102,35 @@ void TIM1_BRK_TIM9_IRQHandler(void)
             printf("C=%d\r\n",ir_command);
             infrared_buf=0;//清空
             ir_begin_flag=0;//码头标志位清0
+            
+            deal_ir_flag=1;//处理一次
+            
+            //进入歌曲播放后，主函数就走不下去了，执行不到其它函数。除非中断函数
+            if(ir_command==69)
+            {
+            beep_one();
+            }
+            else if(ir_command==8)
+            {
+                beep_one();
+             status_dev.PlayState=PLAY_PREVIOUS;//上一曲
+            }
+            else if(ir_command==90)
+            {
+                beep_one();
+             status_dev.PlayState=PLAY_NEXT;//下一曲
+            }
+            else if(ir_command==28)
+            {
+                beep_one();
+             
+             if(audiodev.status & 0X01)          // 正在播放 → 发暂停命令
+             status_dev.PlayState = PLAY_PAUSE;
+             else  
+             {// 已暂停 → 发继续命令
+             status_dev.PlayState = PLAY_PLAY;
+             }
+            }
             
         }
     }
@@ -160,5 +191,34 @@ void TIM1_BRK_TIM9_IRQHandler(void)
     }
 }
 
-
+//69 70 71 
+//68 64 67 
+// 7 21 9 
+//22 25 13 
+//   24 
+// 8 28 90 
+//   82
+void deal_if(void)
+{
+    if(deal_ir_flag==0)
+        return;
+    
+    if(ir_command==69)
+    {
+    beep_one();
+    }
+    else if(ir_command==8)
+    {
+        beep_one();
+     status_dev.PlayState=PLAY_PREVIOUS;//上一曲,进入歌曲播放后，主函数就走不下去了，执行不到其它函数。除非中断函数
+    }
+    else if(ir_command==90)
+    {
+        beep_one();
+     status_dev.PlayState=PLAY_NEXT;//下一曲
+    }
+    
+    
+    deal_ir_flag=0;
+}
 

@@ -174,7 +174,7 @@ void EXTI0_IRQHandler(void)
     
     
 //    status_dev.PlayState = PLAY_NEXT;           // 短按:下一首
-    status_dev.PlayState = PLAY_STOP;
+//    status_dev.PlayState = PLAY_STOP;
 
 //        if(GPIO_ReadOutputDataBit(GPIOE,GPIO_Pin_0)==RESET)
 //        {
@@ -188,6 +188,8 @@ void EXTI0_IRQHandler(void)
         
         
 //        beep_one();
+    
+    Audio_MusicPlay();
     
     
     
@@ -213,7 +215,7 @@ void key_scan_tim_ini(void)   // main 里调用
 
     NVIC_InitTypeDef n = {0};
     n.NVIC_IRQChannel                   = TIM1_UP_TIM10_IRQn;
-    n.NVIC_IRQChannelPreemptionPriority = 2;   // 高于 EXTI0(3),低于播放DMA,扫描不丢
+    n.NVIC_IRQChannelPreemptionPriority = 1;   
     n.NVIC_IRQChannelSubPriority        = 0;
     n.NVIC_IRQChannelCmd                = ENABLE;
     NVIC_Init(&n);

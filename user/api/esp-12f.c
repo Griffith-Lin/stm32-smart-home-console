@@ -335,9 +335,8 @@ void esp_analysis(void)
         }
         else if(music_play == 1)
         {
-//            beep_one();
-            Audio_MusicPlay();
-//        Wav_PlaySong((u8 *)"0:MUSIC/许嵩、何曼婷 - 素颜.wav");
+          status_dev.PlayState = PLAY_PLAY;   // 关键：清掉残留命令，发开播命令
+          Audio_MusicPlay();
         }
         else if(music_play==2)
         {

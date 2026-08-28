@@ -123,7 +123,7 @@ int main(void)
 
       Tcloud_report();//上报本地json数据到云端      
   
-
+        deal_if();//接收红外
 
         
 
