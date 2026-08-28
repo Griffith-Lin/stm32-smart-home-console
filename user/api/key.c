@@ -173,8 +173,17 @@ void EXTI0_IRQHandler(void)
 //          违反中断设计原则：ISR应“快进快出”，只做最少必要工作（读状态、清标志、设标志位），耗时操作必须移到主循环。
     
     
-    
+//    status_dev.PlayState = PLAY_NEXT;           // 短按:下一首
+//    status_dev.PlayState = PLAY_STOP;
 
+        if(GPIO_ReadOutputDataBit(GPIOE,GPIO_Pin_0)==RESET)
+        {
+        GPIO_SetBits(GPIOE,GPIO_Pin_0);
+        }
+        else
+        {
+        GPIO_ResetBits(GPIOE,GPIO_Pin_0);
+        }
     }
         
         
@@ -279,7 +288,8 @@ void TIM1_UP_TIM10_IRQHandler(void)
     keys[1].event_flag = KEY_EVENT_NONE;
     status_dev.PlayState = PLAY_NEXT;           // 短按:下一首
         
-        wifi_send_command("AT+MQTTPUB=0,\"attributes\",\"{\\\"led\\\":1}\",0,0\r\n","OK",10000);//上报给云平台
+//        wifi_send_command("AT+MQTTPUB=0,\"attributes\",\"{\\\"led\\\":1}\",0,0\r\n","OK",10000);//上报给云平台
+        
     }
     
     
