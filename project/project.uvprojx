@@ -573,6 +573,16 @@
               <FileType>5</FileType>
               <FilePath>..\user\api\relay.h</FilePath>
             </File>
+            <File>
+              <FileName>font1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\font1.c</FilePath>
+            </File>
+            <File>
+              <FileName>font1.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\font1.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

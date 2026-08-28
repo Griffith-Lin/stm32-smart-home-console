@@ -236,24 +236,28 @@ void Tcloud_report(void)             // 主循环每轮调用，替换 Tcloud_tem_hu 和 Tc
 {
     uint32_t now = GetTim6Tick();
 
-    if (pub_busy)
+    //每次进来都先判断，有没有发布给esp的命令还没收到应答
+    if (pub_busy)//如果还没收到应答
     {
         if (idle_flag)               // 应答到了，本轮结束
         {
             idle_flag = 0;
-            pub_busy  = 0;
+            pub_busy  = 0;//busy清零，应答已收到
         }
-        else if (now - last_pub > 3000)
+        else if (now - last_pub > 3000)//应答没到，且已经过了3秒
         {
-            pub_busy = 0;
+            pub_busy = 0;//清除busy,防止卡死
         }
         return;
     }
 
+    //判断间隔是否小于10秒
     if (now - last_pub < 10000)
         return;
-    last_pub = now;
+    
+    last_pub = now;//获取当前tick
 
+    //选择该执行的任务
     switch (pub_sel)
     {
         case 0:  // SHT30 温度
@@ -295,11 +299,13 @@ void Tcloud_report(void)             // 主循环每轮调用，替换 Tcloud_tem_hu 和 Tc
                       adc_arr[1]);
             break;
     }
-    pub_sel = (pub_sel + 1) % 5;//任务选择
+    pub_sel = (pub_sel + 1) % 5;//下次执行下一个任务
 
-    idle_flag = 0;
-    usart2_send_string((uint8_t*)t_cmd);
-    pub_busy = 1;
+    
+    
+    idle_flag = 0;//应答结束
+    usart2_send_string((uint8_t*)t_cmd);//发送命令给esp-12f
+    pub_busy = 1;//busy置一，直到esp返回应答
 }
 
 

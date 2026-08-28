@@ -62,6 +62,7 @@ int main(void)
     // 复位时第一个灯闪绿灯，原因是硬件浮空，加下拉电阻解决
     // WS2812 的 DIN 脚内部有弱上拉（~100kΩ），会把线往上拽。但 PCB 走线本身是天线，会耦合周围的电磁噪声。结果就是 DIN 上的电压随机波动——可能刚好跨过 WS2812 的高低电平阈值，被当成数据吞进去。
     // 多调用一次变色函数，解决复位时第一个灯常亮绿灯。原因可能是复位时有脏数据进入灯带
+    //因为阻塞延时函数delay_us有问题，over
 
     RTC_Cal_Config();                   // 时间初始化
     alarm_ini(RTC_H12_PM, 0, 0, 30, 3); // 闹钟初始化
@@ -73,6 +74,9 @@ int main(void)
 
     LCD_Init();
     CST816S_Init();
+    
+    LCD_Dis_Pic(150,100,gImage_play);
+    
     
     relay_ini();
 
@@ -123,7 +127,7 @@ int main(void)
 
       Tcloud_report();//上报本地json数据到云端      
   
-        deal_if();//接收红外
+      deal_if();//接收红外
 
         
 
