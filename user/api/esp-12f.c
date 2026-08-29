@@ -330,13 +330,13 @@ void esp_analysis(void)
                 
         if(music_play==0)
         {
-        //退出音乐播放函数
-        status_dev.PlayState = PLAY_STOP;
+        
+        status_dev.PlayState = PLAY_PAUSE;
         }
         else if(music_play == 1)
-        {
+        {           
           status_dev.PlayState = PLAY_PLAY;   // 关键：清掉残留命令，发开播命令
-          Audio_MusicPlay();
+          Audio_MusicStart();
         }
         else if(music_play==2)
         {
