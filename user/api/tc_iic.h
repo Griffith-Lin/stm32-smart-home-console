@@ -6,6 +6,8 @@
 #include "stdio.h"
 #include "delay.h"
 #include "motor.h"
+#include "touch_ui.h"
+
 
 #define CTP_SCL_H (GPIOA->ODR |= (1 << 8))
 #define CTP_SCL_L (GPIOA->ODR &=~ (1 << 8))

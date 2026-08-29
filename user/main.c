@@ -75,7 +75,9 @@ int main(void)
     LCD_Init();
     CST816S_Init();
     
+    LCD_Dis_Pic(150,50,gImage_last);
     LCD_Dis_Pic(150,100,gImage_play);
+    LCD_Dis_Pic(150,150,gImage_next);
     
     
     relay_ini();
@@ -102,7 +104,7 @@ int main(void)
 	I2S2_Init(I2S_Standard_Phillips, I2S_Mode_MasterTx, I2S_CPOL_Low, I2S_DataFormat_16bextended);	//飞利浦标准,主机发送,时钟低电平有效,16位扩展帧长度
 	I2S2_SampleRate_Set(44100);	//设置采样率
 	I2S2_TX_DMA_Init(NULL, NULL, WAV_I2S_TX_DMA_BUFSIZE/2); 				//配置TX DMA
-	status_dev.volume = 50;	//初始保存音量 0~63
+	status_dev.volume = 30;	//初始保存音量 0~63
 	WM8978_SPKvol_Set(status_dev.volume);
     
     key_scan_tim_ini();
@@ -118,16 +120,17 @@ int main(void)
 	while(1)
 	{
         
-
         
-      esp_analysis(); //判断分包平台下发的json
         
-      HLK_Control(hlk_getcommand());  
+
+        esp_analysis(); //判断分包平台下发的json
+
+        HLK_Control(hlk_getcommand());  
 
 
-      Tcloud_report();//上报本地json数据到云端      
-  
-      deal_if();//接收红外
+        Tcloud_report();//上报本地json数据到云端      
+
+        deal_if();//接收红外
 
         
 

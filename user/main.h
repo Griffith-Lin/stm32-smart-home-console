@@ -20,7 +20,6 @@
 #include "infrared.h"
 #include "SHT30.h"
 #include "lcd.h"
-#include "font.h"
 #include "tc_iic.h"
 #include "sys.h"
 #include "dma.h"
@@ -35,6 +34,7 @@
 #include "esp-12f.h"
 #include "relay.h"
 #include "font1.h"
+#include "touch_ui.h"
 
 #include <stddef.h>
 #include <stdint.h> // °üº¬uint8_t, uint16_t

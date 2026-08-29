@@ -583,6 +583,16 @@
               <FileType>5</FileType>
               <FilePath>..\user\api\font1.h</FilePath>
             </File>
+            <File>
+              <FileName>touch_ui.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\user\api\touch_ui.h</FilePath>
+            </File>
+            <File>
+              <FileName>touch_ui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\api\touch_ui.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

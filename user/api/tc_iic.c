@@ -323,6 +323,11 @@ void EXTI1_IRQHandler(void)
 
         if (CST816S_Scan() == 1) /* 读到有效触点才动作 */
         {
+            
+            
+            touch_ui_scan();
+            
+          
             if (tp_dev.x[0] < 100)
             {
                 if (motor_speed <= 700)
