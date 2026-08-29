@@ -4,6 +4,91 @@ __status_dev status_dev;
 __wavctrl wavctrl;								//WAV控制结构体，解析WAV格式的头部信息
 volatile unsigned char wavtransferend = 0;	//i2s传输完成标志
 volatile unsigned char wavwitchbuf    = 0;	//i2sbufx指示标志
+
+
+
+wav_phase_t wav_phase = WAV_IDLE;
+static unsigned int fillnum_last = 0;          /* 跨 step 记住上一轮填充量 */
+
+
+/* 关闭当前歌曲并释放内存：step 收尾点 + Wav_PlaySong 失败路径调用（主循环上下文，安全） */
+static void Wav_CloseSong(void)
+{
+    if (audiodev.file)              /* NULL 保护：mymalloc 失败路径不崩溃 */
+    {
+        f_close(audiodev.file);
+        myfree(SRAMIN, audiodev.file);
+    }
+    if (audiodev.i2sbuf1) myfree(SRAMIN, audiodev.i2sbuf1);
+    if (audiodev.i2sbuf2) myfree(SRAMIN, audiodev.i2sbuf2);
+    audiodev.file    = NULL;
+    audiodev.i2sbuf1 = NULL;
+    audiodev.i2sbuf2 = NULL;
+}
+
+
+
+/* 主循环驱动：每圈调用一次，非阻塞。返回 0=继续；PLAY_NEXT/PLAY_PREVIOUS=切歌码；1=本曲结束 */
+u8 Wav_PlayStep(void)
+{
+    unsigned int fillnum;
+
+    /* 1) 先消费控制请求：暂停中也要响应恢复/切歌/停止 */
+    if (status_dev.PlayState == PLAY_PAUSE)
+    {
+        audiodev.status &= ~(1<<0);      /* 清播放位：DMA 回调会把缓冲输出静音 */
+        status_dev.PlayState = PLAY_CLEAR;
+        wav_phase = WAV_PAUSED;
+        return 0;
+    }
+    if (status_dev.PlayState == PLAY_PLAY)
+    {
+        WM8978_SPKvol_Set(status_dev.volume);
+        audiodev.status |= 0X01;
+        status_dev.PlayState = PLAY_CLEAR;
+        if (wav_phase == WAV_PAUSED) wav_phase = WAV_FILLING;  /* 从暂停恢复 */
+    }
+    else if (status_dev.PlayState == PLAY_PREVIOUS ||
+             status_dev.PlayState == PLAY_NEXT)
+    {
+        u8 r = status_dev.PlayState;
+        status_dev.PlayState = PLAY_CLEAR;
+        Audio_Stop();
+        wav_phase = WAV_IDLE;
+        Wav_CloseSong();
+        return r;
+    }
+    else if (status_dev.PlayState == PLAY_STOP)
+    {
+        status_dev.PlayState = PLAY_CLEAR;
+        Audio_Stop();
+        wav_phase = WAV_STOPPED;         /* 停止：不再自动开歌 */
+        Wav_CloseSong();
+        return 0;
+    }
+
+    if (wav_phase == WAV_PAUSED || wav_phase == WAV_STOPPED) return 0;  /* 暂停/停止：不填充 */
+
+    if (wavtransferend == 0) return 0;         /* DMA 正在放缓冲：跳过 */
+    wavtransferend = 0;
+
+    if (fillnum_last != WAV_I2S_TX_DMA_BUFSIZE) /* 播放结束 */
+    {
+        Audio_Stop();
+        Wav_CloseSong();
+        wav_phase = WAV_IDLE;
+        return WAV_END;                        /* 通知上层：本曲播完 */
+    }
+
+    if (wavwitchbuf) fillnum = Wav_BuffFill(audiodev.i2sbuf2, WAV_I2S_TX_DMA_BUFSIZE);
+    else             fillnum = Wav_BuffFill(audiodev.i2sbuf1, WAV_I2S_TX_DMA_BUFSIZE);
+    fillnum_last = fillnum;
+
+    return 0;
+}
+
+
+
 /*********************************************************************************************************
  * 函 数 名 : WavDecode_Init
  * 功能说明 : 解析指定wav文件的头部信息
@@ -60,7 +145,7 @@ unsigned char Wav_DecodeInit(unsigned char *fname, __wavctrl* wavx)
 	myfree(SRAMCCM, ftemp);		//释放内存
 	myfree(SRAMCCM, buf); 
 	
-	return 0;
+	return res;
 }
 /*********************************************************************************************************
 * 函 数 名 : Wav_BuffFill
@@ -76,7 +161,7 @@ unsigned int Wav_BuffFill(unsigned char *buf, unsigned short size)
 
 	f_read(audiodev.file, buf, size, (UINT *)&bread);	
 	if(bread < size)									//不够数据了,补充0
-		for(i=bread; i<size-bread; i++)
+		for(i=bread; i<size; i++)
 			buf[i] = 0; 
 	return bread;
 }  
@@ -124,93 +209,134 @@ void Wav_GetCurtime(FIL *fx, __wavctrl *wavx)
 * 返 回 值 : 
 * 备    注 : 无
 *********************************************************************************************************/ 
+//u8 Wav_PlaySong(u8* fname)
+//{
+//	unsigned char res = 0;  
+//	unsigned int fillnum = 0; 
+//	
+//	audiodev.file = (FIL*)mymalloc(SRAMIN, sizeof(FIL));			//申请用于存储文件描述符的内存
+//	audiodev.i2sbuf1 = mymalloc(SRAMIN, WAV_I2S_TX_DMA_BUFSIZE);	//申请缓存区1的内存，4kb大小
+//	audiodev.i2sbuf2 = mymalloc(SRAMIN, WAV_I2S_TX_DMA_BUFSIZE);	//申请缓存区2的内存，4kb大小
+//	
+//	if(audiodev.file && audiodev.i2sbuf1 && audiodev.i2sbuf2)		//判断有没有申请成功，失败一个都会直接结束
+//	{ 
+//		res = Wav_DecodeInit(fname, &wavctrl);	//得到文件的信息
+//		if(res == 0)	//解析文件成功
+//		{
+//			Audio_Stop();
+//			DMA1_Stream4->M0AR = (unsigned int)audiodev.i2sbuf1;	//绑定缓冲区一
+//			DMA1_Stream4->M1AR = (unsigned int)audiodev.i2sbuf2;	//绑定缓冲区二
+//			i2s_tx_callback = Wav_I2sDmaTx_Callback;				//绑定回调函数
+//			
+//			res = f_open(audiodev.file, (TCHAR *)fname, FA_READ);	//打开文件
+//			if(res == 0)
+//			{
+//				f_lseek(audiodev.file, wavctrl.datastart);			//跳过文件头
+//				fillnum = Wav_BuffFill(audiodev.i2sbuf1, WAV_I2S_TX_DMA_BUFSIZE);
+//				fillnum = Wav_BuffFill(audiodev.i2sbuf2, WAV_I2S_TX_DMA_BUFSIZE);
+//				Audio_Start();  
+//				WM8978_SPKvol_Set(status_dev.volume);
+//                
+//                
+//                
+//				while(res == 0)
+//				{ 
+//					while(wavtransferend == 0);				//等待wav传输完成; 
+//					wavtransferend = 0;
+//					if(fillnum != WAV_I2S_TX_DMA_BUFSIZE)	//播放结束?
+//					{
+//						res = 0;
+//						break;
+//					} 
+// 					if(wavwitchbuf)	fillnum = Wav_BuffFill(audiodev.i2sbuf2, WAV_I2S_TX_DMA_BUFSIZE);//填充buf2
+//					else 			fillnum = Wav_BuffFill(audiodev.i2sbuf1, WAV_I2S_TX_DMA_BUFSIZE);//填充buf1
+//					while(1)
+//					{
+//						if(status_dev.PlayState == PLAY_PAUSE)	//暂停
+//						{
+//							audiodev.status &= ~(1<<0);
+//							status_dev.PlayState = PLAY_CLEAR;
+//						}
+//						if(status_dev.PlayState == PLAY_PLAY)	//播放
+//						{
+//							WM8978_SPKvol_Set(status_dev.volume);
+//							audiodev.status |= 0X01;
+//							status_dev.PlayState = PLAY_CLEAR;
+//						}
+//						if(status_dev.PlayState==PLAY_PREVIOUS || status_dev.PlayState==PLAY_NEXT)		//下一曲/上一曲
+//						{
+//							res = status_dev.PlayState;
+//							status_dev.PlayState = PLAY_CLEAR;
+//							break; 
+//						}
+//						Wav_GetCurtime(audiodev.file, &wavctrl);			//得到总时间和当前播放的时间 
+////						Audio_MsgShow(wavctrl.totsec, wavctrl.cursec);		//显示到屏幕
+//						if(status_dev.PlayState == PLAY_STOP)	
+//						{
+//							res = 0XFF;
+//							status_dev.PlayState = PLAY_CLEAR;
+//							break;
+//						}
+//						if((audiodev.status & 0X01) == false)	Delay_Ms(10);
+//						else break;
+//					}
+//				}
+//				Audio_Stop(); 
+//			}else res=0XFF; 
+//		}else res=0XFF;
+//	}else res=0XFF; 
+//	
+//	f_close(audiodev.file);
+//	myfree(SRAMIN, audiodev.file);		//释放内存 
+//	myfree(SRAMIN, audiodev.i2sbuf1);	//释放内存
+//	myfree(SRAMIN, audiodev.i2sbuf2);	//释放内存 
+//	audiodev.file    = NULL;
+//	audiodev.i2sbuf1 = NULL;
+//	audiodev.i2sbuf2 = NULL;
+
+//	return res;
+//} 
+	
+
+
 u8 Wav_PlaySong(u8* fname)
 {
-	unsigned char res = 0;  
-	unsigned int fillnum = 0; 
-	
-	audiodev.file = (FIL*)mymalloc(SRAMIN, sizeof(FIL));			//申请用于存储文件描述符的内存
-	audiodev.i2sbuf1 = mymalloc(SRAMIN, WAV_I2S_TX_DMA_BUFSIZE);	//申请缓存区1的内存，4kb大小
-	audiodev.i2sbuf2 = mymalloc(SRAMIN, WAV_I2S_TX_DMA_BUFSIZE);	//申请缓存区2的内存，4kb大小
-	
-	if(audiodev.file && audiodev.i2sbuf1 && audiodev.i2sbuf2)		//判断有没有申请成功，失败一个都会直接结束
-	{ 
-		res = Wav_DecodeInit(fname, &wavctrl);	//得到文件的信息
-		if(res == 0)	//解析文件成功
+	unsigned char res = 0;
+	unsigned int fillnum = 0;
+
+	audiodev.file = (FIL*)mymalloc(SRAMIN, sizeof(FIL));
+	audiodev.i2sbuf1 = mymalloc(SRAMIN, WAV_I2S_TX_DMA_BUFSIZE);
+	audiodev.i2sbuf2 = mymalloc(SRAMIN, WAV_I2S_TX_DMA_BUFSIZE);
+
+	if(audiodev.file && audiodev.i2sbuf1 && audiodev.i2sbuf2)
+	{
+		res = Wav_DecodeInit(fname, &wavctrl);
+		if(res == 0)
 		{
 			Audio_Stop();
-			DMA1_Stream4->M0AR = (unsigned int)audiodev.i2sbuf1;	//绑定缓冲区一
-			DMA1_Stream4->M1AR = (unsigned int)audiodev.i2sbuf2;	//绑定缓冲区二
-			i2s_tx_callback = Wav_I2sDmaTx_Callback;				//绑定回调函数
-			
-			res = f_open(audiodev.file, (TCHAR *)fname, FA_READ);	//打开文件
+			DMA1_Stream4->M0AR = (unsigned int)audiodev.i2sbuf1;
+			DMA1_Stream4->M1AR = (unsigned int)audiodev.i2sbuf2;
+			i2s_tx_callback = Wav_I2sDmaTx_Callback;
+
+			res = f_open(audiodev.file, (TCHAR *)fname, FA_READ);
 			if(res == 0)
 			{
-				f_lseek(audiodev.file, wavctrl.datastart);			//跳过文件头
+				f_lseek(audiodev.file, wavctrl.datastart);
 				fillnum = Wav_BuffFill(audiodev.i2sbuf1, WAV_I2S_TX_DMA_BUFSIZE);
 				fillnum = Wav_BuffFill(audiodev.i2sbuf2, WAV_I2S_TX_DMA_BUFSIZE);
-				Audio_Start();  
+				Audio_Start();
 				WM8978_SPKvol_Set(status_dev.volume);
-				while(res == 0)
-				{ 
-					while(wavtransferend == 0);				//等待wav传输完成; 
-					wavtransferend = 0;
-					if(fillnum != WAV_I2S_TX_DMA_BUFSIZE)	//播放结束?
-					{
-						res = 0;
-						break;
-					} 
- 					if(wavwitchbuf)	fillnum = Wav_BuffFill(audiodev.i2sbuf2, WAV_I2S_TX_DMA_BUFSIZE);//填充buf2
-					else 			fillnum = Wav_BuffFill(audiodev.i2sbuf1, WAV_I2S_TX_DMA_BUFSIZE);//填充buf1
-					while(1)
-					{
-						if(status_dev.PlayState == PLAY_PAUSE)	//暂停
-						{
-							audiodev.status &= ~(1<<0);
-							status_dev.PlayState = PLAY_CLEAR;
-						}
-						if(status_dev.PlayState == PLAY_PLAY)	//播放
-						{
-							WM8978_SPKvol_Set(status_dev.volume);
-							audiodev.status |= 0X01;
-							status_dev.PlayState = PLAY_CLEAR;
-						}
-						if(status_dev.PlayState==PLAY_PREVIOUS || status_dev.PlayState==PLAY_NEXT)		//下一曲/上一曲
-						{
-							res = status_dev.PlayState;
-							status_dev.PlayState = PLAY_CLEAR;
-							break; 
-						}
-						Wav_GetCurtime(audiodev.file, &wavctrl);			//得到总时间和当前播放的时间 
-//						Audio_MsgShow(wavctrl.totsec, wavctrl.cursec);		//显示到屏幕
-						if(status_dev.PlayState == PLAY_STOP)	
-						{
-							res = 0XFF;
-							status_dev.PlayState = PLAY_CLEAR;
-							break;
-						}
-						if((audiodev.status & 0X01) == false)	Delay_Ms(10);
-						else break;
-					}
-				}
-				Audio_Stop(); 
-			}else res=0XFF; 
+
+				fillnum_last = fillnum;     /* 预填量：step 判断是否只剩一块 */
+				wav_phase    = WAV_FILLING; /* step 接管 */
+				return 0;
+			}else res=0XFF;
 		}else res=0XFF;
-	}else res=0XFF; 
-	
-	f_close(audiodev.file);
-	myfree(SRAMIN, audiodev.file);		//释放内存 
-	myfree(SRAMIN, audiodev.i2sbuf1);	//释放内存
-	myfree(SRAMIN, audiodev.i2sbuf2);	//释放内存 
-	audiodev.file    = NULL;
-	audiodev.i2sbuf1 = NULL;
-	audiodev.i2sbuf2 = NULL;
+	}else res=0XFF;
 
+	Wav_CloseSong();                        /* 打开/解析失败：释放本次分配 */
 	return res;
-} 
-	
-
-
+}
 
 
 

@@ -27,12 +27,14 @@ typedef __packed struct
 }__audiodev; 
 extern __audiodev audiodev;	//“Ù¿÷≤•∑≈øÿ÷∆∆˜
 
+u8 Audio_MusicStep(void);
+void Audio_MusicStart(void);
+
 void Audio_Start(void);
 void Audio_Stop(void);
 unsigned short Audio_GetTnum(unsigned char *path);
 void Audio_IndexShow(unsigned char *fn, unsigned short index, unsigned short total);
 void Audio_MsgShow(unsigned int totsec,unsigned int cursec);
-void Audio_MusicPlay(void);
 unsigned char Audio_PlaySong(unsigned char* fname);
 
 unsigned char IdentifyResults(unsigned char *buf);

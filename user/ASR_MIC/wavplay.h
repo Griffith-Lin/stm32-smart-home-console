@@ -103,6 +103,14 @@ typedef enum
 	PLAY_PLAY,		//播放音乐
 }PLAY_STATE;
 
+
+typedef enum { WAV_IDLE, WAV_FILLING, WAV_PAUSED, WAV_STOPPED } wav_phase_t;
+extern wav_phase_t wav_phase;      /* 播放相位：Audio_MusicStep 用它判断是否在播 */
+
+#define WAV_END 0xFE        /* 本曲自然播完：与 PLAY_* 枚举值错开 */
+u8 Wav_PlayStep(void);
+unsigned int Wav_BuffFill(unsigned char *buf, unsigned short size);
+
 void Wav_I2sDmaTx_Callback(void); 
 unsigned char Wav_PlaySong(unsigned char *fname);
 

@@ -120,7 +120,7 @@ int main(void)
 	while(1)
 	{
         
-        
+        Audio_MusicStep();    
         
 
         esp_analysis(); //判断分包平台下发的json
