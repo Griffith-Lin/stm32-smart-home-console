@@ -101,6 +101,63 @@ flowchart LR
 | 红外 EXTI / 输入捕获 | NEC 协议解码（注意：输入捕获与 WS2812E 共用 TIM3_CH3，当前已注释禁用） |
 | I2S2 TX DMA | WAV 音频播放 |
 
+### 1.5 中断优先级分配
+
+分组配置：`main.c` 中 `NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3)` → **3 位抢占优先级（0~7）+ 1 位子优先级（0~1）**
+
+| 抢占 | 子 | IRQ | 位置 | 用途 |
+|---|---|---|---|---|
+| **1** | 0 | `TIM6_DAC_IRQn` | [tim.c:74](user/api/tim.c#L74) | 系统节拍 `GetTim6Tick` + 按键扫描定时 |
+| **1** | 0 | `TIM1_BRK_TIM9_IRQn` | [infrared.c:57](user/api/infrared.c#L57) | 红外 NEC 解码计时（时间关键，丢帧即整帧错乱） |
+| **2** | 1 | `DMA1_Stream4_IRQn` | [i2s.c:152](user/ASR_MIC/i2s.c#L152) | I2S2 TX DMA 音频播放（双缓冲切换，保证音频连续） |
+| 3 | 0 | `USART2_IRQn` | [esp-12f.c:39](user/api/esp-12f.c#L39) | ESP-12F 云通信（空闲中断收帧） |
+| 3 | 0 | `USART3_IRQn` | [hlk_v20.c:34](user/api/hlk_v20.c#L34) | HLK-V20 语音帧接收 |
+| 3 | 0 | `EXTI0_IRQn` | [key.c:114](user/api/key.c#L114) | 按键触发 |
+| 3 | 0 | `TIM1_UP_TIM10_IRQn` | [key.c:218](user/api/key.c#L218) | 按键扫描/长按计时（`key_scan_tim_ini`） |
+| 3 | 0 | `RTC_Alarm_IRQn` | [rtc.c:195](user/api/rtc.c#L195) | RTC 闹钟 |
+| 3 | 0 | `RTC_WKUP_IRQn` | [rtc.c:248](user/api/rtc.c#L248) | RTC 周期唤醒 |
+| 3 | 0 | `EXTI1_IRQn` | [tc_iic.c:46](user/api/tc_iic.c#L46) | CST816S 触摸中断 |
+| 3 | 0 | `TIM3_IRQn` | [tim.c:211](user/api/tim.c#L211) | 输入捕获（与 WS2812E 共用 TIM3_CH3，当前禁用） |
+| — | — | `DMA2_Stream5_IRQn` | [dma.c:254](user/api/dma.c#L254) | 串口 1 字库下载双缓冲 DMA（`DMA_Font_Config`，当前注释） |
+| — | — | `DMA2_Stream2_IRQn` | [dma.c:200](user/api/dma.c#L200) | USART1 RX DMA（`dma2_stream2_ini`，预留未用） |
+
+分配原则：
+
+1. **抢占优先级只分三档**：`1`（时间关键，丢帧即错——系统节拍、红外时序）→ `2`（音频 DMA，保证播放连续）→ `3`（通信/交互，丢一拍可重发/轮询补偿）。
+
+2. 子优先级只出现 0/1 两档：同抢占级内的中断按子优先级裁决（当前抢占 3 组内全为子 0；抢占 1 组内 TIM6/TIM9 为子 0、字库 DMA 为子 1）。**若改分组，需重审全部优先级**。
+
+3. USART1 仅做 `printf` 输出，接收中断已关闭（提交 `28653a7`），接收可走 DMA（预留）。
+
+   
+
+### 1.6 内存分配
+
+| 区域 | 大小 | 说明 |
+|---|---|---|
+| 启动文件栈 `Stack_Size` | **4KB** | [startup_stm32f40_41xxx.s](startup/startup_stm32f40_41xxx.s)，提交 `0e54388` 调整过 |
+| 启动文件堆 `Heap_Size` | **8KB** | 同上（`malloc`/`printf` 浮点等使用） |
+| MEM1（内部 SRAM） | **60KB** | 正点原子风格分块内存池，块 32B，16bit map 状态表（~2.56KB）；从 100KB 砍到 60KB 省内存 |
+| MEM2（外部 SRAM） | 960KB | `mymalloc.h` 预留定义，当前板未用 |
+| MEM3（CCM 内存） | 60KB | 仅供 CPU 直访                                                |
+| 音频 DMA 缓冲 | 2 × **8KB** | `WAV_I2S_TX_DMA_BUFSIZE = 8192`（[wavplay.h](user/ASR_MIC/wavplay.h)），双缓冲，192Kbps@24bit 时需 8192 才不卡 |
+
+内存池管理（[mymalloc.h](user/ASR_MIC/mymalloc.h) / [mymalloc.c](user/ASR_MIC/mymalloc.c)）：
+
+- 三个池共用一套结构 `mallco_dev`：`membase`（池基址）+ `memmap`（16bit 分配状态表）+ `memrdy`（就绪标志）。
+- 内部接口：`my_mem_init` / `my_mem_malloc` / `my_mem_free` / `my_mem_perused`（内存使用率）。
+- 用户封装：`mymalloc(memx, size)` / `myfree` / `myrealloc`，`memx` 传 `SRAMIN / SRAMEX / SRAMCCM`。
+
+实际使用场景：
+
+| 场景 | 分配 | 池 |
+|---|---|---|
+| 音乐播放（[revert.c](user/ASR_MIC/revert.c)） | `audiodev1.file`（FIL）+ `i2sbuf1/i2sbuf2` 双缓冲（各 8KB） | SRAMIN |
+| 文件倒放（[revert.c](user/ASR_MIC/revert.c)） | `FIL` 对象 + 512B 数据缓冲（CPU 直访，无 DMA 需求 → 放 CCM） | SRAMCCM |
+| 曲目列表（[audioplay.c](user/ASR_MIC/audioplay.c)） | `pname` 曲目路径表 + `wavindextbl` 索引表 | SRAMIN |
+
+> 注：LCD 字库**不占用 RAM**——通过串口 1 DMA 双缓冲下载后写入 W25QXX 外部 Flash（`DMA_Font_Config` + `Font_Load`，当前为省时默认注释）。
+
 ---
 
 ## 2. 环境搭建步骤
@@ -123,7 +180,6 @@ flowchart LR
    - 宏定义：`STM32F40_41xxx`、`USE_STDPERIPH_DRIVER`。
    - 包含路径：`user`、`user/api`、`user/ff14b/source`、`user/ASR_MIC`、`startup`、`lib/inc`、`lib/src`。
    - 输出：`project/project.hex`（可直接烧录）。
-4. **VSCode 编辑辅助**：安装 `keil-assistant` 插件，`project/.vscode/c_cpp_properties.json` 已配好全部 includePath 与 ARMCC 宏，可直接写代码后回 Keil 编译。
 5. 烧录调试：ST-Link / J-Link 下载 `project.hex`。
 
 ### 2.3 硬件接线与资源准备
@@ -149,7 +205,7 @@ flowchart LR
 
 ---
 
-## 3. 目录结构
+## 3. 软件架构
 
 ```
 train1/
@@ -276,15 +332,26 @@ train1/
 ### 6.2 未来规划（依据提交轨迹）
 
 - [x] 基础驱动：点灯 → 串口 → 舵机 → 蜂鸣器 → 风扇 → ADC 光照/火焰 → WS2812E
+
 - [x] RTC 实时钟 + 闹钟 + 周期唤醒，编译时间自动对时
+
 - [x] LCD 显示 + 触摸 + 中英文滚动显示 + 时间实时刷新
+
 - [x] SD 卡 + FatFs 文件系统 + WAV 音乐播放（WM8978 + I2S2 + DMA）
+
 - [x] WiFi 联网（ESP-12F）+ 涂鸦云 MQTT 收发 + 5 类数据周期上报
+
 - [x] 语音识别（HLK-V20）控制风扇、红外遥控切歌/暂停/播放、按键长按切歌
+
 - [x] 播放 / 上一首 / 下一首 位图数据
+
 - [ ] 修复按键长按状态机 bug，完成音乐播放与状态显示的完整联动
+
 - [ ] 优化云端 busy 冲突：下行命令优先于周期上报，实现实时控制
+
 - [ ] 完善 LCD 歌曲名中文显示（当前曾出现红块问题）
+
 - [ ] 扩展语音指令集（灯光、窗帘、温度播报等）
-- [ ] 统一源码编码（GBK → UTF-8）与初始化函数命名（`_ini` 收敛）
+
+  
 
