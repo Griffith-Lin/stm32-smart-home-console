@@ -90,6 +90,59 @@ flowchart LR
 | 音乐播放状态机 | `status_dev.PlayState` | `PLAY_STOP / PLAY_PLAY / PLAY_NEXT / PLAY_PREVIOUS`，云端 `{"music":0~3}` 与红外/按键共同驱动 |
 | 红外命令标志 | `api/infrared.c` | 中断里只置 `deal_ir_flag`，主循环 `deal_if()` 统一消费，避免中断里执行耗时操作 |
 
+#### 1.3.1 音乐播放状态机设计
+
+> 非阻塞播放：DMA 中断只置信号，主循环每圈消费。原 `while(res==0)` 阻塞播放已移除，播放期间触摸 / 云端指令 / 红外照常响应。
+
+**两层状态设计**
+
+| 层 | 载体 | 职责 | 写入方 |
+|---|---|---|---|
+| 命令层 | `status_dev.PlayState`（PLAY_*） | 一次性请求：播放 / 暂停 / 上一曲 / 下一曲 / 停止 | 云端、红外中断、按键、触摸随时置位；状态机消费后清回 `PLAY_CLEAR` |
+| 状态层 | `wav_phase`（WAV_*） | 播放当前所处阶段 | 仅 `Wav_PlayStep()` / `Wav_PlaySong()` 修改 |
+
+**四态转移图**（`wavplay.h` 的 `wav_phase_t`）
+
+```
+                 Wav_PlaySong() 成功
+            （分配内存 + 解析WAV头 + 预填2帧）
+        ┌──────────────────────────────────┐
+        ▼                                  │
+  WAV_IDLE ─▶ WAV_FILLING ─PLAY_PAUSE─▶ WAV_PAUSED
+        ▲          │      ◀PLAY_PLAY─┘     │
+        │          ▼                       │
+        │  fillnum_last != BUFSIZE（播完）  │
+        │  return WAV_END                  │
+        └── WAV_IDLE（上层 curindex++ 自动下一首）
+  PLAY_STOP ─▶ WAV_STOPPED（驻留，必须再发播放指令才重开）
+  PLAY_PREVIOUS / PLAY_NEXT ─▶ WAV_IDLE（上层切索引后重开）
+```
+
+| 状态 | 含义 |
+|---|---|
+| WAV_IDLE | 无曲在播，`Audio_MusicStep` 自动打开 `curindex` 曲目（开机首播 / 播完循环 / 切歌重开） |
+| WAV_FILLING | 播放中，每帧执行：等 DMA 空缓冲 → 填充 → 消费命令 |
+| WAV_PAUSED | 暂停，不填充，但命令照常消费（暂停中可恢复 / 切歌 / 停止） |
+| WAV_STOPPED | 显式停止，不自动重开，等 `PLAY_PLAY` 才恢复 |
+
+**单帧处理流程**（`Wav_PlayStep()`，主循环每圈调用一次）
+
+1. 先消费命令：PAUSE 清播放位 → WAV_PAUSED；PLAY 恢复 → 回 WAV_FILLING；PREV / NEXT 关停释放 → WAV_IDLE 并返回给上层切索引；STOP 关停释放 → WAV_STOPPED
+2. 暂停 / 停止态 → 直接返回（不填充）
+3. `wavtransferend == 0`（DMA 缓冲未空）→ 返回，下轮再看
+4. `fillnum_last != BUFSIZE` → 播完：关停 + 释放 → WAV_IDLE → 返回 `WAV_END`（上层自动下一首）
+5. 填充空出的缓冲，`fillnum_last = 实际读取字节数`
+
+**关键设计**
+
+- **非阻塞的"等待"**：原 `while(wavtransferend==0)` 阻塞改为 `if (wavtransferend==0) return 0;`，信号由 DMA 回调置位、主循环消费清零；暂停期间信号悬置，恢复后下一圈正好可用
+- **`fillnum_last` 双帧预填**：预填 buf1 / buf2 两帧，播完判断永远滞后一帧，保证最后一帧完整播完才停
+- **命令优先于暂停判断**：`Wav_PlayStep` 先查 `PlayState` 再查 `wav_phase`，暂停中才能响应恢复 / 切歌 / 停止
+- **`WAV_END = 0xFE`**：播放结束返回码与 `PLAY_*` 枚举（`PLAY_PREVIOUS == 1`）值域错开，防止播完被误判为"上一曲"
+- **STOPPED ≠ IDLE**：IDLE 是自动续播入口（播完 / 切歌后无需指令），STOPPED 是强制驻留，除非再发播放指令
+
+**调用链**：`main.c` 主循环 `Audio_MusicStep()` →（无曲时）`Wav_PlaySong()` 开歌 /（播放中）`Wav_PlayStep()` 驱动 → DMA 中断 `Wav_I2sDmaTx_Callback()` 只置 `wavtransferend` / `wavwitchbuf`
+
 ### 1.4 中断资源
 
 | 中断 | 用途 |
@@ -345,13 +398,13 @@ train1/
 
 - [x] 播放 / 上一首 / 下一首 位图数据
 
-- [ ] 修复按键长按状态机 bug，完成音乐播放与状态显示的完整联动
+- [x] 修复按键长按状态机 bug，完成音乐播放与状态显示的完整联动
 
-- [ ] 优化云端 busy 冲突：下行命令优先于周期上报，实现实时控制
+- [x] 优化云端 busy 冲突：下行命令优先于周期上报，实现实时控制
 
-- [ ] 完善 LCD 歌曲名中文显示（当前曾出现红块问题）
+- [x] 完善 LCD 歌曲名中文显示（当前曾出现红块问题）
 
-- [ ] 扩展语音指令集（灯光、窗帘、温度播报等）
+- [x] 扩展语音指令集（灯光、窗帘、温度播报等）
 
   
 
