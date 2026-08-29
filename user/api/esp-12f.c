@@ -236,7 +236,7 @@ uint16_t sg90_angle=0;
 uint8_t music_play=0;
 uint32_t lamp=0;
 
-//用返回的信息做判断
+//判断下发的信息
 void esp_analysis(void)
 {
     if(idle_flag==0)
