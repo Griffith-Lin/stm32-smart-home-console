@@ -34,12 +34,10 @@ int main(void)
     // NVIC_SetPriorityGrouping(3);
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_3); // 不配置默认为4位占先
 
-    
     TIM6_Task_Init(84, 1000);
     led_ini();
     Usart1_Config(115200);
     Usart3_hlk_ini(115200);
-
 
     key_ini();
     Exti_key_ini();
@@ -47,7 +45,7 @@ int main(void)
     beep_ini();
 
     motor_pwm_ini(84, 1000);
-//    mortor_minspeed_open();
+    //    mortor_minspeed_open();
 
     adc_ini();
     adc_GL5506_ini(); // 光敏电阻
@@ -62,106 +60,90 @@ int main(void)
     // 复位时第一个灯闪绿灯，原因是硬件浮空，加下拉电阻解决
     // WS2812 的 DIN 脚内部有弱上拉（~100kΩ），会把线往上拽。但 PCB 走线本身是天线，会耦合周围的电磁噪声。结果就是 DIN 上的电压随机波动——可能刚好跨过 WS2812 的高低电平阈值，被当成数据吞进去。
     // 多调用一次变色函数，解决复位时第一个灯常亮绿灯。原因可能是复位时有脏数据进入灯带
-    //因为阻塞延时函数delay_us有问题，over
+    // 因为阻塞延时函数delay_us有问题，over
 
     RTC_Cal_Config();                   // 时间初始化
     alarm_ini(RTC_H12_PM, 0, 0, 30, 3); // 闹钟初始化
     rtc_wakeup_ini();                   // 唤醒初始化
 
-//    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
+    //    in_cap_ini(84, 1000); // 输入捕获初始化      会让风扇停止转动（因为同时占用了TIM3_CH3）    会让彩灯时序乱掉（关闭全局中断保护时序）
 
     irm_3638T_ini(168, 30000);
 
     LCD_Init();
     CST816S_Init();
-    
-    LCD_Dis_Pic(150,50,gImage_last);
-    LCD_Dis_Pic(150,100,gImage_play);
-    LCD_Dis_Pic(150,150,gImage_next);
-    
-    
+
+    LCD_Dis_Pic(150, 50, gImage_last);
+    LCD_Dis_Pic(150, 100, gImage_play);
+    LCD_Dis_Pic(150, 150, gImage_next);
+
     relay_ini();
 
-//	DMA_Font_Config();
-//	Font_Load();//专门用于字库下载的函数，死循环判断标志位
+    //	DMA_Font_Config();
+    // Font_Load();//专门用于字库下载的函数，死循环判断标志位
 
-    
-    
-//    LCD_Roll_Dis(100,24,RED,WHITE,arr,1);//死循环
+    //    LCD_Roll_Dis(100,24,RED,WHITE,arr,1);//死循环
 
-//    SD_WaitReady();SD_Initialize()中已有等待帧
-//    while(SD_Initialize())printf("初始化失败");
-    
+    //    SD_WaitReady();SD_Initialize()中已有等待帧
+    //    while(SD_Initialize())printf("初始化失败");
+
     ff_test();
-    
-	WM8978_Init();				//初始化WM8978
-	WM8978_HPvol_Set(0, 0);		//耳机音量设置
-	WM8978_SPKvol_Set(0);		//喇叭音量设置
-	WM8978_ADDA_Cfg(1, 0);		//开启DAC
-	WM8978_Input_Cfg(0, 0, 0);	//关闭输入通道
-	WM8978_Output_Cfg(1, 0);	//开启DAC输出   
-	WM8978_I2S_Cfg(2, 0);		//飞利浦标准,16位数据长度
-	I2S2_Init(I2S_Standard_Phillips, I2S_Mode_MasterTx, I2S_CPOL_Low, I2S_DataFormat_16bextended);	//飞利浦标准,主机发送,时钟低电平有效,16位扩展帧长度
-	I2S2_SampleRate_Set(44100);	//设置采样率
-	I2S2_TX_DMA_Init(NULL, NULL, WAV_I2S_TX_DMA_BUFSIZE/2); 				//配置TX DMA
-	status_dev.volume = 30;	//初始保存音量 0~63
-	WM8978_SPKvol_Set(status_dev.volume);
-    
+
+    WM8978_Init();                                                                                 // 初始化WM8978
+    WM8978_HPvol_Set(0, 0);                                                                        // 耳机音量设置
+    WM8978_SPKvol_Set(0);                                                                          // 喇叭音量设置
+    WM8978_ADDA_Cfg(1, 0);                                                                         // 开启DAC
+    WM8978_Input_Cfg(0, 0, 0);                                                                     // 关闭输入通道
+    WM8978_Output_Cfg(1, 0);                                                                       // 开启DAC输出
+    WM8978_I2S_Cfg(2, 0);                                                                          // 飞利浦标准,16位数据长度
+    I2S2_Init(I2S_Standard_Phillips, I2S_Mode_MasterTx, I2S_CPOL_Low, I2S_DataFormat_16bextended); // 飞利浦标准,主机发送,时钟低电平有效,16位扩展帧长度
+    I2S2_SampleRate_Set(44100);                                                                    // 设置采样率
+    I2S2_TX_DMA_Init(NULL, NULL, WAV_I2S_TX_DMA_BUFSIZE / 2);                                      // 配置TX DMA
+    status_dev.volume = 30;                                                                        // 初始保存音量 0~63
+    WM8978_SPKvol_Set(status_dev.volume);
+
     key_scan_tim_ini();
-    
-    
-//    Audio_MusicPlay();//循环播放 按键切换歌曲
-    
-    usart2_ini(115200);   
+
+    //    Audio_MusicPlay();//循环播放 按键切换歌曲
+
+    usart2_ini(115200);
     esp_12f_ini();
-    
-    
 
-	while(1)
-	{
-        
-        Audio_MusicStep();    
-        
+    while (1)
+    {
 
-        esp_analysis(); //判断分包平台下发的json
+        Audio_MusicStep();
 
-        HLK_Control(hlk_getcommand());  
+        esp_analysis(); // 判断分包平台下发的json
 
+        HLK_Control(hlk_getcommand());
 
-        Tcloud_report();//上报本地json数据到云端      
+        Tcloud_report(); // 上报本地json数据到云端
 
-        deal_if();//接收红外
+        deal_if(); // 接收红外
 
-        
+        /*
+        状态机的骨架（busy + 门控 + 兜底）本身是标准写法，没问题。但两个独立发布者共用 idle_flag/str2_buf，一定会打起来，具体三个冲突点：
 
-/*
-状态机的骨架（busy + 门控 + 兜底）本身是标准写法，没问题。但两个独立发布者共用 idle_flag/str2_buf，一定会打起来，具体三个冲突点：
+        冲突点
+        1. 两个 10 秒定时器同时从 0 起跑：last_pub 初始都是 0，主循环第一轮两个函数都会触发 → 温湿度和 MLX 两条命令几乎同时发出。两条应答在线上乱序回来，谁消费了哪条全靠运气。
 
-冲突点
-1. 两个 10 秒定时器同时从 0 起跑：last_pub 初始都是 0，主循环第一轮两个函数都会触发 → 温湿度和 MLX 两条命令几乎同时发出。两条应答在线上乱序回来，谁消费了哪条全靠运气。
+        2. 应答帧计数错位：tem 的 OK 可能被 mlx 的 busy 状态消费掉（反之亦然），加上模块回显会产生多余帧，帧数对不上时一个函数会被提前清 busy，另一个得靠 3 秒兜底才恢复——功能勉强不坏，但状态机完全失真。
 
-2. 应答帧计数错位：tem 的 OK 可能被 mlx 的 busy 状态消费掉（反之亦然），加上模块回显会产生多余帧，帧数对不上时一个函数会被提前清 busy，另一个得靠 3 秒兜底才恢复——功能勉强不坏，但状态机完全失真。
+        3. 最危险的：发布状态机 busy 时会吞掉下行命令。你的发布逻辑是"收到任意帧就结束 busy"——如果云端正好在这 1~2 秒窗口内下发 {"led":1} 或 {"fan_speed":800}，这个帧会被发布状态机当应答吃掉，esp_analysis 永远看不到它 → LED/风扇控制丢失。这不是概率问题，是必然会发生的事件（10 秒一发的窗口天天有）。
 
-3. 最危险的：发布状态机 busy 时会吞掉下行命令。你的发布逻辑是"收到任意帧就结束 busy"——如果云端正好在这 1~2 秒窗口内下发 {"led":1} 或 {"fan_speed":800}，这个帧会被发布状态机当应答吃掉，esp_analysis 永远看不到它 → LED/风扇控制丢失。这不是概率问题，是必然会发生的事件（10 秒一发的窗口天天有）。        
-        
-*/        
-//      Tcloud_tem_hu();
-//        
-//      Tcloud_mlx90614_tem();
-        
-        
-//    lcd_test2();
-        
-//      TIM6_delay(500);   
-        
-//        
-//      sht31_test();  
-//        
-//      Delay_Ms(10000);  
-        
-    }  
-        
+        */
+        //      Tcloud_tem_hu();
+        //
+        //      Tcloud_mlx90614_tem();
 
-    
-    
+        //    lcd_test2();
+
+        //      TIM6_delay(500);
+
+        //
+        //      sht31_test();
+        //
+        //      Delay_Ms(10000);
+    }
 }

@@ -18,7 +18,7 @@ void mlx90614_i2c_send(uint8_t data)
     {
         ack_flag=i2c_master_write(id_w); 
     }
-    while((!ack_flag) && try_count--);//没收到就重试
+    while((!ack_flag) && --try_count);//没收到就重试
     
     i2c_master_write(data);//命令
     
@@ -41,7 +41,7 @@ void mlx90614_i2c_read(uint8_t command,uint8_t *buf)
     {
         ack_flag=i2c_master_write(id_w);
     }
-    while(!ack_flag && try_count--);//没收到就重试
+    while(!ack_flag && --try_count);//没收到就重试
     
     i2c_master_write(command);//命令
     
